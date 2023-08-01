@@ -1,0 +1,30 @@
+#FROM node:14
+ARG SAPPER_APP_HOSTIP=tir4dev.ti-robots.ru
+FROM node:14
+
+
+
+COPY . /usr/src/app/
+
+#RUN npm install -g node-binance-api
+#RUN yarn install --silent 
+#RUN npm audit fix
+#COPY ../.env ./
+#RUN npm install -g npm@7.0.13 
+#RUN npm install --silent
+
+#COPY . .
+
+WORKDIR /usr/src/app
+RUN npm install -g dotenv-cli
+#RUN npm run build
+
+ENV HOST 0.0.0.0
+
+
+EXPOSE 3000
+
+#CMD [ "/bin/sh", "dotenv npm start"]
+CMD ["dotenv", "npm", "start"]
+#CMD ["node", "__sapper__/build"]
+

@@ -1,1 +1,3 @@
-# tir5
+# tradebot node-red svelte
+ 
+ titradebotpassnr
