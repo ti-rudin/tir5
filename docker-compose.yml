@@ -64,7 +64,7 @@ services:
       dockerfile: ./nodered2.Dockerfile
     env_file: .env
     ports:
-      - "1881:1880"
+      - "1881:1881"
     networks:
       - tibotnet
     depends_on:
@@ -75,10 +75,10 @@ services:
     restart: always
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.node-red-core.rule=Host(`worker1.ti-robots.ru`)"
-      - "traefik.http.routers.node-red-core.entrypoints=websecure"
-      - "traefik.http.routers.node-red-core.tls.certresolver=myresolver"
-      - "traefik.http.services.node-red-core.loadBalancer.server.port=1881"
+      - "traefik.http.routers.node-red2.rule=Host(`worker1.ti-robots.ru`)"
+      - "traefik.http.routers.node-red2.entrypoints=websecure"
+      - "traefik.http.routers.node-red2.tls.certresolver=myresolver"
+      - "traefik.http.services.node-red2.loadBalancer.server.port=1881"
 
 
   redis:

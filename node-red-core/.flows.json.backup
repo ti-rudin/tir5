@@ -77,9 +77,7 @@
             "9a835f6c.6a1ab"
         ],
         "x": 2554,
-        "y": 19,
-        "w": 632,
-        "h": 162
+        "y": 19
     },
     {
         "id": "e83aa13614517c81",
@@ -151,9 +149,7 @@
             "c4cf96930d013efb"
         ],
         "x": 1574,
-        "y": 1739,
-        "w": 792,
-        "h": 122
+        "y": 1739
     },
     {
         "id": "586e39dc007e0cae",
@@ -201,9 +197,7 @@
             "d3749cac89a0e2c9"
         ],
         "x": 2554,
-        "y": 1119,
-        "w": 1352,
-        "h": 82
+        "y": 1119
     },
     {
         "id": "7f9b2dd857a6dfb2",
@@ -226,9 +220,7 @@
             "792187aede59b6ac"
         ],
         "x": 2554,
-        "y": 1239,
-        "w": 912,
-        "h": 82
+        "y": 1239
     },
     {
         "id": "44cf135596e2716e",
@@ -292,9 +284,7 @@
             "bf190e9d.225ad"
         ],
         "x": 154,
-        "y": 1699,
-        "w": 1232,
-        "h": 402
+        "y": 1699
     },
     {
         "id": "014ce62956a26f95",
@@ -367,9 +357,7 @@
             "c4cfc0830f4e28bc"
         ],
         "x": 34,
-        "y": 779,
-        "w": 2092,
-        "h": 822
+        "y": 779
     },
     {
         "id": "d508da9d29e25c1b",
@@ -396,9 +384,7 @@
             "04c874ce359ca023"
         ],
         "x": 34,
-        "y": 639,
-        "w": 1612,
-        "h": 102
+        "y": 639
     },
     {
         "id": "17b2eb4baaa826d1",
@@ -816,9 +802,7 @@
             "869be0a90b76a3ef"
         ],
         "x": 2554,
-        "y": 219,
-        "w": 1032,
-        "h": 142
+        "y": 219
     },
     {
         "id": "048120318edbeca7",
@@ -896,9 +880,7 @@
             "54197cf454887ecb"
         ],
         "x": 28,
-        "y": 33,
-        "w": 2078,
-        "h": 588
+        "y": 33
     },
     {
         "id": "2c85add4d80ea7f8",
@@ -923,9 +905,7 @@
             "a18bcf73d30443dd"
         ],
         "x": 2554,
-        "y": 1419,
-        "w": 772,
-        "h": 142
+        "y": 1419
     },
     {
         "id": "a515f6f54037387e",
@@ -964,9 +944,7 @@
             "1b0a7ba8e33f06b7"
         ],
         "x": 2554,
-        "y": 599,
-        "w": 1052,
-        "h": 502
+        "y": 599
     },
     {
         "id": "f68e039ff73498a8",
@@ -1007,9 +985,7 @@
             "9767b09975ad71d4"
         ],
         "x": 2494,
-        "y": 1599,
-        "w": 832,
-        "h": 622
+        "y": 1599
     },
     {
         "id": "3eb02193332f12bf",
@@ -1115,9 +1091,7 @@
             "96bdef7048780d35"
         ],
         "x": 54,
-        "y": 59,
-        "w": 792,
-        "h": 122
+        "y": 59
     },
     {
         "id": "f120eab2.0a60a8",
@@ -6641,8 +6615,8 @@
         "id": "dc2aeff7a359f934",
         "type": "function",
         "z": "b89efe2b1fe909cb",
-        "name": "push ex1",
-        "func": "msg.topic = \"resurse-que\";\nmsg.payload = [\"push\",\"ex1\"];\n\n\nreturn msg;",
+        "name": "push ex0",
+        "func": "msg.topic = \"resurse-que\";\nmsg.payload = [\"push\",\"ex0\"];\n\n\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -6676,7 +6650,7 @@
         "server": "f120eab2.0a60a8",
         "command": "subscribe",
         "name": "",
-        "topic": "resurse:ex1",
+        "topic": "resurse:ex0",
         "obj": true,
         "timeout": 0,
         "x": 270,
@@ -7065,7 +7039,7 @@
         "id": "075eef81d6e1252e",
         "type": "switch",
         "z": "b89efe2b1fe909cb",
-        "name": "",
+        "name": "ресурсы есть ?",
         "property": "resurse",
         "propertyType": "msg",
         "rules": [
@@ -7079,7 +7053,7 @@
         "checkall": "true",
         "repair": false,
         "outputs": 2,
-        "x": 1250,
+        "x": 1280,
         "y": 580,
         "wires": [
             [
@@ -7108,7 +7082,7 @@
         "drop": false,
         "allowrate": false,
         "outputs": 1,
-        "x": 1430,
+        "x": 1470,
         "y": 620,
         "wires": [
             [
@@ -7125,7 +7099,7 @@
         "name": "",
         "topic": "",
         "obj": true,
-        "x": 1600,
+        "x": 1640,
         "y": 540,
         "wires": []
     },
@@ -7140,7 +7114,7 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 1430,
+        "x": 1470,
         "y": 540,
         "wires": [
             [
@@ -7178,8 +7152,8 @@
         "id": "a36d19b4ca26282e",
         "type": "function",
         "z": "b89efe2b1fe909cb",
-        "name": "push ex1",
-        "func": "msg.topic = \"resurse-que\";\nmsg.payload = [\"push\",\"ex1\"];\n\n\nreturn msg;",
+        "name": "push ex0",
+        "func": "msg.topic = \"resurse-que\";\nmsg.payload = [\"push\",\"ex0\"];\n\n\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -7260,157 +7234,23 @@
         "wires": []
     },
     {
-        "id": "8abba28438a58d65",
-        "type": "inject",
+        "id": "e8bdce28439340e5",
+        "type": "comment",
         "z": "b89efe2b1fe909cb",
-        "name": "start onLoad",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "",
-        "crontab": "",
-        "once": true,
-        "onceDelay": "2",
-        "topic": "",
-        "payload": "",
-        "payloadType": "date",
-        "x": 1150,
-        "y": 1080,
-        "wires": [
-            [
-                "092132f36d5fe529"
-            ]
-        ]
-    },
-    {
-        "id": "092132f36d5fe529",
-        "type": "function",
-        "z": "b89efe2b1fe909cb",
-        "name": "push ex1",
-        "func": "msg.topic = \"resurse-que\";\nmsg.payload = [\"push\",\"ex2\"];\n\n\nreturn msg;",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 1320,
-        "y": 1080,
-        "wires": [
-            [
-                "3fee35807a7d6fda"
-            ]
-        ]
-    },
-    {
-        "id": "3fee35807a7d6fda",
-        "type": "redis-out",
-        "z": "b89efe2b1fe909cb",
-        "server": "f120eab2.0a60a8",
-        "command": "publish",
-        "name": "",
-        "topic": "resurse-que",
-        "obj": true,
-        "x": 1490,
-        "y": 1080,
+        "name": "Повторный запрос ресурса",
+        "info": "",
+        "x": 1700,
+        "y": 620,
         "wires": []
     },
     {
-        "id": "cf38be1e14f15551",
-        "type": "redis-in",
+        "id": "e2a93dd287c21f7c",
+        "type": "comment",
         "z": "b89efe2b1fe909cb",
-        "server": "f120eab2.0a60a8",
-        "command": "subscribe",
-        "name": "",
-        "topic": "resurse:ex2",
-        "obj": true,
-        "timeout": 0,
-        "x": 1130,
-        "y": 1160,
-        "wires": [
-            [
-                "b6ab6b782ba34905"
-            ]
-        ]
-    },
-    {
-        "id": "b6ab6b782ba34905",
-        "type": "delay",
-        "z": "b89efe2b1fe909cb",
-        "name": "",
-        "pauseType": "random",
-        "timeout": "5",
-        "timeoutUnits": "seconds",
-        "rate": "1",
-        "nbRateUnits": "1",
-        "rateUnits": "second",
-        "randomFirst": "0",
-        "randomLast": "2",
-        "randomUnits": "seconds",
-        "drop": false,
-        "allowrate": false,
-        "outputs": 1,
-        "x": 1300,
-        "y": 1160,
-        "wires": [
-            [
-                "bef4b7e3af4be6e3",
-                "03fc6d84463521d5"
-            ]
-        ]
-    },
-    {
-        "id": "bef4b7e3af4be6e3",
-        "type": "function",
-        "z": "b89efe2b1fe909cb",
-        "name": "push ex1",
-        "func": "msg.topic = \"resurse-que\";\nmsg.payload = [\"push\",\"ex2\"];\n\n\nreturn msg;",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 1500,
-        "y": 1160,
-        "wires": [
-            [
-                "b039c6d68d9fa266"
-            ]
-        ]
-    },
-    {
-        "id": "b039c6d68d9fa266",
-        "type": "redis-out",
-        "z": "b89efe2b1fe909cb",
-        "server": "f120eab2.0a60a8",
-        "command": "publish",
-        "name": "",
-        "topic": "resurse-que",
-        "obj": true,
-        "x": 1670,
-        "y": 1160,
-        "wires": []
-    },
-    {
-        "id": "03fc6d84463521d5",
-        "type": "debug",
-        "z": "b89efe2b1fe909cb",
-        "name": "debug 37",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "true",
-        "targetType": "full",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 1600,
-        "y": 1240,
+        "name": "api",
+        "info": "",
+        "x": 1050,
+        "y": 180,
         "wires": []
     },
     {
