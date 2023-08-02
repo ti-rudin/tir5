@@ -34,14 +34,37 @@ services:
       - tibotnet
 
 
-  node-red:
-    container_name: node-red
+  node-red-core:
+    container_name: node-red-core
+    build:
+      context: .
+      dockerfile: ./nodered-core.Dockerfile
+    env_file: .env
+    ports:
+      - "1880:1880"
+    networks:
+      - tibotnet
+    depends_on:
+      - redis
+    volumes:
+      - ./node-red-core:/data 
+      - ./nr-logs:/usr/src/node-red/logs
+    restart: always
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.node-red-core.rule=Host(`api.ti-robots.ru`)"
+      - "traefik.http.routers.node-red-core.entrypoints=websecure"
+      - "traefik.http.routers.node-red-core.tls.certresolver=myresolver"
+      - "traefik.http.services.node-red-core.loadBalancer.server.port=1880"
+
+  node-red2:
+    container_name: node-red2
     build:
       context: .
       dockerfile: ./nodered2.Dockerfile
     env_file: .env
     ports:
-      - "1880:1880"
+      - "1881:1880"
     networks:
       - tibotnet
     depends_on:
@@ -52,10 +75,11 @@ services:
     restart: always
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.node-red.rule=Host(`api.ti-robots.ru`)"
-      - "traefik.http.routers.node-red.entrypoints=websecure"
-      - "traefik.http.routers.node-red.tls.certresolver=myresolver"
-      - "traefik.http.services.node-red.loadBalancer.server.port=1880"
+      - "traefik.http.routers.node-red-core.rule=Host(`worker1.ti-robots.ru`)"
+      - "traefik.http.routers.node-red-core.entrypoints=websecure"
+      - "traefik.http.routers.node-red-core.tls.certresolver=myresolver"
+      - "traefik.http.services.node-red-core.loadBalancer.server.port=1881"
+
 
   redis:
     image: "redis:alpine"
@@ -112,7 +136,7 @@ services:
     restart: always
     depends_on:
       - redis
-      - node-red
+      - node-red-core
 
     networks:
       - tibotnet
@@ -132,6 +156,7 @@ services:
 
 volumes:
   redis-data:
+  node-red-core:
   node-red-data2:
 
 
