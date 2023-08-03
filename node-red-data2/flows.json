@@ -171,9 +171,7 @@
             "dd73e1c4557a5e65"
         ],
         "x": 3234,
-        "y": 1499,
-        "w": 792,
-        "h": 122
+        "y": 1499
     },
     {
         "id": "1af578fa0e07ad5a",
@@ -408,9 +406,7 @@
             "503d53910c17c784"
         ],
         "x": 3424,
-        "y": 499,
-        "w": 512,
-        "h": 142
+        "y": 499
     },
     {
         "id": "422e384634a8793d",
@@ -670,9 +666,7 @@
             "3520419ec219563a"
         ],
         "x": 1854,
-        "y": 119,
-        "w": 612,
-        "h": 162
+        "y": 119
     },
     {
         "id": "55e30606c2e4a038",
@@ -708,9 +702,7 @@
             "3aa78e92fd51af7b"
         ],
         "x": 74,
-        "y": 59,
-        "w": 1682,
-        "h": 222
+        "y": 59
     },
     {
         "id": "73c30bbe5f45e91f",
@@ -732,9 +724,7 @@
             "ca72074c8d540aae"
         ],
         "x": 714,
-        "y": 319,
-        "w": 792,
-        "h": 122
+        "y": 319
     },
     {
         "id": "4b5621a5daf6eb8e",
@@ -6572,314 +6562,6 @@
         "location": "flow",
         "x": 750,
         "y": 100,
-        "wires": []
-    },
-    {
-        "id": "df8949bac971e658",
-        "type": "inject",
-        "z": "b89efe2b1fe909cb",
-        "name": "start onLoad",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "",
-        "crontab": "",
-        "once": true,
-        "onceDelay": "2",
-        "topic": "",
-        "payload": "",
-        "payloadType": "date",
-        "x": 190,
-        "y": 420,
-        "wires": [
-            [
-                "dc2aeff7a359f934"
-            ]
-        ]
-    },
-    {
-        "id": "dc2aeff7a359f934",
-        "type": "function",
-        "z": "b89efe2b1fe909cb",
-        "name": "push ex1",
-        "func": "msg.topic = \"resurse-que\";\nmsg.payload = [\"push\",\"ex1\"];\n\n\nreturn msg;",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 360,
-        "y": 420,
-        "wires": [
-            [
-                "c1b1c62e6b0f4e2a"
-            ]
-        ]
-    },
-    {
-        "id": "c1b1c62e6b0f4e2a",
-        "type": "redis-out",
-        "z": "b89efe2b1fe909cb",
-        "server": "f120eab2.0a60a8",
-        "command": "publish",
-        "name": "",
-        "topic": "resurse-que",
-        "obj": true,
-        "x": 530,
-        "y": 420,
-        "wires": []
-    },
-    {
-        "id": "5f4515f84461838f",
-        "type": "redis-in",
-        "z": "b89efe2b1fe909cb",
-        "server": "f120eab2.0a60a8",
-        "command": "subscribe",
-        "name": "",
-        "topic": "resurse:ex1",
-        "obj": true,
-        "timeout": 0,
-        "x": 170,
-        "y": 500,
-        "wires": [
-            [
-                "f09138c9d7915de9"
-            ]
-        ]
-    },
-    {
-        "id": "f09138c9d7915de9",
-        "type": "delay",
-        "z": "b89efe2b1fe909cb",
-        "name": "",
-        "pauseType": "random",
-        "timeout": "5",
-        "timeoutUnits": "seconds",
-        "rate": "1",
-        "nbRateUnits": "1",
-        "rateUnits": "second",
-        "randomFirst": "0",
-        "randomLast": "2",
-        "randomUnits": "seconds",
-        "drop": false,
-        "allowrate": false,
-        "outputs": 1,
-        "x": 340,
-        "y": 500,
-        "wires": [
-            [
-                "a36d19b4ca26282e",
-                "f8727ffca66ea75d"
-            ]
-        ]
-    },
-    {
-        "id": "a36d19b4ca26282e",
-        "type": "function",
-        "z": "b89efe2b1fe909cb",
-        "name": "push ex1",
-        "func": "msg.topic = \"resurse-que\";\nmsg.payload = [\"push\",\"ex1\"];\n\n\nreturn msg;",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 540,
-        "y": 500,
-        "wires": [
-            [
-                "32a0c5684062bd5e"
-            ]
-        ]
-    },
-    {
-        "id": "32a0c5684062bd5e",
-        "type": "redis-out",
-        "z": "b89efe2b1fe909cb",
-        "server": "f120eab2.0a60a8",
-        "command": "publish",
-        "name": "",
-        "topic": "resurse-que",
-        "obj": true,
-        "x": 710,
-        "y": 500,
-        "wires": []
-    },
-    {
-        "id": "f8727ffca66ea75d",
-        "type": "debug",
-        "z": "b89efe2b1fe909cb",
-        "name": "debug 36",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "true",
-        "targetType": "full",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 420,
-        "y": 580,
-        "wires": []
-    },
-    {
-        "id": "8abba28438a58d65",
-        "type": "inject",
-        "z": "b89efe2b1fe909cb",
-        "name": "start onLoad",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "",
-        "crontab": "",
-        "once": true,
-        "onceDelay": "2",
-        "topic": "",
-        "payload": "",
-        "payloadType": "date",
-        "x": 1050,
-        "y": 420,
-        "wires": [
-            [
-                "092132f36d5fe529"
-            ]
-        ]
-    },
-    {
-        "id": "092132f36d5fe529",
-        "type": "function",
-        "z": "b89efe2b1fe909cb",
-        "name": "push ex2",
-        "func": "msg.topic = \"resurse-que\";\nmsg.payload = [\"push\",\"ex2\"];\n\n\nreturn msg;",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 1220,
-        "y": 420,
-        "wires": [
-            [
-                "3fee35807a7d6fda"
-            ]
-        ]
-    },
-    {
-        "id": "3fee35807a7d6fda",
-        "type": "redis-out",
-        "z": "b89efe2b1fe909cb",
-        "server": "f120eab2.0a60a8",
-        "command": "publish",
-        "name": "",
-        "topic": "resurse-que",
-        "obj": true,
-        "x": 1390,
-        "y": 420,
-        "wires": []
-    },
-    {
-        "id": "cf38be1e14f15551",
-        "type": "redis-in",
-        "z": "b89efe2b1fe909cb",
-        "server": "f120eab2.0a60a8",
-        "command": "subscribe",
-        "name": "",
-        "topic": "resurse:ex2",
-        "obj": true,
-        "timeout": 0,
-        "x": 1030,
-        "y": 500,
-        "wires": [
-            [
-                "b6ab6b782ba34905"
-            ]
-        ]
-    },
-    {
-        "id": "b6ab6b782ba34905",
-        "type": "delay",
-        "z": "b89efe2b1fe909cb",
-        "name": "",
-        "pauseType": "random",
-        "timeout": "5",
-        "timeoutUnits": "seconds",
-        "rate": "1",
-        "nbRateUnits": "1",
-        "rateUnits": "second",
-        "randomFirst": "0",
-        "randomLast": "2",
-        "randomUnits": "seconds",
-        "drop": false,
-        "allowrate": false,
-        "outputs": 1,
-        "x": 1200,
-        "y": 500,
-        "wires": [
-            [
-                "bef4b7e3af4be6e3",
-                "03fc6d84463521d5"
-            ]
-        ]
-    },
-    {
-        "id": "bef4b7e3af4be6e3",
-        "type": "function",
-        "z": "b89efe2b1fe909cb",
-        "name": "push ex2",
-        "func": "msg.topic = \"resurse-que\";\nmsg.payload = [\"push\",\"ex2\"];\n\n\nreturn msg;",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 1400,
-        "y": 500,
-        "wires": [
-            [
-                "b039c6d68d9fa266"
-            ]
-        ]
-    },
-    {
-        "id": "b039c6d68d9fa266",
-        "type": "redis-out",
-        "z": "b89efe2b1fe909cb",
-        "server": "f120eab2.0a60a8",
-        "command": "publish",
-        "name": "",
-        "topic": "resurse-que",
-        "obj": true,
-        "x": 1570,
-        "y": 500,
-        "wires": []
-    },
-    {
-        "id": "03fc6d84463521d5",
-        "type": "debug",
-        "z": "b89efe2b1fe909cb",
-        "name": "debug 37",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "true",
-        "targetType": "full",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 1400,
-        "y": 600,
         "wires": []
     },
     {
