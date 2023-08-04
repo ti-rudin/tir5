@@ -33,7 +33,6 @@ services:
     networks:
       - tibotnet
 
-
   node-red-core:
     container_name: node-red-core
     build:
@@ -79,7 +78,6 @@ services:
       - "traefik.http.routers.node-red2.entrypoints=websecure"
       - "traefik.http.routers.node-red2.tls.certresolver=myresolver"
       - "traefik.http.services.node-red2.loadBalancer.server.port=1881"
-
 
   redis:
     image: "redis:alpine"
@@ -153,12 +151,10 @@ services:
       - "traefik.http.middlewares.cors.headers.accesscontrolmaxage=300"
       - "traefik.http.middlewares.cors.headers.addvaryheader=true"
 
-
 volumes:
   redis-data:
   node-red-core:
   node-red-data2:
-
 
 networks:
   tibotnet:
