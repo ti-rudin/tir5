@@ -1006,7 +1006,9 @@
             "5b7bb9d6beb5e5a8"
         ],
         "x": 674,
-        "y": 859
+        "y": 859,
+        "w": 792,
+        "h": 122
     },
     {
         "id": "fbac187aa8b93ccd",
@@ -3721,7 +3723,7 @@
         "type": "debug",
         "z": "b89efe2b1fe909cb",
         "name": "debug 38",
-        "active": true,
+        "active": false,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
@@ -3774,7 +3776,7 @@
         "type": "debug",
         "z": "b89efe2b1fe909cb",
         "name": "debug 41",
-        "active": true,
+        "active": false,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
@@ -7487,7 +7489,7 @@
         "type": "debug",
         "z": "5df15275.2888ec",
         "name": "debug 43",
-        "active": true,
+        "active": false,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
@@ -7609,7 +7611,7 @@
         "type": "debug",
         "z": "5df15275.2888ec",
         "name": "debug 47",
-        "active": true,
+        "active": false,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
