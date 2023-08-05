@@ -97,10 +97,10 @@ services:
     restart: always
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.node-red2.rule=Host(`worker2.ti-robots.ru`)"
-      - "traefik.http.routers.node-red2.entrypoints=websecure"
-      - "traefik.http.routers.node-red2.tls.certresolver=myresolver"
-      - "traefik.http.services.node-red2.loadBalancer.server.port=1882"
+      - "traefik.http.routers.node-red-worker2.rule=Host(`worker2.ti-robots.ru`)"
+      - "traefik.http.routers.node-red-worker2.entrypoints=websecure"
+      - "traefik.http.routers.node-red-worker2.tls.certresolver=myresolver"
+      - "traefik.http.services.node-red-worker2.loadBalancer.server.port=1882"
 
   redis:
     image: "redis:alpine"
