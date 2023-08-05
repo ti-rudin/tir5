@@ -589,7 +589,9 @@
             "2f83bb2fab63d1bd"
         ],
         "x": 1114,
-        "y": 1119
+        "y": 1119,
+        "w": 792,
+        "h": 122
     },
     {
         "id": "666006aaa2e325fc",
@@ -2987,12 +2989,10 @@
         "topic": "tasks-que",
         "payload": "{\"bot\":\"botdata\",\"worktype\":\"worktypename\",\"workdata\":\"workdataobj\",\"trackname\":\"msg.trackname\"}",
         "payloadType": "json",
-        "x": 110,
-        "y": 600,
+        "x": 130,
+        "y": 460,
         "wires": [
-            [
-                "2c689edc998203f7"
-            ]
+            []
         ]
     },
     {
@@ -3236,70 +3236,17 @@
         ]
     },
     {
-        "id": "98b717c0054f370c",
-        "type": "function",
-        "z": "b89efe2b1fe909cb",
-        "name": "getresurse()",
-        "func": "",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "\n// Code added here will be run once\n// whenever the node is deployed.\nlet getresurse = function () {\n    \n    let promise = new Promise((resolve, reject) => {\n        msg.resolve = resolve;\n        msg.reject = reject;\n    });\n    \n\n    msg.topic = \"resurse-list\";\n    msg.payload = 1;\n\n    node.send(Object.assign({}, msg));\n    \n    return promise;\n};\n\nglobal.set('getresurse', getresurse);",
-        "finalize": "",
-        "libs": [],
-        "x": 790,
-        "y": 100,
-        "wires": [
-            [
-                "93c214ff307913cd"
-            ]
-        ]
-    },
-    {
-        "id": "ee67c78202abae19",
-        "type": "function",
-        "z": "b89efe2b1fe909cb",
-        "name": "resolve",
-        "func": "msg.resolve(msg.payload);\n\n// reject\n// setTimeout(function () {\n//     msg.reject({message: 'Could not request joke'});\n// }, 2000);",
-        "outputs": "0",
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 1160,
-        "y": 100,
-        "wires": []
-    },
-    {
-        "id": "677e987c0cd9a00f",
-        "type": "inject",
-        "z": "b89efe2b1fe909cb",
-        "name": "1",
-        "props": [],
-        "repeat": "",
-        "crontab": "",
-        "once": true,
-        "onceDelay": "0.1",
-        "topic": "",
-        "x": 630,
-        "y": 100,
-        "wires": [
-            [
-                "98b717c0054f370c"
-            ]
-        ]
-    },
-    {
         "id": "06a96de74bf8bfaf",
         "type": "function",
         "z": "b89efe2b1fe909cb",
         "name": "resurse push",
-        "func": "let resurses = global.get('resurse-list') || [];\n\nresurses.push(msg.payload[1]);\nglobal.set('resurse-list',resurses);\nreturn msg;",
+        "func": "\n\nglobal.get('resurse-list', function (err, resurses) {\n    if (err) {\n        node.error(err, msg);\n    } else {\n        // Если счетчика еще нет, инициализируем его со значением «0»:\n        //resurses = resurses || [];\n        resurses.push(msg.payload[1]);\n        msg.payload = resurses;\n            // Сохраняем измененное значение обратно:\n            global.set('resurse-list', resurses, function (err) {\n                if (err) {\n                    node.error(err, msg);\n                } else {\n                    msg.payload = resurses;\n                    node.send(msg);\n                }\n            });\n\n        }\n\n\n    }\n);",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 1690,
+        "x": 1610,
         "y": 100,
         "wires": [
             []
@@ -3320,36 +3267,17 @@
         ]
     },
     {
-        "id": "93c214ff307913cd",
-        "type": "function",
-        "z": "b89efe2b1fe909cb",
-        "name": " resurses.pop()",
-        "func": "//let resurses = global.get('resurse-list') || [];\n//node.warn(\"r1:\" + resurses);\n//msg.payload = resurses.pop();\n//node.warn(\"p:\" + msg.payload);\n//node.warn(\"r2:\" + resurses);\n//global.set('resurse-list', resurses);\n\n\nglobal.get('resurse-list', function (err, resurses) {\n    if (err) {\n        node.error(err, msg);\n    } else {\n        // Если счетчика еще нет, инициализируем его со значением «0»:\n        resurses = resurses || [];\n        if (resurses) {\n            let resurs = resurses.pop();\n\n            // Сохраняем измененное значение обратно:\n            global.set('resurse-list', resurses, function (err) {\n                if (err) {\n                    node.error(err, msg);\n                } else {\n                    msg.payload = resurs;\n                    node.send(msg);\n                }\n            });\n\n        }\n        \n    }\n});\n\n//return msg;",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 980,
-        "y": 100,
-        "wires": [
-            [
-                "ee67c78202abae19"
-            ]
-        ]
-    },
-    {
         "id": "87127cf4dbe6e9a4",
         "type": "function",
         "z": "b89efe2b1fe909cb",
         "name": "getresurse ",
-        "func": "const gp = global.get('getresurse')();\n\ngp.then(gp => {\n\n    msg.resurse = gp;\n   \n    node.status({ fill: \"green\", shape: \"dot\" });\n    node.send(msg);\n\n}).catch(error => {\n\n    node.status({ fill: \"red\", shape: \"dot\" });\n    node.error(error);\n});",
+        "func": "\nglobal.get('resurse-list', function (err, resurses) {\n    if (err) {\n        node.error(err, msg);\n    } else {\n        \n\n        if (resurses) {\n            let resurs = resurses.pop();\n\n            // Сохраняем измененное значение обратно:\n            global.set('resurse-list', resurses, function (err) {\n                if (err) {\n                    node.error(err, msg);\n                } else {\n                    msg.payload = resurses;\n                    node.send(msg);\n                }\n            });\n            msg.payload = resurs;\n\n        }\n\n    }\n});",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 890,
+        "x": 990,
         "y": 600,
         "wires": [
             [
@@ -3363,7 +3291,7 @@
         "type": "switch",
         "z": "b89efe2b1fe909cb",
         "name": "ресурсы есть ?",
-        "property": "resurse",
+        "property": "payload",
         "propertyType": "msg",
         "rules": [
             {
@@ -3376,7 +3304,7 @@
         "checkall": "true",
         "repair": false,
         "outputs": 2,
-        "x": 1080,
+        "x": 1180,
         "y": 600,
         "wires": [
             [
@@ -3406,7 +3334,7 @@
         "drop": false,
         "allowrate": false,
         "outputs": 1,
-        "x": 1270,
+        "x": 1370,
         "y": 640,
         "wires": [
             [
@@ -3424,7 +3352,7 @@
         "name": "",
         "topic": "",
         "obj": true,
-        "x": 1440,
+        "x": 1540,
         "y": 560,
         "wires": []
     },
@@ -3433,13 +3361,13 @@
         "type": "function",
         "z": "b89efe2b1fe909cb",
         "name": "send payload ",
-        "func": "msg ={\ntopic : \"resurse:\" + msg.resurse,\npayload : msg.payload\n}\n\n\nreturn msg;",
+        "func": "msg ={\ntopic : \"resurse:\" + msg.payload,\npayload : msg.work\n}\n\n\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 1280,
+        "x": 1380,
         "y": 560,
         "wires": [
             [
@@ -3453,7 +3381,7 @@
         "z": "b89efe2b1fe909cb",
         "name": "Повторный запрос ресурса",
         "info": "",
-        "x": 1500,
+        "x": 1600,
         "y": 640,
         "wires": []
     },
@@ -3491,8 +3419,8 @@
         "y": 600,
         "wires": [
             [
-                "87127cf4dbe6e9a4",
-                "07a2972bbcd657fd"
+                "07a2972bbcd657fd",
+                "ae3c3fe3dcf72f19"
             ]
         ]
     },
@@ -3543,7 +3471,7 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 1420,
+        "x": 1520,
         "y": 740,
         "wires": [
             [
@@ -3563,7 +3491,7 @@
         "complete": "false",
         "statusVal": "",
         "statusType": "auto",
-        "x": 1640,
+        "x": 1740,
         "y": 740,
         "wires": []
     },
@@ -3594,12 +3522,12 @@
         "topic": "taskque",
         "obj": true,
         "timeout": 0,
-        "x": 410,
-        "y": 400,
+        "x": 210,
+        "y": 600,
         "wires": [
             [
                 "015cb77a3fb3ae39",
-                "2c689edc998203f7"
+                "5cd26982523d7784"
             ]
         ]
     },
@@ -3616,8 +3544,8 @@
         "targetType": "full",
         "statusVal": "",
         "statusType": "auto",
-        "x": 580,
-        "y": 460,
+        "x": 460,
+        "y": 400,
         "wires": []
     },
     {
@@ -3625,7 +3553,7 @@
         "type": "debug",
         "z": "b89efe2b1fe909cb",
         "name": "debug 41",
-        "active": true,
+        "active": false,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
@@ -3633,7 +3561,7 @@
         "targetType": "full",
         "statusVal": "",
         "statusType": "auto",
-        "x": 1040,
+        "x": 1140,
         "y": 720,
         "wires": []
     },
@@ -3642,7 +3570,7 @@
         "type": "debug",
         "z": "b89efe2b1fe909cb",
         "name": "debug 48",
-        "active": true,
+        "active": false,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
@@ -3659,7 +3587,7 @@
         "type": "debug",
         "z": "b89efe2b1fe909cb",
         "name": "debug 49",
-        "active": true,
+        "active": false,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
@@ -3676,7 +3604,7 @@
         "type": "debug",
         "z": "b89efe2b1fe909cb",
         "name": "debug 50",
-        "active": true,
+        "active": false,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
@@ -3687,6 +3615,69 @@
         "x": 1000,
         "y": 440,
         "wires": []
+    },
+    {
+        "id": "5cd26982523d7784",
+        "type": "filter",
+        "z": "b89efe2b1fe909cb",
+        "name": "",
+        "property": "payload",
+        "propertyType": "msg",
+        "asArray": false,
+        "itemProperty": "payload",
+        "itemPropertyType": "item",
+        "rules": [
+            {
+                "t": "nnull",
+                "output": 1
+            }
+        ],
+        "checkall": "true",
+        "outputs": 1,
+        "x": 370,
+        "y": 600,
+        "wires": [
+            [
+                "2c689edc998203f7",
+                "58ad2e3aad0d6994"
+            ]
+        ]
+    },
+    {
+        "id": "58ad2e3aad0d6994",
+        "type": "debug",
+        "z": "b89efe2b1fe909cb",
+        "name": "debug 51",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 620,
+        "y": 500,
+        "wires": []
+    },
+    {
+        "id": "ae3c3fe3dcf72f19",
+        "type": "function",
+        "z": "b89efe2b1fe909cb",
+        "name": "function 3",
+        "func": "msg.work = msg.payload;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 840,
+        "y": 580,
+        "wires": [
+            [
+                "87127cf4dbe6e9a4"
+            ]
+        ]
     },
     {
         "id": "a7628168.861ce",
@@ -5462,7 +5453,6 @@
         "id": "c63e2cc4400d40fe",
         "type": "link in",
         "z": "5df15275.2888ec",
-        "d": true,
         "g": "251a240e36b31c14",
         "name": "",
         "links": [
@@ -5493,7 +5483,7 @@
         "y": 1400,
         "wires": [
             [
-                "c80bf4b14fe4742e"
+                "aff2e0df221f4a3e"
             ]
         ]
     },
@@ -5766,9 +5756,11 @@
         "finalize": "",
         "libs": [],
         "x": 1650,
-        "y": 1440,
+        "y": 1400,
         "wires": [
-            []
+            [
+                "c80bf4b14fe4742e"
+            ]
         ]
     },
     {
@@ -7127,7 +7119,7 @@
         "type": "debug",
         "z": "5df15275.2888ec",
         "name": "debug 47",
-        "active": true,
+        "active": false,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
