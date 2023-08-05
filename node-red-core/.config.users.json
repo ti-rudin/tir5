@@ -29,6 +29,18 @@
             },
             "tours": {
                 "welcome": "3.0.2"
+            },
+            "sidebar": {
+                "order": [
+                    "debug",
+                    "context",
+                    "help",
+                    "info",
+                    "config",
+                    "flow-debugger",
+                    "smxstate",
+                    "dashboard"
+                ]
             }
         },
         "menu-menu-item-palette": true,
