@@ -1,21 +1,10 @@
 {
     "node-red": {
         "name": "node-red",
-        "version": "3.0.2",
+        "version": "2.1.1",
         "local": false,
         "user": false,
         "nodes": {
-            "junction": {
-                "name": "junction",
-                "types": [
-                    "junction"
-                ],
-                "enabled": true,
-                "local": false,
-                "user": false,
-                "module": "node-red",
-                "file": "/usr/src/node-red/node_modules/@node-red/nodes/core/common/05-junction.js"
-            },
             "inject": {
                 "name": "inject",
                 "types": [
@@ -461,7 +450,7 @@
     },
     "node-red-node-ui-table": {
         "name": "node-red-node-ui-table",
-        "version": "0.4.3",
+        "version": "0.3.11",
         "local": false,
         "user": false,
         "nodes": {
@@ -480,7 +469,7 @@
     },
     "node-red-dashboard": {
         "name": "node-red-dashboard",
-        "version": "3.5.0",
+        "version": "3.0.4",
         "local": false,
         "user": false,
         "nodes": {
@@ -737,25 +726,6 @@
                 "user": false,
                 "module": "node-red-contrib-memory-queue",
                 "file": "/usr/src/node-red/node_modules/node-red-contrib-memory-queue/src/memoryQueue.js"
-            }
-        }
-    },
-    "node-red-contrib-simple-message-queue": {
-        "name": "node-red-contrib-simple-message-queue",
-        "version": "0.2.8",
-        "local": true,
-        "user": true,
-        "nodes": {
-            "simple-queue": {
-                "name": "simple-queue",
-                "types": [
-                    "simple-queue"
-                ],
-                "enabled": true,
-                "local": true,
-                "user": false,
-                "module": "node-red-contrib-simple-message-queue",
-                "file": "/data/node_modules/node-red-contrib-simple-message-queue/simple-message-queue.js"
             }
         }
     }

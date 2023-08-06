@@ -170,17 +170,16 @@ function subscribe(store, ...callbacks) {
     const unsub = store.subscribe(...callbacks);
     return unsub.unsubscribe ? () => unsub.unsubscribe() : unsub;
 }
-function get_store_value(store) {
-    let value;
-    subscribe(store, _ => value = _)();
-    return value;
-}
 function null_to_empty(value) {
     return value == null ? '' : value;
 }
-function custom_event(type, detail) {
+function set_store_value(store, ret, value) {
+    store.set(value);
+    return ret;
+}
+function custom_event(type, detail, { bubbles = false, cancelable = false } = {}) {
     const e = document.createEvent('CustomEvent');
-    e.initCustomEvent(type, false, false, detail);
+    e.initCustomEvent(type, bubbles, cancelable, detail);
     return e;
 }
 
@@ -190,38 +189,83 @@ function set_current_component(component) {
 }
 function get_current_component() {
     if (!current_component)
-        throw new Error(`Function called outside component initialization`);
+        throw new Error('Function called outside component initialization');
     return current_component;
 }
+/**
+ * The `onMount` function schedules a callback to run as soon as the component has been mounted to the DOM.
+ * It must be called during the component's initialisation (but doesn't need to live *inside* the component;
+ * it can be called from an external module).
+ *
+ * `onMount` does not run inside a [server-side component](/docs#run-time-server-side-component-api).
+ *
+ * https://svelte.dev/docs#run-time-svelte-onmount
+ */
 function onMount(fn) {
     get_current_component().$$.on_mount.push(fn);
 }
+/**
+ * Schedules a callback to run immediately after the component has been updated.
+ *
+ * The first time the callback runs will be after the initial `onMount`
+ */
 function afterUpdate(fn) {
     get_current_component().$$.after_update.push(fn);
 }
+/**
+ * Schedules a callback to run immediately before the component is unmounted.
+ *
+ * Out of `onMount`, `beforeUpdate`, `afterUpdate` and `onDestroy`, this is the
+ * only one that runs inside a server-side component.
+ *
+ * https://svelte.dev/docs#run-time-svelte-ondestroy
+ */
 function onDestroy(fn) {
     get_current_component().$$.on_destroy.push(fn);
 }
+/**
+ * Creates an event dispatcher that can be used to dispatch [component events](/docs#template-syntax-component-directives-on-eventname).
+ * Event dispatchers are functions that can take two arguments: `name` and `detail`.
+ *
+ * Component events created with `createEventDispatcher` create a
+ * [CustomEvent](https://developer.mozilla.org/en-US/docs/Web/API/CustomEvent).
+ * These events do not [bubble](https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Building_blocks/Events#Event_bubbling_and_capture).
+ * The `detail` argument corresponds to the [CustomEvent.detail](https://developer.mozilla.org/en-US/docs/Web/API/CustomEvent/detail)
+ * property and can contain any type of data.
+ *
+ * https://svelte.dev/docs#run-time-svelte-createeventdispatcher
+ */
 function createEventDispatcher() {
     const component = get_current_component();
-    return (type, detail) => {
+    return (type, detail, { cancelable = false } = {}) => {
         const callbacks = component.$$.callbacks[type];
         if (callbacks) {
             // TODO are there situations where events could be dispatched
             // in a server (non-DOM) environment?
-            const event = custom_event(type, detail);
+            const event = custom_event(type, detail, { cancelable });
             callbacks.slice().forEach(fn => {
                 fn.call(component, event);
             });
+            return !event.defaultPrevented;
         }
+        return true;
     };
 }
+/**
+ * Associates an arbitrary `context` object with the current component and the specified `key`
+ * and returns that object. The context is then available to children of the component
+ * (including slotted content) with `getContext`.
+ *
+ * Like lifecycle functions, this must be called during component initialisation.
+ *
+ * https://svelte.dev/docs#run-time-svelte-setcontext
+ */
 function setContext(key, context) {
     get_current_component().$$.context.set(key, context);
+    return context;
 }
 
-// source: https://html.spec.whatwg.org/multipage/indices.html
-const boolean_attributes = new Set([
+const _boolean_attributes = [
     'allowfullscreen',
     'allowpaymentrequest',
     'async',
@@ -234,6 +278,7 @@ const boolean_attributes = new Set([
     'disabled',
     'formnovalidate',
     'hidden',
+    'inert',
     'ismap',
     'loop',
     'multiple',
@@ -246,19 +291,36 @@ const boolean_attributes = new Set([
     'required',
     'reversed',
     'selected'
-]);
+];
+/**
+ * List of HTML boolean attributes (e.g. `<input disabled>`).
+ * Source: https://html.spec.whatwg.org/multipage/indices.html
+ */
+const boolean_attributes = new Set([..._boolean_attributes]);
 
 const invalid_attribute_name_character = /[\s'">/=\u{FDD0}-\u{FDEF}\u{FFFE}\u{FFFF}\u{1FFFE}\u{1FFFF}\u{2FFFE}\u{2FFFF}\u{3FFFE}\u{3FFFF}\u{4FFFE}\u{4FFFF}\u{5FFFE}\u{5FFFF}\u{6FFFE}\u{6FFFF}\u{7FFFE}\u{7FFFF}\u{8FFFE}\u{8FFFF}\u{9FFFE}\u{9FFFF}\u{AFFFE}\u{AFFFF}\u{BFFFE}\u{BFFFF}\u{CFFFE}\u{CFFFF}\u{DFFFE}\u{DFFFF}\u{EFFFE}\u{EFFFF}\u{FFFFE}\u{FFFFF}\u{10FFFE}\u{10FFFF}]/u;
 // https://html.spec.whatwg.org/multipage/syntax.html#attributes-2
 // https://infra.spec.whatwg.org/#noncharacter
-function spread(args, classes_to_add) {
+function spread(args, attrs_to_add) {
     const attributes = Object.assign({}, ...args);
-    if (classes_to_add) {
-        if (attributes.class == null) {
-            attributes.class = classes_to_add;
+    if (attrs_to_add) {
+        const classes_to_add = attrs_to_add.classes;
+        const styles_to_add = attrs_to_add.styles;
+        if (classes_to_add) {
+            if (attributes.class == null) {
+                attributes.class = classes_to_add;
+            }
+            else {
+                attributes.class += ' ' + classes_to_add;
+            }
         }
-        else {
-            attributes.class += ' ' + classes_to_add;
+        if (styles_to_add) {
+            if (attributes.style == null) {
+                attributes.style = style_object_to_string(styles_to_add);
+            }
+            else {
+                attributes.style = style_object_to_string(merge_ssr_styles(attributes.style, styles_to_add));
+            }
         }
     }
     let str = '';
@@ -267,26 +329,69 @@ function spread(args, classes_to_add) {
             return;
         const value = attributes[name];
         if (value === true)
-            str += " " + name;
+            str += ' ' + name;
         else if (boolean_attributes.has(name.toLowerCase())) {
             if (value)
-                str += " " + name;
+                str += ' ' + name;
         }
         else if (value != null) {
-            str += ` ${name}="${String(value).replace(/"/g, '&#34;').replace(/'/g, '&#39;')}"`;
+            str += ` ${name}="${value}"`;
         }
     });
     return str;
 }
-const escaped = {
-    '"': '&quot;',
-    "'": '&#39;',
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;'
-};
-function escape(html) {
-    return String(html).replace(/["'&<>]/g, match => escaped[match]);
+function merge_ssr_styles(style_attribute, style_directive) {
+    const style_object = {};
+    for (const individual_style of style_attribute.split(';')) {
+        const colon_index = individual_style.indexOf(':');
+        const name = individual_style.slice(0, colon_index).trim();
+        const value = individual_style.slice(colon_index + 1).trim();
+        if (!name)
+            continue;
+        style_object[name] = value;
+    }
+    for (const name in style_directive) {
+        const value = style_directive[name];
+        if (value) {
+            style_object[name] = value;
+        }
+        else {
+            delete style_object[name];
+        }
+    }
+    return style_object;
+}
+const ATTR_REGEX = /[&"]/g;
+const CONTENT_REGEX = /[&<]/g;
+/**
+ * Note: this method is performance sensitive and has been optimized
+ * https://github.com/sveltejs/svelte/pull/5701
+ */
+function escape(value, is_attr = false) {
+    const str = String(value);
+    const pattern = is_attr ? ATTR_REGEX : CONTENT_REGEX;
+    pattern.lastIndex = 0;
+    let escaped = '';
+    let last = 0;
+    while (pattern.test(str)) {
+        const i = pattern.lastIndex - 1;
+        const ch = str[i];
+        escaped += str.substring(last, i) + (ch === '&' ? '&amp;' : (ch === '"' ? '&quot;' : '&lt;'));
+        last = i + 1;
+    }
+    return escaped + str.substring(last);
+}
+function escape_attribute_value(value) {
+    // keep booleans, null, and undefined for the sake of `spread`
+    const should_escape = typeof value === 'string' || (value && typeof value === 'object');
+    return should_escape ? escape(value, true) : value;
+}
+function escape_object(obj) {
+    const result = {};
+    for (const key in obj) {
+        result[key] = escape_attribute_value(obj[key]);
+    }
+    return result;
 }
 function each(items, fn) {
     let str = '';
@@ -302,17 +407,17 @@ function validate_component(component, name) {
     if (!component || !component.$$render) {
         if (name === 'svelte:component')
             name += ' this={...}';
-        throw new Error(`<${name}> is not a valid SSR component. You may need to review your build config to ensure that dependencies are compiled, rather than imported as pre-compiled modules`);
+        throw new Error(`<${name}> is not a valid SSR component. You may need to review your build config to ensure that dependencies are compiled, rather than imported as pre-compiled modules. Otherwise you may need to fix a <${name}>.`);
     }
     return component;
 }
 let on_destroy;
 function create_ssr_component(fn) {
-    function $$render(result, props, bindings, slots) {
+    function $$render(result, props, bindings, slots, context) {
         const parent_component = current_component;
         const $$ = {
             on_destroy,
-            context: new Map(parent_component ? parent_component.$$.context : []),
+            context: new Map(context || (parent_component ? parent_component.$$.context : [])),
             // these will be immediately discarded
             on_mount: [],
             before_update: [],
@@ -325,10 +430,10 @@ function create_ssr_component(fn) {
         return html;
     }
     return {
-        render: (props = {}, options = {}) => {
+        render: (props = {}, { $$slots = {}, context = new Map() } = {}) => {
             on_destroy = [];
             const result = { title: '', head: '', css: new Set() };
-            const html = $$render(result, props, {}, options);
+            const html = $$render(result, props, {}, $$slots, context);
             run_all(on_destroy);
             return {
                 html,
@@ -345,27 +450,33 @@ function create_ssr_component(fn) {
 function add_attribute(name, value, boolean) {
     if (value == null || (boolean && !value))
         return '';
-    return ` ${name}${value === true ? '' : `=${typeof value === 'string' ? JSON.stringify(escape(value)) : `"${value}"`}`}`;
+    const assignment = (boolean && value === true) ? '' : `="${escape(value, true)}"`;
+    return ` ${name}${assignment}`;
+}
+function style_object_to_string(style_object) {
+    return Object.keys(style_object)
+        .filter(key => style_object[key])
+        .map(key => `${key}: ${escape_attribute_value(style_object[key])};`)
+        .join(' ');
 }
 
 const subscriber_queue = [];
 /**
  * Create a `Writable` store that allows both updating and reading by subscription.
  * @param {*=}value initial value
- * @param {StartStopNotifier=}start start and stop notifications for subscriptions
+ * @param {StartStopNotifier=} start
  */
 function writable(value, start = noop) {
     let stop;
-    const subscribers = [];
+    const subscribers = new Set();
     function set(new_value) {
         if (safe_not_equal(value, new_value)) {
             value = new_value;
             if (stop) { // store is ready
                 const run_queue = !subscriber_queue.length;
-                for (let i = 0; i < subscribers.length; i += 1) {
-                    const s = subscribers[i];
-                    s[1]();
-                    subscriber_queue.push(s, value);
+                for (const subscriber of subscribers) {
+                    subscriber[1]();
+                    subscriber_queue.push(subscriber, value);
                 }
                 if (run_queue) {
                     for (let i = 0; i < subscriber_queue.length; i += 2) {
@@ -381,17 +492,14 @@ function writable(value, start = noop) {
     }
     function subscribe(run, invalidate = noop) {
         const subscriber = [run, invalidate];
-        subscribers.push(subscriber);
-        if (subscribers.length === 1) {
+        subscribers.add(subscriber);
+        if (subscribers.size === 1) {
             stop = start(set) || noop;
         }
         run(value);
         return () => {
-            const index = subscribers.indexOf(subscriber);
-            if (index !== -1) {
-                subscribers.splice(index, 1);
-            }
-            if (subscribers.length === 0) {
+            subscribers.delete(subscriber);
+            if (subscribers.size === 0 && stop) {
                 stop();
                 stop = null;
             }
@@ -403,27 +511,28 @@ function writable(value, start = noop) {
 const stateStore = writable({ rout: "botlist", 
                                     showmenu: false,
                                     selectbotname: "",
-                                    urlhost: "https://api.ti-robots.ru/",
-                                    urlhostenv: "https://api.ti-robots.ru/",
+                                    urlhost: "http://dev.ti-robots.ru:1800/",
+                                    urlhostenv: "http://dev.ti-robots.ru:1800/",
                                     darkmodestatus: true,
                                     timerId: "",
                                     timerIdlist: ""});
 
-/* node_modules/smelte/src/components/Ripple/Ripple.svelte generated by Svelte v3.24.0 */
+/* node_modules/smelte/src/components/Ripple/Ripple.svelte generated by Svelte v3.59.2 */
 
 const css = {
 	code: ".ripple.svelte-1o8z87d{position:absolute !important}",
-	map: "{\"version\":3,\"file\":\"Ripple.svelte\",\"sources\":[\"Ripple.svelte\"],\"sourcesContent\":[\"<script>\\n  export let color = \\\"primary\\\";\\n  export let noHover = false;\\n  import createRipple from \\\"../Ripple/ripple.js\\\";\\n\\n  $: ripple = createRipple(color, true);\\n  $: hoverClass = `hover:bg-${color}-transLight`;\\n</script>\\n\\n<style>\\n  .ripple {\\n    position: absolute !important;\\n  }\\n</style>\\n\\n<span\\n  use:ripple\\n  class=\\\"z-40 {$$props.class} p-2 rounded-full flex items-center justify-center top-0 left-0 {noHover ? \\\"\\\" : hoverClass}\\\">\\n  <slot />\\n</span>\\n\"],\"names\":[],\"mappings\":\"AAUE,OAAO,eAAC,CAAC,AACP,QAAQ,CAAE,QAAQ,CAAC,UAAU,AAC/B,CAAC\"}"
+	map: "{\"version\":3,\"file\":\"Ripple.svelte\",\"sources\":[\"Ripple.svelte\"],\"sourcesContent\":[\"<script>\\n  export let color = \\\"primary\\\";\\n  export let noHover = false;\\n  import createRipple from \\\"../Ripple/ripple.js\\\";\\n\\n  $: ripple = createRipple(color, true);\\n  $: hoverClass = `hover:bg-${color}-transLight`;\\n</script>\\n\\n<style>\\n  .ripple {\\n    position: absolute !important;\\n  }\\n</style>\\n\\n<span\\n  use:ripple\\n  class=\\\"z-40 {$$props.class} p-2 rounded-full flex items-center justify-center top-0 left-0 {noHover ? \\\"\\\" : hoverClass}\\\">\\n  <slot />\\n</span>\\n\"],\"names\":[],\"mappings\":\"AAUE,sBAAQ,CACN,QAAQ,CAAE,QAAQ,CAAC,UACrB\"}"
 };
 
-const Ripple = create_ssr_component(($$result, $$props, $$bindings, $$slots) => {
+const Ripple = create_ssr_component(($$result, $$props, $$bindings, slots) => {
+	let hoverClass;
 	let { color = "primary" } = $$props;
 	let { noHover = false } = $$props;
 	if ($$props.color === void 0 && $$bindings.color && color !== void 0) $$bindings.color(color);
 	if ($$props.noHover === void 0 && $$bindings.noHover && noHover !== void 0) $$bindings.noHover(noHover);
 	$$result.css.add(css);
-	let hoverClass = `hover:bg-${color}-transLight`;
-	return `<span class="${"z-40 " + escape($$props.class) + " p-2 rounded-full flex items-center justify-center top-0 left-0 " + escape(noHover ? "" : hoverClass) + " svelte-1o8z87d"}">${$$slots.default ? $$slots.default({}) : ``}</span>`;
+	hoverClass = `hover:bg-${color}-transLight`;
+	return `<span class="${"z-40 " + escape($$props.class, true) + " p-2 rounded-full flex items-center justify-center top-0 left-0 " + escape(noHover ? "" : hoverClass, true) + " svelte-1o8z87d"}">${slots.default ? slots.default({}) : ``}</span>`;
 });
 
 const noDepth = ["white", "black", "transparent"];
@@ -506,23 +615,30 @@ class ClassBuilder {
   }
 }
 
+const defaultReserved = ["class", "add", "remove", "replace", "value"];
+
 function filterProps(reserved, props) {
+  const r = [...reserved, ...defaultReserved];
 
   return Object.keys(props).reduce(
     (acc, cur) =>
-      cur.includes("$$") || cur.includes("Class") || reserved.includes(cur)
+      cur.includes("$$") || cur.includes("Class") || r.includes(cur)
         ? acc
         : { ...acc, [cur]: props[cur] },
     {}
   );
 }
 
-/* node_modules/smelte/src/components/Switch/Switch.svelte generated by Svelte v3.24.0 */
+/* node_modules/smelte/src/components/Switch/Switch.svelte generated by Svelte v3.59.2 */
 const trackClassesDefault = "relative w-10 h-auto z-0 rounded-full overflow-visible flex items-center justify-center";
-const thumbClassesDefault = "rounded-full p-2 w-5 h-5 absolute elevation-3 duration-100";
+const thumbClassesDefault = "rounded-full p-2 w-5 h-5 absolute shadow duration-100";
 const labelClassesDefault = "pl-2 cursor-pointer";
 
-const Switch = create_ssr_component(($$result, $$props, $$bindings, $$slots) => {
+const Switch = create_ssr_component(($$result, $$props, $$bindings, slots) => {
+	let c;
+	let tr;
+	let th;
+	let l;
 	const classesDefault = `inline-flex items-center mb-2 cursor-pointer z-10`;
 	let { value = false } = $$props;
 	let { label = "" } = $$props;
@@ -545,35 +661,37 @@ const Switch = create_ssr_component(($$result, $$props, $$bindings, $$slots) => 
 	if ($$props.thumbClasses === void 0 && $$bindings.thumbClasses && thumbClasses !== void 0) $$bindings.thumbClasses(thumbClasses);
 	if ($$props.labelClasses === void 0 && $$bindings.labelClasses && labelClasses !== void 0) $$bindings.labelClasses(labelClasses);
 	if ($$props.classes === void 0 && $$bindings.classes && classes !== void 0) $$bindings.classes(classes);
-	let c = cb.flush().add(classes, true, classesDefault).add($$props.class).get();
-	let tr = trcb.flush().add("bg-gray-700", !value).add(`bg-${color}-200`, value).add(trackClasses, true, trackClassesDefault).get();
-	let th = thcb.flush().add(thumbClasses, true, thumbClassesDefault).add("bg-white left-0", !value).add(`bg-${color}-400`, value).get();
-	let l = lcb.flush().add(labelClasses, true, labelClassesDefault).add("text-gray-500", disabled).add("text-gray-700", !disabled).get();
+	c = cb.flush().add(classes, true, classesDefault).add($$props.class).get();
+	tr = trcb.flush().add("bg-gray-700", !value).add(`bg-${color}-200`, value).add(trackClasses, true, trackClassesDefault).get();
+	th = thcb.flush().add(thumbClasses, true, thumbClassesDefault).add("bg-white left-0", !value).add(`bg-${color}-400`, value).get();
+	l = lcb.flush().add(labelClasses, true, labelClassesDefault).add("text-gray-500", disabled).add("text-gray-700", !disabled).get();
 
-	return `<div${add_attribute("class", c, 0)}><input class="${"hidden"}" type="${"checkbox"}"${add_attribute("value", value, 1)}>
-  <div${add_attribute("class", tr, 0)}><div class="${"w-full h-full absolute"}"></div>
+	return `<div${add_attribute("class", c, 0)}><input class="hidden" type="checkbox"${add_attribute("value", value, 0)}>
+  <div${add_attribute("class", tr, 0)}><div class="w-full h-full absolute"></div>
     ${validate_component(Ripple, "Ripple").$$render(
 		$$result,
 		{
-			color: value && !disabled ? color : "gray",
+			color: value && !disabled ? color : 'gray',
 			noHover: true
 		},
 		{},
 		{
-			default: () => `<div${add_attribute("class", th, 0)}${add_attribute("style", value ? "left: 1.25rem" : "", 0)}></div>`
+			default: () => {
+				return `<div${add_attribute("class", th, 0)}${add_attribute("style", value ? 'left: 1.25rem' : "", 0)}></div>`;
+			}
 		}
 	)}</div>
-  <label aria-hidden="${"true"}"${add_attribute("class", l, 0)}>${escape(label)}</label></div>`;
+  <label aria-hidden="true"${add_attribute("class", l, 0)}>${escape(label)}</label></div>`;
 });
 
-/* node_modules/smelte/src/components/Icon/Icon.svelte generated by Svelte v3.24.0 */
+/* node_modules/smelte/src/components/Icon/Icon.svelte generated by Svelte v3.59.2 */
 
 const css$1 = {
 	code: ".reverse.svelte-zzky5a{transform:rotate(180deg)}.tip.svelte-zzky5a{transform:rotate(90deg)}",
-	map: "{\"version\":3,\"file\":\"Icon.svelte\",\"sources\":[\"Icon.svelte\"],\"sourcesContent\":[\"<script>\\n\\n\\n  export let small = false;\\n  export let xs = false;\\n  export let reverse = false;\\n  export let tip = false;\\n  export let color = \\\"default\\\";\\n</script>\\n\\n<style>\\n  .reverse {\\n    transform: rotate(180deg);\\n  }\\n\\n  .tip {\\n    transform: rotate(90deg);\\n  }\\n</style>\\n\\n<i\\n  aria-hidden=\\\"true\\\"\\n  class=\\\"material-icons icon text-xl {$$props.class} duration-200 ease-in\\\"\\n  class:reverse\\n  class:tip\\n  on:click\\n  class:text-base={small}\\n  class:text-xs={xs}\\n  style={color ? `color: ${color}` : ''}>\\n  <slot />\\n</i>\\n\"],\"names\":[],\"mappings\":\"AAWE,QAAQ,cAAC,CAAC,AACR,SAAS,CAAE,OAAO,MAAM,CAAC,AAC3B,CAAC,AAED,IAAI,cAAC,CAAC,AACJ,SAAS,CAAE,OAAO,KAAK,CAAC,AAC1B,CAAC\"}"
+	map: "{\"version\":3,\"file\":\"Icon.svelte\",\"sources\":[\"Icon.svelte\"],\"sourcesContent\":[\"<script>\\n\\n\\n  export let small = false;\\n  export let xs = false;\\n  export let reverse = false;\\n  export let tip = false;\\n  export let color = \\\"default\\\";\\n</script>\\n\\n<style>\\n  .reverse {\\n    transform: rotate(180deg);\\n  }\\n\\n  .tip {\\n    transform: rotate(90deg);\\n  }\\n</style>\\n\\n<i\\n  aria-hidden=\\\"true\\\"\\n  class=\\\"material-icons icon text-xl select-none {$$props.class} duration-200 ease-in\\\"\\n  class:reverse\\n  class:tip\\n  on:click\\n  class:text-base={small}\\n  class:text-xs={xs}\\n  style={color ? `color: ${color}` : ''}>\\n  <slot />\\n</i>\\n\"],\"names\":[],\"mappings\":\"AAWE,sBAAS,CACP,SAAS,CAAE,OAAO,MAAM,CAC1B,CAEA,kBAAK,CACH,SAAS,CAAE,OAAO,KAAK,CACzB\"}"
 };
 
-const Icon = create_ssr_component(($$result, $$props, $$bindings, $$slots) => {
+const Icon = create_ssr_component(($$result, $$props, $$bindings, slots) => {
 	let { small = false } = $$props;
 	let { xs = false } = $$props;
 	let { reverse = false } = $$props;
@@ -586,20 +704,20 @@ const Icon = create_ssr_component(($$result, $$props, $$bindings, $$slots) => {
 	if ($$props.color === void 0 && $$bindings.color && color !== void 0) $$bindings.color(color);
 	$$result.css.add(css$1);
 
-	return `<i aria-hidden="${"true"}" class="${[
-		"material-icons icon text-xl " + escape($$props.class) + " duration-200 ease-in" + " svelte-zzky5a",
-		(reverse ? "reverse" : "") + " " + (tip ? "tip" : "") + " " + (small ? "text-base" : "") + " " + (xs ? "text-xs" : "")
-	].join(" ").trim()}"${add_attribute("style", color ? `color: ${color}` : "", 0)}>${$$slots.default ? $$slots.default({}) : ``}</i>`;
+	return `<i aria-hidden="true" class="${[
+		"material-icons icon text-xl select-none " + escape($$props.class, true) + " duration-200 ease-in" + " svelte-zzky5a",
+		(reverse ? "reverse" : "") + ' ' + (tip ? "tip" : "") + ' ' + (small ? "text-base" : "") + ' ' + (xs ? "text-xs" : "")
+	].join(' ').trim()}"${add_attribute("style", color ? `color: ${color}` : '', 0)}>${slots.default ? slots.default({}) : ``}</i>`;
 });
 
-/* node_modules/smelte/src/components/TextField/Label.svelte generated by Svelte v3.24.0 */
+/* node_modules/smelte/src/components/TextField/Label.svelte generated by Svelte v3.59.2 */
 
 const css$2 = {
 	code: ".label-top.svelte-r33x2y{line-height:0.05}.label-transition.svelte-r33x2y{transition:font-size 0.05s, line-height 0.1s}label.text-xs{font-size:0.7rem}",
-	map: "{\"version\":3,\"file\":\"Label.svelte\",\"sources\":[\"Label.svelte\"],\"sourcesContent\":[\"<script>\\n  import utils, { ClassBuilder, filterProps } from \\\"../../utils/classes.js\\\";\\n\\n\\n\\n  export let focused = false;\\n  export let error = false;\\n  export let outlined = false;\\n  export let labelOnTop = false;\\n  export let prepend = false;\\n  export let color = \\\"primary\\\";\\n  // for outlined button label\\n  export let bgColor = \\\"white\\\";\\n  export let dense = false;\\n\\n  let labelDefault = `pt-4 absolute top-0 label-transition block pb-2 px-4 pointer-events-none cursor-text`;\\n\\n  export let add = \\\"\\\";\\n  export let remove = \\\"\\\";\\n  export let replace = \\\"\\\";\\n\\n  export let labelClasses = labelDefault;\\n\\n  const {\\n    bg,\\n    border,\\n    txt,\\n    caret,\\n  } = utils(color);\\n\\n  const l = new ClassBuilder(labelClasses, labelDefault);\\n\\n  let lClasses = i => i;\\n\\n  $: lClasses = l\\n      .flush()\\n      .add(txt(), focused && !error)\\n      .add('text-error-500', focused && error)\\n      .add('label-top text-xs', labelOnTop)\\n      .add('text-xs', focused)\\n      .remove('pt-4 pb-2 px-4 px-1 pt-0', labelOnTop && outlined)\\n      .add(`ml-3 p-1 pt-0 mt-0 bg-${bgColor} dark:bg-dark-500`, labelOnTop && outlined)\\n      .remove('px-4', prepend)\\n      .add('pr-4 pl-10', prepend)\\n      .remove('pt-4', dense)\\n      .add('pt-3', dense)\\n      .add(add)\\n      .remove(remove)\\n      .replace(replace)\\n      .get();\\n\\n  const props = filterProps([\\n    'focused',\\n    'error',\\n    'outlined',\\n    'labelOnTop',\\n    'prepend',\\n    'color',\\n    'dense'\\n  ], $$props);\\n</script>\\n\\n<style>\\n.label-top {\\n  line-height: 0.05;\\n}\\n.label-transition {\\n  transition: font-size 0.05s, line-height 0.1s;\\n}\\n:global(label.text-xs) {\\n  font-size: 0.7rem;\\n}\\n</style>\\n\\n<label class=\\\"{lClasses} {$$props.class}\\\" {...props}>\\n  <slot />\\n</label>\\n\"],\"names\":[],\"mappings\":\"AA+DA,UAAU,cAAC,CAAC,AACV,WAAW,CAAE,IAAI,AACnB,CAAC,AACD,iBAAiB,cAAC,CAAC,AACjB,UAAU,CAAE,SAAS,CAAC,KAAK,CAAC,CAAC,WAAW,CAAC,IAAI,AAC/C,CAAC,AACO,aAAa,AAAE,CAAC,AACtB,SAAS,CAAE,MAAM,AACnB,CAAC\"}"
+	map: "{\"version\":3,\"file\":\"Label.svelte\",\"sources\":[\"Label.svelte\"],\"sourcesContent\":[\"<script>\\n  import utils, { ClassBuilder, filterProps } from \\\"../../utils/classes.js\\\";\\n\\n\\n\\n  export let focused = false;\\n  export let error = false;\\n  export let outlined = false;\\n  export let labelOnTop = false;\\n  export let prepend = false;\\n  export let color = \\\"primary\\\";\\n  // for outlined button label\\n  export let bgColor = \\\"white\\\";\\n  export let dense = false;\\n\\n  let labelDefault = `pt-4 absolute top-0 label-transition block pb-2 px-4 pointer-events-none cursor-text`;\\n\\n  export let add = \\\"\\\";\\n  export let remove = \\\"\\\";\\n  export let replace = \\\"\\\";\\n\\n  export let labelClasses = labelDefault;\\n\\n  const {\\n    border,\\n    txt,\\n  } = utils(color);\\n\\n  const l = new ClassBuilder(labelClasses, labelDefault);\\n\\n  let lClasses = i => i;\\n\\n  $: lClasses = l\\n      .flush()\\n      .add(txt(), focused && !error)\\n      .add('text-error-500', focused && error)\\n      .add('label-top text-xs', labelOnTop)\\n      .add('text-xs', focused)\\n      .remove('pt-4 pb-2 px-4 px-1 pt-0', labelOnTop && outlined)\\n      .add(`ml-3 p-1 pt-0 mt-0 bg-${bgColor} dark:bg-dark-500`, labelOnTop && outlined)\\n      .remove('px-4', prepend)\\n      .add('pr-4 pl-10', prepend)\\n      .remove('pt-4', dense)\\n      .add('pt-3', dense)\\n      .add(add)\\n      .remove(remove)\\n      .replace(replace)\\n      .get();\\n\\n  const props = filterProps([\\n    'focused',\\n    'error',\\n    'outlined',\\n    'labelOnTop',\\n    'prepend',\\n    'color',\\n    'dense'\\n  ], $$props);\\n</script>\\n\\n<style>\\n.label-top {\\n  line-height: 0.05;\\n}\\n.label-transition {\\n  transition: font-size 0.05s, line-height 0.1s;\\n}\\n:global(label.text-xs) {\\n  font-size: 0.7rem;\\n}\\n</style>\\n\\n<label class=\\\"{lClasses} {$$props.class}\\\" {...props}>\\n  <slot />\\n</label>\\n\"],\"names\":[],\"mappings\":\"AA6DA,wBAAW,CACT,WAAW,CAAE,IACf,CACA,+BAAkB,CAChB,UAAU,CAAE,SAAS,CAAC,KAAK,CAAC,CAAC,WAAW,CAAC,IAC3C,CACQ,aAAe,CACrB,SAAS,CAAE,MACb\"}"
 };
 
-const Label = create_ssr_component(($$result, $$props, $$bindings, $$slots) => {
+const Label = create_ssr_component(($$result, $$props, $$bindings, slots) => {
 	let { focused = false } = $$props;
 	let { error = false } = $$props;
 	let { outlined = false } = $$props;
@@ -613,10 +731,10 @@ const Label = create_ssr_component(($$result, $$props, $$bindings, $$slots) => {
 	let { remove = "" } = $$props;
 	let { replace = "" } = $$props;
 	let { labelClasses = labelDefault } = $$props;
-	const { bg, border, txt, caret } = utils(color);
+	const { border, txt } = utils(color);
 	const l = new ClassBuilder(labelClasses, labelDefault);
 	let lClasses = i => i;
-	const props = filterProps(["focused", "error", "outlined", "labelOnTop", "prepend", "color", "dense"], $$props);
+	const props = filterProps(['focused', 'error', 'outlined', 'labelOnTop', 'prepend', 'color', 'dense'], $$props);
 	if ($$props.focused === void 0 && $$bindings.focused && focused !== void 0) $$bindings.focused(focused);
 	if ($$props.error === void 0 && $$bindings.error && error !== void 0) $$bindings.error(error);
 	if ($$props.outlined === void 0 && $$bindings.outlined && outlined !== void 0) $$bindings.outlined(outlined);
@@ -630,17 +748,17 @@ const Label = create_ssr_component(($$result, $$props, $$bindings, $$slots) => {
 	if ($$props.replace === void 0 && $$bindings.replace && replace !== void 0) $$bindings.replace(replace);
 	if ($$props.labelClasses === void 0 && $$bindings.labelClasses && labelClasses !== void 0) $$bindings.labelClasses(labelClasses);
 	$$result.css.add(css$2);
-	lClasses = l.flush().add(txt(), focused && !error).add("text-error-500", focused && error).add("label-top text-xs", labelOnTop).add("text-xs", focused).remove("pt-4 pb-2 px-4 px-1 pt-0", labelOnTop && outlined).add(`ml-3 p-1 pt-0 mt-0 bg-${bgColor} dark:bg-dark-500`, labelOnTop && outlined).remove("px-4", prepend).add("pr-4 pl-10", prepend).remove("pt-4", dense).add("pt-3", dense).add(add).remove(remove).replace(replace).get();
+	lClasses = l.flush().add(txt(), focused && !error).add('text-error-500', focused && error).add('label-top text-xs', labelOnTop).add('text-xs', focused).remove('pt-4 pb-2 px-4 px-1 pt-0', labelOnTop && outlined).add(`ml-3 p-1 pt-0 mt-0 bg-${bgColor} dark:bg-dark-500`, labelOnTop && outlined).remove('px-4', prepend).add('pr-4 pl-10', prepend).remove('pt-4', dense).add('pt-3', dense).add(add).remove(remove).replace(replace).get();
 
 	return `<label${spread(
 		[
 			{
-				class: escape(lClasses) + " " + escape($$props.class)
+				class: escape(lClasses, true) + " " + escape($$props.class, true)
 			},
-			props
+			escape_object(props)
 		],
-		"svelte-r33x2y"
-	)}>${$$slots.default ? $$slots.default({}) : ``}</label>`;
+		{ classes: "svelte-r33x2y" }
+	)}>${slots.default ? slots.default({}) : ``}</label>`;
 });
 
 function quadIn(t) {
@@ -650,10 +768,11 @@ function quadOut(t) {
     return -t * (t - 2.0);
 }
 
-/* node_modules/smelte/src/components/TextField/Hint.svelte generated by Svelte v3.24.0 */
-let classesDefault = "text-xs py-1 pl-4 absolute bottom-1 left-0";
+/* node_modules/smelte/src/components/TextField/Hint.svelte generated by Svelte v3.59.2 */
+let classesDefault = "text-xs py-1 pl-4 absolute left-0";
 
-const Hint = create_ssr_component(($$result, $$props, $$bindings, $$slots) => {
+const Hint = create_ssr_component(($$result, $$props, $$bindings, slots) => {
+	let classes;
 	let { error = false } = $$props;
 	let { hint = "" } = $$props;
 	let { add = "" } = $$props;
@@ -661,27 +780,28 @@ const Hint = create_ssr_component(($$result, $$props, $$bindings, $$slots) => {
 	let { replace = "" } = $$props;
 	let { transitionProps = { y: -10, duration: 100, easing: quadOut } } = $$props;
 	const l = new ClassBuilder($$props.class, classesDefault);
-	const props = filterProps(["error", "hint"], $$props);
+	const props = filterProps(['error', 'hint'], $$props);
 	if ($$props.error === void 0 && $$bindings.error && error !== void 0) $$bindings.error(error);
 	if ($$props.hint === void 0 && $$bindings.hint && hint !== void 0) $$bindings.hint(hint);
 	if ($$props.add === void 0 && $$bindings.add && add !== void 0) $$bindings.add(add);
 	if ($$props.remove === void 0 && $$bindings.remove && remove !== void 0) $$bindings.remove(remove);
 	if ($$props.replace === void 0 && $$bindings.replace && replace !== void 0) $$bindings.replace(replace);
 	if ($$props.transitionProps === void 0 && $$bindings.transitionProps && transitionProps !== void 0) $$bindings.transitionProps(transitionProps);
-	let classes = l.flush().add("text-error-500", error).add("text-gray-600", hint).add(add).remove(remove).replace(replace).get();
+	classes = l.flush().add('text-error-500', error).add('text-gray-600', hint).add(add).remove(remove).replace(replace).get();
 
-	return `<div${add_attribute("class", classes, 0)}>${escape(hint || "")}
-  ${escape(error || "")}</div>`;
+	return `<div${add_attribute("class", classes, 0)}>${hint || ''}
+  ${escape(error || '')}</div>`;
 });
 
-/* node_modules/smelte/src/components/TextField/Underline.svelte generated by Svelte v3.24.0 */
+/* node_modules/smelte/src/components/TextField/Underline.svelte generated by Svelte v3.59.2 */
 
 const css$3 = {
 	code: ".line.svelte-xd9zs6{height:1px}",
-	map: "{\"version\":3,\"file\":\"Underline.svelte\",\"sources\":[\"Underline.svelte\"],\"sourcesContent\":[\"<script>\\n  import utils, { ClassBuilder, filterProps } from \\\"../../utils/classes.js\\\";\\n\\n\\n\\n  export let noUnderline = false;\\n  export let outlined = false;\\n  export let focused = false;\\n  export let error = false;\\n  export let color = \\\"primary\\\";\\n\\n  let defaultClasses = `mx-auto w-0`;\\n\\n  export let add = \\\"\\\";\\n  export let remove = \\\"\\\";\\n  export let replace = \\\"\\\";\\n\\n  export let lineClasses = defaultClasses;\\n\\n  const {\\n    bg,\\n    border,\\n    txt,\\n    caret,\\n  } = utils(color);\\n\\n  const l = new ClassBuilder(lineClasses, defaultClasses);\\n\\n  let Classes = i => i;\\n\\n  $: classes = l\\n      .flush()\\n      .add(txt(), focused && !error)\\n      .add('bg-error-500', error)\\n      .add('w-full', focused || error)\\n      .add(bg(), focused)\\n      .add(add)\\n      .remove(remove)\\n      .replace(replace)\\n      .get();\\n\\n  const props = filterProps([\\n    'focused',\\n    'error',\\n    'outlined',\\n    'labelOnTop',\\n    'prepend',\\n    'bgcolor',\\n    'color'\\n  ], $$props);\\n</script>\\n\\n<style>\\n.line {\\n  height: 1px;\\n}\\n</style>\\n\\n<div\\n  class=\\\"line absolute bottom-0 left-0 w-full bg-gray-600 {$$props.class}\\\"\\n  class:hidden={noUnderline || outlined}>\\n  <div\\n    class=\\\"{classes}\\\"\\n    style=\\\"height: 2px; transition: width .2s ease\\\" />\\n</div>\\n\"],\"names\":[],\"mappings\":\"AAqDA,KAAK,cAAC,CAAC,AACL,MAAM,CAAE,GAAG,AACb,CAAC\"}"
+	map: "{\"version\":3,\"file\":\"Underline.svelte\",\"sources\":[\"Underline.svelte\"],\"sourcesContent\":[\"<script>\\n  import utils, { ClassBuilder, filterProps } from \\\"../../utils/classes.js\\\";\\n\\n\\n\\n  export let noUnderline = false;\\n  export let outlined = false;\\n  export let focused = false;\\n  export let error = false;\\n  export let color = \\\"primary\\\";\\n\\n  let defaultClasses = `mx-auto w-0`;\\n\\n  export let add = \\\"\\\";\\n  export let remove = \\\"\\\";\\n  export let replace = \\\"\\\";\\n\\n  export let lineClasses = defaultClasses;\\n\\n  const {\\n    bg,\\n    border,\\n    txt,\\n    caret,\\n  } = utils(color);\\n\\n  const l = new ClassBuilder(lineClasses, defaultClasses);\\n\\n  let Classes = i => i;\\n\\n  $: classes = l\\n      .flush()\\n      .add(txt(), focused && !error)\\n      .add('bg-error-500', error)\\n      .add('w-full', focused || error)\\n      .add(bg(), focused)\\n      .add(add)\\n      .remove(remove)\\n      .replace(replace)\\n      .get();\\n\\n  const props = filterProps([\\n    'focused',\\n    'error',\\n    'outlined',\\n    'labelOnTop',\\n    'prepend',\\n    'bgcolor',\\n    'color'\\n  ], $$props);\\n</script>\\n\\n<style>\\n.line {\\n  height: 1px;\\n}\\n</style>\\n\\n<div\\n  class=\\\"line absolute bottom-0 left-0 w-full bg-gray-600 {$$props.class}\\\"\\n  class:hidden={noUnderline || outlined}>\\n  <div\\n    class=\\\"{classes}\\\"\\n    style=\\\"height: 2px; transition: width .2s ease\\\" />\\n</div>\\n\"],\"names\":[],\"mappings\":\"AAqDA,mBAAM,CACJ,MAAM,CAAE,GACV\"}"
 };
 
-const Underline = create_ssr_component(($$result, $$props, $$bindings, $$slots) => {
+const Underline = create_ssr_component(($$result, $$props, $$bindings, slots) => {
+	let classes;
 	let { noUnderline = false } = $$props;
 	let { outlined = false } = $$props;
 	let { focused = false } = $$props;
@@ -694,7 +814,7 @@ const Underline = create_ssr_component(($$result, $$props, $$bindings, $$slots) 
 	let { lineClasses = defaultClasses } = $$props;
 	const { bg, border, txt, caret } = utils(color);
 	const l = new ClassBuilder(lineClasses, defaultClasses);
-	const props = filterProps(["focused", "error", "outlined", "labelOnTop", "prepend", "bgcolor", "color"], $$props);
+	const props = filterProps(['focused', 'error', 'outlined', 'labelOnTop', 'prepend', 'bgcolor', 'color'], $$props);
 	if ($$props.noUnderline === void 0 && $$bindings.noUnderline && noUnderline !== void 0) $$bindings.noUnderline(noUnderline);
 	if ($$props.outlined === void 0 && $$bindings.outlined && outlined !== void 0) $$bindings.outlined(outlined);
 	if ($$props.focused === void 0 && $$bindings.focused && focused !== void 0) $$bindings.focused(focused);
@@ -705,20 +825,24 @@ const Underline = create_ssr_component(($$result, $$props, $$bindings, $$slots) 
 	if ($$props.replace === void 0 && $$bindings.replace && replace !== void 0) $$bindings.replace(replace);
 	if ($$props.lineClasses === void 0 && $$bindings.lineClasses && lineClasses !== void 0) $$bindings.lineClasses(lineClasses);
 	$$result.css.add(css$3);
-	let classes = l.flush().add(txt(), focused && !error).add("bg-error-500", error).add("w-full", focused || error).add(bg(), focused).add(add).remove(remove).replace(replace).get();
+	classes = l.flush().add(txt(), focused && !error).add('bg-error-500', error).add('w-full', focused || error).add(bg(), focused).add(add).remove(remove).replace(replace).get();
 
 	return `<div class="${[
-		"line absolute bottom-0 left-0 w-full bg-gray-600 " + escape($$props.class) + " svelte-xd9zs6",
+		"line absolute bottom-0 left-0 w-full bg-gray-600 " + escape($$props.class, true) + " svelte-xd9zs6",
 		noUnderline || outlined ? "hidden" : ""
-	].join(" ").trim()}"><div class="${escape(null_to_empty(classes)) + " svelte-xd9zs6"}" style="${"height: 2px; transition: width .2s ease"}"></div></div>`;
+	].join(' ').trim()}"><div class="${escape(null_to_empty(classes), true) + " svelte-xd9zs6"}" style="height: 2px; transition: width .2s ease"></div></div>`;
 });
 
-/* node_modules/smelte/src/components/TextField/TextField.svelte generated by Svelte v3.24.0 */
+/* node_modules/smelte/src/components/TextField/TextField.svelte generated by Svelte v3.59.2 */
+const inputDefault = "pb-2 pt-6 px-4 rounded-t text-black dark:text-gray-100 w-full";
 const classesDefault$1 = "mt-2 mb-6 relative text-gray-600 dark:text-gray-100";
 const appendDefault = "absolute right-0 top-0 pb-2 pr-4 pt-4 text-gray-700 z-10";
 const prependDefault = "absolute left-0 top-0 pb-2 pl-2 pt-4 text-xs text-gray-700 z-10";
 
-const TextField = create_ssr_component(($$result, $$props, $$bindings, $$slots) => {
+const TextField = create_ssr_component(($$result, $$props, $$bindings, slots) => {
+	let showHint;
+	let labelOnTop;
+	let iClasses;
 	let { outlined = false } = $$props;
 	let { value = null } = $$props;
 	let { label = "" } = $$props;
@@ -740,7 +864,6 @@ const TextField = create_ssr_component(($$result, $$props, $$bindings, $$slots) 
 	let { bgColor = "white" } = $$props;
 	let { iconClass = "" } = $$props;
 	let { disabled = false } = $$props;
-	const inputDefault = `duration-200 ease-in pb-2 pt-6 px-4 rounded-t text-black dark:text-gray-100 w-full`;
 	let { add = "" } = $$props;
 	let { remove = "" } = $$props;
 	let { replace = "" } = $$props;
@@ -765,27 +888,27 @@ const TextField = create_ssr_component(($$result, $$props, $$bindings, $$slots) 
 
 	const props = filterProps(
 		[
-			"outlined",
-			"label",
-			"placeholder",
-			"hint",
-			"error",
-			"append",
-			"prepend",
-			"persistentHint",
-			"textarea",
-			"rows",
-			"select",
-			"autocomplete",
-			"noUnderline",
-			"appendReverse",
-			"prependReverse",
-			"color",
-			"bgColor",
-			"disabled",
-			"replace",
-			"remove",
-			"small"
+			'outlined',
+			'label',
+			'placeholder',
+			'hint',
+			'error',
+			'append',
+			'prepend',
+			'persistentHint',
+			'textarea',
+			'rows',
+			'select',
+			'autocomplete',
+			'noUnderline',
+			'appendReverse',
+			'prependReverse',
+			'color',
+			'bgColor',
+			'disabled',
+			'replace',
+			'remove',
+			'small'
 		],
 		$$props
 	);
@@ -821,16 +944,16 @@ const TextField = create_ssr_component(($$result, $$props, $$bindings, $$slots) 
 	if ($$props.prependClasses === void 0 && $$bindings.prependClasses && prependClasses !== void 0) $$bindings.prependClasses(prependClasses);
 	if ($$props.extend === void 0 && $$bindings.extend && extend !== void 0) $$bindings.extend(extend);
 	if ($$props.focused === void 0 && $$bindings.focused && focused !== void 0) $$bindings.focused(focused);
-	let showHint = error || (persistentHint ? hint : focused && hint);
-	let labelOnTop = placeholder || focused || (value || value === 0);
-	let iClasses = cb.flush().remove("pt-6 pb-2", outlined).add("border rounded bg-transparent py-4 duration-200 ease-in", outlined).add("border-error-500 caret-error-500", error).remove(caret(), error).add(caret(), !error).add(border(), focused && !error).add("border-gray-600", !error && !focused).add("bg-gray-100 dark:bg-dark-600", !outlined).add("bg-gray-300 dark:bg-dark-200", focused && !outlined).remove("px-4", prepend).add("pr-4 pl-10", prepend).add(add).remove("pt-6 pb-2", dense && !outlined).add("pt-4 pb-1", dense && !outlined).remove("bg-gray-100", disabled).add("bg-gray-50", disabled).add("cursor-pointer", select && !autocomplete).add($$props.class).remove(remove).replace(replace).extend(extend).get();
-	wClasses = ccb.flush().add("select", select || autocomplete).add("dense", dense && !outlined).remove("mb-6 mt-2", dense && !outlined).add("mb-4 mt-1", dense).replace({ "text-gray-600": "text-error-500" }, error).add("text-gray-200", disabled).get();
+	showHint = error || (persistentHint ? hint : focused && hint);
+	labelOnTop = placeholder || focused || (value || value === 0);
+	iClasses = cb.flush().remove('pt-6 pb-2', outlined).add('border rounded bg-transparent py-4 duration-200 ease-in', outlined).add('border-error-500 caret-error-500', error).remove(caret(), error).add(caret(), !error).add(border(), outlined && focused && !error).add('bg-gray-100 dark:bg-dark-600', !outlined).add('bg-gray-300 dark:bg-dark-200', focused && !outlined).remove('px-4', prepend).add('pr-4 pl-10', prepend).add(add).remove('pt-6 pb-2', dense && !outlined).add('pt-4 pb-1', dense && !outlined).remove('bg-gray-100', disabled).add('bg-gray-50', disabled).add('cursor-pointer', select && !autocomplete).add($$props.class).remove(remove).replace(replace).extend(extend).get();
+	wClasses = ccb.flush().add('select', select || autocomplete).add('dense', dense && !outlined).remove('mb-6 mt-2', dense && !outlined).add('mb-4 mt-1', dense).replace({ 'text-gray-600': 'text-error-500' }, error).add('text-gray-200', disabled).get();
 	aClasses = acb.flush().get();
 	pClasses = pcb.flush().get();
 
 	return `<div${add_attribute("class", wClasses, 0)}>${label
-	? `${$$slots.label
-		? $$slots.label({})
+	? `${slots.label
+		? slots.label({})
 		: `
     ${validate_component(Label, "Label").$$render(
 				$$result,
@@ -845,39 +968,53 @@ const TextField = create_ssr_component(($$result, $$props, $$bindings, $$slots) 
 					dense: dense && !outlined
 				},
 				{},
-				{ default: () => `${escape(label)}` }
+				{
+					default: () => {
+						return `${escape(label)}`;
+					}
+				}
 			)}
   `}`
 	: ``}
 
   ${!textarea && !select || autocomplete
-	? `<input${spread([
-			{ "aria-label": escape(label) },
-			{ class: escape(iClasses) },
-			{ disabled: disabled || null },
-			props,
-			{
-				placeholder: escape(!value ? placeholder : "")
-			}
-		])}${add_attribute("value", value, 1)}>`
-	: `${textarea && !select
-		? `<textarea${spread([
-				{ rows: escape(rows) },
-				{ "aria-label": escape(label) },
-				{ class: escape(iClasses) },
-				{ disabled: disabled || null },
-				props,
+	? `<input${spread(
+			[
 				{
-					placeholder: escape(!value ? placeholder : "")
+					"aria-label": escape_attribute_value(label)
+				},
+				{ class: escape_attribute_value(iClasses) },
+				{ disabled: disabled || null },
+				escape_object(props),
+				{
+					placeholder: escape_attribute_value(!value ? placeholder : "")
 				}
-			])}>${value || ""}</textarea>`
+			],
+			{}
+		)}${add_attribute("value", value, 0)}>`
+	: `${textarea && !select
+		? `<textarea${spread(
+				[
+					{ rows: escape_attribute_value(rows) },
+					{
+						"aria-label": escape_attribute_value(label)
+					},
+					{ class: escape_attribute_value(iClasses) },
+					{ disabled: disabled || null },
+					escape_object(props),
+					{
+						placeholder: escape_attribute_value(!value ? placeholder : "")
+					}
+				],
+				{}
+			)}>${escape(value || "")}</textarea>`
 		: `${select && !autocomplete
 			? `<input readonly${add_attribute("class", iClasses, 0)} ${disabled ? "disabled" : ""}${add_attribute("value", value, 0)}>`
 			: ``}`}`}
 
   ${append
-	? `<div${add_attribute("class", aClasses, 0)}>${$$slots.append
-		? $$slots.append({})
+	? `<div${add_attribute("class", aClasses, 0)}>${slots.append
+		? slots.append({})
 		: `
         ${validate_component(Icon, "Icon").$$render(
 				$$result,
@@ -886,14 +1023,18 @@ const TextField = create_ssr_component(($$result, $$props, $$bindings, $$slots) 
 					class: (focused ? txt() : "") + " " + iconClass
 				},
 				{},
-				{ default: () => `${escape(append)}` }
+				{
+					default: () => {
+						return `${escape(append)}`;
+					}
+				}
 			)}
       `}</div>`
 	: ``}
 
   ${prepend
-	? `<div${add_attribute("class", pClasses, 0)}>${$$slots.prepend
-		? $$slots.prepend({})
+	? `<div${add_attribute("class", pClasses, 0)}>${slots.prepend
+		? slots.prepend({})
 		: `
         ${validate_component(Icon, "Icon").$$render(
 				$$result,
@@ -902,30 +1043,47 @@ const TextField = create_ssr_component(($$result, $$props, $$bindings, $$slots) 
 					class: (focused ? txt() : "") + " " + iconClass
 				},
 				{},
-				{ default: () => `${escape(prepend)}` }
+				{
+					default: () => {
+						return `${escape(prepend)}`;
+					}
+				}
 			)}
       `}</div>`
 	: ``}
 
-  ${validate_component(Underline, "Underline").$$render($$result, { noUnderline, outlined, focused, error }, {}, {})}
+  ${validate_component(Underline, "Underline").$$render(
+		$$result,
+		{
+			noUnderline,
+			outlined,
+			focused,
+			error,
+			color
+		},
+		{},
+		{}
+	)}
 
   ${showHint
 	? `${validate_component(Hint, "Hint").$$render($$result, { error, hint }, {}, {})}`
 	: ``}</div>`;
 });
 
-/* node_modules/smelte/src/components/Button/Button.svelte generated by Svelte v3.24.0 */
-const classesDefault$2 = "py-2 px-4 uppercase text-sm font-medium relative overflow-hidden";
-const basicDefault = "text-white duration-200 ease-in";
-const outlinedDefault = "bg-transparent border border-solid";
-const textDefault = "bg-transparent border-none px-4 hover:bg-transparent";
-const iconDefault = "p-4 flex items-center select-none";
-const fabDefault = "hover:bg-transparent";
-const smallDefault = "pt-1 pb-1 pl-2 pr-2 text-xs";
-const disabledDefault = "bg-gray-300 text-gray-500 dark:bg-dark-400 elevation-none pointer-events-none hover:bg-gray-300 cursor-default";
-const elevationDefault = "hover:elevation-5 elevation-3";
+/* node_modules/smelte/src/components/Button/Button.svelte generated by Svelte v3.59.2 */
+const classesDefault$2 = 'z-10 py-2 px-4 uppercase text-sm font-medium relative overflow-hidden';
+const basicDefault = 'text-white duration-200 ease-in';
+const outlinedDefault = 'bg-transparent border border-solid';
+const textDefault = 'bg-transparent border-none px-4 hover:bg-transparent';
+const iconDefault = 'p-4 flex items-center select-none';
+const fabDefault = 'hover:bg-transparent';
+const smallDefault = 'pt-1 pb-1 pl-2 pr-2 text-xs';
+const disabledDefault = 'bg-gray-300 text-gray-500 dark:bg-dark-400 pointer-events-none hover:bg-gray-300 cursor-default';
+const elevationDefault = 'hover:shadow shadow';
 
-const Button = create_ssr_component(($$result, $$props, $$bindings, $$slots) => {
+const Button = create_ssr_component(($$result, $$props, $$bindings, slots) => {
+	let normal;
+	let lighter;
 	let { value = false } = $$props;
 	let { outlined = false } = $$props;
 	let { text = false } = $$props;
@@ -940,6 +1098,7 @@ const Button = create_ssr_component(($$result, $$props, $$bindings, $$slots) => 
 	let { color = "primary" } = $$props;
 	let { href = null } = $$props;
 	let { fab = false } = $$props;
+	let { type = "button" } = $$props;
 	let { remove = "" } = $$props;
 	let { add = "" } = $$props;
 	let { replace = {} } = $$props;
@@ -967,19 +1126,19 @@ const Button = create_ssr_component(($$result, $$props, $$bindings, $$slots) => 
 
 	const props = filterProps(
 		[
-			"outlined",
-			"text",
-			"color",
-			"block",
-			"disabled",
-			"icon",
-			"small",
-			"light",
-			"dark",
-			"flat",
-			"add",
-			"remove",
-			"replace"
+			'outlined',
+			'text',
+			'color',
+			'block',
+			'disabled',
+			'icon',
+			'small',
+			'light',
+			'dark',
+			'flat',
+			'add',
+			'remove',
+			'replace'
 		],
 		$$props
 	);
@@ -998,6 +1157,7 @@ const Button = create_ssr_component(($$result, $$props, $$bindings, $$slots) => 
 	if ($$props.color === void 0 && $$bindings.color && color !== void 0) $$bindings.color(color);
 	if ($$props.href === void 0 && $$bindings.href && href !== void 0) $$bindings.href(href);
 	if ($$props.fab === void 0 && $$bindings.fab && fab !== void 0) $$bindings.fab(fab);
+	if ($$props.type === void 0 && $$bindings.type && type !== void 0) $$bindings.type(type);
 	if ($$props.remove === void 0 && $$bindings.remove && remove !== void 0) $$bindings.remove(remove);
 	if ($$props.add === void 0 && $$bindings.add && add !== void 0) $$bindings.add(add);
 	if ($$props.replace === void 0 && $$bindings.replace && replace !== void 0) $$bindings.replace(replace);
@@ -1018,8 +1178,8 @@ const Button = create_ssr_component(($$result, $$props, $$bindings, $$slots) => 
 		}
 	}
 
-	let normal = 500 - shade;
-	let lighter = 400 - shade;
+	normal = 500 - shade;
+	lighter = 400 - shade;
 	classes = cb.flush().add(basicClasses, basic, basicDefault).add(`${bg(normal)} hover:${bg(lighter)}`, basic).add(elevationClasses, elevation, elevationDefault).add(outlinedClasses, outlined, outlinedDefault).add(`${border(lighter)} ${txt(normal)} hover:${bg("trans")} dark-hover:${bg("transDark")}`, outlined).add(`${txt(lighter)}`, text).add(textClasses, text, textDefault).add(iconClasses, icon, iconDefault).remove("py-2", icon).remove(txt(lighter), fab).add(disabledClasses, disabled, disabledDefault).add(smallClasses, small, smallDefault).add("flex items-center justify-center h-8 w-8", small && icon).add("border-solid", outlined).add("rounded-full", icon).add("w-full", block).add("rounded", basic || outlined || text).add("button", !icon).add(fabClasses, fab, fabDefault).add(`hover:${bg("transLight")}`, fab).add($$props.class).remove(remove).replace(replace).add(add).get();
 
 	 {
@@ -1029,31 +1189,59 @@ const Button = create_ssr_component(($$result, $$props, $$bindings, $$slots) => 
 	}
 
 	return `${href
-	? `<a${spread([{ href: escape(href) }, props])}><button${spread([{ class: escape(classes) }, props, { disabled: disabled || null }])}>${icon
-		? `${validate_component(Icon, "Icon").$$render($$result, { class: iClasses, small }, {}, { default: () => `${escape(icon)}` })}`
+	? `<a${spread([{ href: escape_attribute_value(href) }, escape_object(props)], {})}><button${spread(
+			[
+				{ class: escape_attribute_value(classes) },
+				escape_object(props),
+				{ type: escape_attribute_value(type) },
+				{ disabled: disabled || null }
+			],
+			{}
+		)}>${icon
+		? `${validate_component(Icon, "Icon").$$render($$result, { class: iClasses, small }, {}, {
+				default: () => {
+					return `${escape(icon)}`;
+				}
+			})}`
 		: ``}
-      ${$$slots.default ? $$slots.default({}) : ``}</button></a>`
-	: `<button${spread([{ class: escape(classes) }, props, { disabled: disabled || null }])}>${icon
-		? `${validate_component(Icon, "Icon").$$render($$result, { class: iClasses, small }, {}, { default: () => `${escape(icon)}` })}`
+      ${slots.default ? slots.default({}) : ``}</button></a>`
+	: `<button${spread(
+			[
+				{ class: escape_attribute_value(classes) },
+				escape_object(props),
+				{ type: escape_attribute_value(type) },
+				{ disabled: disabled || null }
+			],
+			{}
+		)}>${icon
+		? `${validate_component(Icon, "Icon").$$render($$result, { class: iClasses, small }, {}, {
+				default: () => {
+					return `${escape(icon)}`;
+				}
+			})}`
 		: ``}
-    ${$$slots.default ? $$slots.default({}) : ``}</button>`}`;
+    ${slots.default ? slots.default({}) : ``}</button>`}`;
 });
 
 const authStore = writable({ status: "loading" });
 
-/* src/components/NewBot.svelte generated by Svelte v3.24.0 */
+/* src/components/NewBot.svelte generated by Svelte v3.59.2 */
 
 const css$4 = {
 	code: ".padtop5.svelte-1b158ah{padding-top:14px}.foolrow.svelte-1b158ah{width:400px}.row.svelte-1b158ah{display:flex;max-width:400px;margin-left:auto;margin-right:auto;justify-content:space-between}.leftitem.svelte-1b158ah{border:0px solid;text-align:left}.rightitem.svelte-1b158ah{border:0px solid;text-align:right}.headblock.svelte-1b158ah{display:flex;max-width:400px;margin:auto;justify-content:space-around;margin-top:7px;color:rgb(36, 36, 36)}label.svelte-1b158ah{margin-bottom:7px;color:rgb(126, 126, 126)}main.svelte-1b158ah{text-align:center;padding:0px}",
-	map: "{\"version\":3,\"file\":\"NewBot.svelte\",\"sources\":[\"NewBot.svelte\"],\"sourcesContent\":[\"<script>\\n    import { onMount } from 'svelte';\\n    import TextField from 'smelte/src/components/TextField';\\n    import Switch from 'smelte/src/components/Switch';\\n    import Button from 'smelte/src/components/Button';\\n    export let urlhost;\\n    export let comission;\\n\\n    import { authStore } from '../stores/auth';\\n    import { stateStore } from '../stores/statebot.js';\\n    let userid = $authStore.user.uid;\\n\\n    let urlbotslist = urlhost + 'botslist';\\n    //let newbot = urlhost + 'api/newbot.php';\\n    let api_bots = 'http://77.87.212.38:1337/bots';\\n    let api_botcreate = urlhost + 'botcreate';\\n\\n\\n    let isrunning = false;\\n    let quotacoin;\\n    let basecoin;\\n    let digitq;\\n    let digitprice;\\n    let minprice;\\n    let maxprice;\\n    let startdepo;\\n    let profitproc;\\n    let ordersize;\\n    let ordersizeinquota = 0;\\n    $: ordersizeinquota = (((startdepo / 100) * ordersize) / minprice).toFixed(digitq);\\n    $: ordersizeinbase = ((startdepo / 100) * ordersize).toFixed(digitq);\\n    let ofsetbottom;\\n    let ofsettop;\\n    $: ofsetbottomsize = (minprice / 100) * ofsetbottom;\\n    $: ofsettopsize = ((minprice * (1 + profitproc / 100)) / 100) * ofsettop;\\n    let comment;\\n    let floorsvsego = 0;\\n\\n    let startfloorprice = minprice;\\n    let heightfirstfloor = 0;\\n    let heightlastfloor = 0;\\n    let ma1 = 3;\\n    let ma2 = 30;\\n    let maxpriceforzakup;\\n    let minpriceforzakup;\\n    let floors = [];\\n    let curenntprice = 0;\\n    let priceforwake;\\n    let handyzapretnazakup = false;\\n\\n    function getfloorsvsego(m, mx, pr, ob, ot) {\\n        let fv = 1;\\n        let height_floor = 0;\\n\\n        if (m && mx && pr && ob && ot) {\\n            let p = parseInt(pr * 1000) / 1000;\\n            floors = [];\\n            let mnz = 10 * parseInt(digitprice);\\n            let startfloorprice = parseInt(m * mnz) / mnz;\\n\\n            if (m && mx && p) {\\n                while (startfloorprice < mx) {\\n                    height_floor =\\n                        (startfloorprice * (comission + p)) / 100 +\\n                        (ofsetbottom * startfloorprice) / 100 +\\n                        (ofsettop * startfloorprice) / 100;\\n                    floors.push([\\n                        fv,\\n                        startfloorprice,\\n                        startfloorprice + height_floor,\\n                        startfloorprice + (ofsetbottom * startfloorprice) / 100,\\n                        startfloorprice +\\n                            (ofsetbottom * startfloorprice) / 100 +\\n                            (startfloorprice * comission) / 100,\\n                        startfloorprice +\\n                            (ofsetbottom * startfloorprice) / 100 +\\n                            (startfloorprice * comission) / 100 +\\n                            (ofsettop * startfloorprice) / 100,\\n                        startfloorprice +\\n                            (ofsetbottom * startfloorprice) / 100 +\\n                            (startfloorprice * (comission + p)) / 100,\\n                        0,\\n                        0,\\n                        0,\\n                        0,\\n                        0,\\n                        0,\\n                        0,\\n                        0,\\n                    ]);\\n\\n                    startfloorprice = startfloorprice + height_floor;\\n                    fv++;\\n                }\\n                if (m < mx) {\\n                    heightfirstfloor = (floors[0][2] - floors[0][1]).toFixed(digitprice);\\n                } else {\\n                    heightfirstfloor = 0;\\n                }\\n                if (m < mx) {\\n                    heightlastfloor = (floors[fv - 2][2] - floors[fv - 2][1]).toFixed(digitprice);\\n                } else {\\n                    heightlastfloor = 0;\\n                }\\n\\n                console.log(heightfirstfloor, heightlastfloor);\\n            }\\n\\n            fv = fv - 1;\\n            return fv;\\n        }\\n    }\\n\\n    $: floorsvsego = getfloorsvsego(minprice, maxprice, profitproc, ofsetbottom, ofsettop);\\n\\n    let bots = [];\\n    onMount(async () => {\\n        const res = await fetch(urlbotslist);\\n        bots = await res.json();\\n    });\\n\\n    function addNewBot() {\\n        var d = new Date();\\n        var ms = Date.parse(d) / 1000;\\n        if (bots == null) {\\n            bots = [];\\n        }\\n        let botname = quotacoin + basecoin + '-' + ms;\\n        let moneta = quotacoin + basecoin;\\n        bots = [...bots, [false, botname, 0, 0, 0, 0, 0, 0, userid]];\\n\\n        let settings = {\\n            botname,\\n            isrunning,\\n            handyzapretnazakup,\\n            comment,\\n            quotacoin,\\n            basecoin,\\n            moneta,\\n            digitq,\\n            digitprice,\\n            minprice,\\n            maxprice,\\n            profitproc,\\n            ordersize,\\n            ofsetbottom,\\n            ofsettop,\\n            ma1,\\n            ma2,\\n            maxpriceforzakup,\\n            minpriceforzakup,\\n            priceforwake,\\n            userid\\n        };\\n\\n        let finance = {\\n            startdepo: startdepo,\\n            depo: startdepo,\\n            quotanal: 0,\\n            quotainorders: 0,\\n            basenal: startdepo,\\n            baseinorders: 0,\\n            profittoday: 0,\\n        };\\n        let sales = { today: [], days: [], all: [] };\\n        let status = {\\n            currentprice: -1,\\n            lastprice: -1,\\n            currentfloor: -1,\\n            lastfloor: -1,\\n            sr_ma_big: -1,\\n            sr_ma_small: -1,\\n            rezhim: 'Стартовые настройки',\\n            updated: ms\\n        };\\n        let ttp = {\\n            raschstopprice: 0,\\n            curstop: 0,\\n            curorderid: 0,\\n            quantity: 0,\\n            ttpbusy: false,\\n            sold: false\\n        };\\n        \\n\\n    fetch(api_botcreate, {\\n        method: 'post',\\n        headers: {\\n            Accept: 'application/json, text/plain, */*',\\n            'Content-Type': 'application/json',\\n        },\\n        body: JSON.stringify({ \\n            \\\"botname\\\" : botname,\\n            \\\"busy\\\": false,\\n            \\\"onoff\\\": false,\\n            \\\"user_id_from_google\\\": userid,\\n            \\\"settings\\\": JSON.stringify(settings),\\n            \\\"floors\\\": JSON.stringify(floors),\\n            \\\"finance\\\" : JSON.stringify(finance),\\n            \\\"sales\\\" : JSON.stringify(sales),\\n            \\\"status\\\" : JSON.stringify(status),\\n            \\\"ttp\\\" : JSON.stringify(ttp),\\n            \\\"start_set\\\" : JSON.stringify({settings,floors,finance,sales,status,ttp})\\n        })\\n    });\\n\\n\\n        //fetch(api_botcreate, {\\n        //    method: 'post',\\n        //    headers: {\\n        //        Accept: 'application/json, text/plain, */*',\\n        //        'Content-Type': 'application/json',\\n        //    },\\n        //    body: JSON.stringify({ \\n        //        \\\"botname\\\" : botname,\\n        //        \\\"user_id_from_google\\\": userid,\\n        //        \\\"ttp\\\" : ttp\\n        //    }),\\n        //});\\n       //\\n        //ym(65948110,'reachGoal','createbot');\\n        //\\n        //window.location = \\\"/\\\";\\n        //console.log(Object.values(bots));\\n    }\\n    //let botsettingsall = [];\\n//\\n    //$: botsettingsall = [\\n    //    comment,\\n    //    quotacoin,\\n    //    basecoin,\\n    //    digitq,\\n    //    digitprice,\\n    //    minprice,\\n    //    maxprice,\\n    //    profitproc,\\n    //    ordersize,\\n    //    ofsetbottom,\\n    //    ofsettop,\\n    //    ma1,\\n    //    ma2,\\n    //    maxpriceforzakup,\\n    //    minpriceforzakup,\\n    //    priceforwake,\\n    //];\\n</script>\\n\\n<style type=\\\"text/scss\\\">\\n    .padtop5 {\\n        padding-top: 14px;\\n    }\\n\\n    .foolrow {\\n        width: 400px;\\n    }\\n\\n    .row {\\n        display: flex;\\n        max-width: 400px;\\n        margin-left: auto;\\n        margin-right: auto;\\n        justify-content: space-between;\\n    }\\n    .leftitem {\\n        border: 0px solid;\\n        text-align: left;\\n    }\\n    .rightitem {\\n        border: 0px solid;\\n        text-align: right;\\n    }\\n    .headblock {\\n        display: flex;\\n        max-width: 400px;\\n        margin: auto;\\n        justify-content: space-around;\\n        margin-top: 7px;\\n        color: rgb(36, 36, 36);\\n    }\\n\\n    label {\\n        margin-bottom: 7px;\\n        color: rgb(126, 126, 126);\\n    }\\n    main {\\n        text-align: center;\\n        padding: 0px;\\n    }\\n</style>\\n\\n<main>\\n    <div class=\\\"headblock\\\">\\n        <p class=\\\"text-xl text-gray-900 dark:text-gray-300\\\">Создание нового бота</p>\\n\\n    </div>\\n    <div class=\\\"row\\\">\\n        <div class=\\\"leftitem\\\">\\n            <div class=\\\"foolrow\\\">\\n                <TextField label=\\\"Комментарий\\\" outlined bind:value={comment} />\\n            </div>\\n        </div>\\n    </div>\\n    <div class=\\\"row\\\">\\n        <div class=\\\"leftitem\\\">\\n            <TextField label=\\\"Торгуемая валюта\\\" outlined bind:value={quotacoin} />\\n        </div>\\n        &nbsp;&nbsp;\\n        <div class=\\\"rightitem\\\">\\n            <TextField label=\\\"Базовая валюта\\\" outlined bind:value={basecoin} />\\n        </div>\\n    </div>\\n    <div class=\\\"row\\\">\\n        <div class=\\\"leftitem\\\">\\n            <TextField label=\\\"Округление цены\\\" outlined bind:value={digitprice} />\\n        </div>\\n        &nbsp;&nbsp;\\n        <div class=\\\"rightitem\\\">\\n            <TextField label=\\\"Округление объема\\\" outlined bind:value={digitq} />\\n        </div>\\n    </div>\\n    <div class=\\\"row\\\">\\n        <div class=\\\"leftitem\\\">\\n            <TextField label=\\\"Низ сетки\\\" outlined bind:value={minprice} />\\n        </div>\\n        &nbsp;&nbsp;\\n        <div class=\\\"rightitem\\\">\\n            <TextField label=\\\"Верх сетки\\\" outlined bind:value={maxprice} />\\n        </div>\\n    </div>\\n    <div class=\\\"row\\\">\\n        <div class=\\\"leftitem\\\">\\n            <TextField label=\\\"Стартовый депозит\\\" outlined bind:value={startdepo} />\\n        </div>\\n        &nbsp;&nbsp;\\n        <div class=\\\"rightitem\\\">\\n\\n            <TextField label=\\\"Прибыль в сделке, %\\\" outlined bind:value={profitproc} />\\n        </div>\\n    </div>\\n    <div class=\\\"row\\\">\\n        <div class=\\\"leftitem\\\">\\n            <label>Объем ордера</label>\\n            <br />\\n            <p class=\\\" text-gray-900 dark:text-gray-300\\\">\\n                ~ {ordersizeinquota ? ordersizeinquota : 0} {quotacoin}, {ordersizeinbase ? ordersizeinbase : 0}\\n                {basecoin}\\n            </p>\\n        </div>\\n        &nbsp;&nbsp;\\n        <div class=\\\"rightitem\\\">\\n            <TextField label=\\\"% от депо\\\" outlined bind:value={ordersize} size=\\\"10\\\" />\\n\\n        </div>\\n    </div>\\n    <div class=\\\"row\\\">\\n        <div class=\\\"leftitem\\\">\\n            <TextField label=\\\"Отступ снизу, %\\\" outlined bind:value={ofsetbottom} />\\n            <p class=\\\" text-gray-900 dark:text-gray-300\\\">\\n                ~ {ofsetbottomsize.toFixed(digitprice)} {basecoin}\\n            </p>\\n        </div>\\n        &nbsp;&nbsp;\\n        <div class=\\\"rightitem\\\">\\n            <TextField label=\\\"Отступ сверху, %\\\" outlined bind:value={ofsettop} />\\n            <p class=\\\" text-gray-900 dark:text-gray-300\\\">\\n                ~ {ofsettopsize.toFixed(digitprice)} {basecoin}\\n            </p>\\n        </div>\\n    </div>\\n    <div class=\\\"row\\\">\\n        <div class=\\\"leftitem\\\">\\n            <br />\\n            <label>Всего этажей</label>\\n            <p class=\\\" text-gray-900 dark:text-gray-300\\\">{floorsvsego}</p>\\n        </div>\\n    </div>\\n    <div class=\\\"row\\\">\\n        <div class=\\\"leftitem\\\">\\n            <br />\\n            <label>Высота 1-го этажа</label>\\n            <p class=\\\" text-gray-900 dark:text-gray-300\\\">{heightfirstfloor} {basecoin}</p>\\n        </div>\\n        <div class=\\\"rightitem\\\">\\n            <br />\\n            <label>Высота верхнего этажа</label>\\n            <p class=\\\" text-gray-900 dark:text-gray-300\\\">{heightlastfloor} {basecoin}</p>\\n        </div>\\n    </div>\\n    <br />\\n    <div class=\\\"row\\\">\\n        <div class=\\\"leftitem\\\">\\n            <TextField label=\\\"MA1, мин\\\" outlined bind:value={ma1} />\\n        </div>\\n        &nbsp;&nbsp;\\n        <div class=\\\"rightitem\\\">\\n            <TextField label=\\\"MA2, мин\\\" outlined bind:value={ma2} />\\n        </div>\\n    </div>\\n    <div class=\\\"row\\\">\\n        <div class=\\\"leftitem padtop5\\\">\\n            <label>Не закупать, если цена больше</label>\\n        </div>\\n        &nbsp;&nbsp;\\n        <div class=\\\"rightitem\\\">\\n            <TextField label=\\\"\\\" outlined bind:value={maxpriceforzakup} size=\\\"10\\\" />\\n        </div>\\n    </div>\\n\\n    <div class=\\\"row\\\">\\n        <div class=\\\"leftitem padtop5\\\">\\n            <label>Не закупать, если цена меньше</label>\\n        </div>\\n        <div class=\\\"rightitem\\\">\\n            <TextField label=\\\"\\\" outlined bind:value={minpriceforzakup} size=\\\"10\\\" />\\n        </div>\\n    </div>\\n    <br />\\n    <Button href=\\\"/\\\" on:click={addNewBot}>Создать</Button>\\n    <br />\\n    <br />\\n</main>\\n\"],\"names\":[],\"mappings\":\"AAwPI,QAAQ,eAAC,CAAC,AACN,WAAW,CAAE,IAAI,AACrB,CAAC,AAED,QAAQ,eAAC,CAAC,AACN,KAAK,CAAE,KAAK,AAChB,CAAC,AAED,IAAI,eAAC,CAAC,AACF,OAAO,CAAE,IAAI,CACb,SAAS,CAAE,KAAK,CAChB,WAAW,CAAE,IAAI,CACjB,YAAY,CAAE,IAAI,CAClB,eAAe,CAAE,aAAa,AAClC,CAAC,AACD,SAAS,eAAC,CAAC,AACP,MAAM,CAAE,GAAG,CAAC,KAAK,CACjB,UAAU,CAAE,IAAI,AACpB,CAAC,AACD,UAAU,eAAC,CAAC,AACR,MAAM,CAAE,GAAG,CAAC,KAAK,CACjB,UAAU,CAAE,KAAK,AACrB,CAAC,AACD,UAAU,eAAC,CAAC,AACR,OAAO,CAAE,IAAI,CACb,SAAS,CAAE,KAAK,CAChB,MAAM,CAAE,IAAI,CACZ,eAAe,CAAE,YAAY,CAC7B,UAAU,CAAE,GAAG,CACf,KAAK,CAAE,IAAI,EAAE,CAAC,CAAC,EAAE,CAAC,CAAC,EAAE,CAAC,AAC1B,CAAC,AAED,KAAK,eAAC,CAAC,AACH,aAAa,CAAE,GAAG,CAClB,KAAK,CAAE,IAAI,GAAG,CAAC,CAAC,GAAG,CAAC,CAAC,GAAG,CAAC,AAC7B,CAAC,AACD,IAAI,eAAC,CAAC,AACF,UAAU,CAAE,MAAM,CAClB,OAAO,CAAE,GAAG,AAChB,CAAC\"}"
+	map: "{\"version\":3,\"file\":\"NewBot.svelte\",\"sources\":[\"NewBot.svelte\"],\"sourcesContent\":[\"<script>\\n    import { onMount } from 'svelte';\\n    import TextField from 'smelte/src/components/TextField';\\n    import Switch from 'smelte/src/components/Switch';\\n    import Button from 'smelte/src/components/Button';\\n    export let urlhost;\\n    export let comission;\\n\\n    import { authStore } from '../stores/auth';\\n    import { stateStore } from '../stores/statebot.js';\\n    let userid = $authStore.user.uid;\\n\\n    let urlbotslist = urlhost + 'botslist';\\n    //let newbot = urlhost + 'api/newbot.php';\\n    let api_bots = 'http://77.87.212.38:1337/bots';\\n    let api_botcreate = urlhost + 'botcreate';\\n\\n\\n    let isrunning = false;\\n    let quotacoin;\\n    let basecoin;\\n    let digitq;\\n    let digitprice;\\n    let minprice;\\n    let maxprice;\\n    let startdepo;\\n    let profitproc;\\n    let ordersize;\\n    let ordersizeinquota = 0;\\n    $: ordersizeinquota = (((startdepo / 100) * ordersize) / minprice).toFixed(digitq);\\n    $: ordersizeinbase = ((startdepo / 100) * ordersize).toFixed(digitq);\\n    let ofsetbottom;\\n    let ofsettop;\\n    $: ofsetbottomsize = (minprice / 100) * ofsetbottom;\\n    $: ofsettopsize = ((minprice * (1 + profitproc / 100)) / 100) * ofsettop;\\n    let comment;\\n    let floorsvsego = 0;\\n\\n    let startfloorprice = minprice;\\n    let heightfirstfloor = 0;\\n    let heightlastfloor = 0;\\n    let ma1 = 3;\\n    let ma2 = 30;\\n    let maxpriceforzakup;\\n    let minpriceforzakup;\\n    let floors = [];\\n    let curenntprice = 0;\\n    let priceforwake;\\n    let handyzapretnazakup = false;\\n\\n    function getfloorsvsego(m, mx, pr, ob, ot) {\\n        let fv = 1;\\n        let height_floor = 0;\\n\\n        if (m && mx && pr && ob && ot) {\\n            let p = parseInt(pr * 1000) / 1000;\\n            floors = [];\\n            let mnz = 10 * parseInt(digitprice);\\n            let startfloorprice = parseInt(m * mnz) / mnz;\\n\\n            if (m && mx && p) {\\n                while (startfloorprice < mx) {\\n                    height_floor =\\n                        (startfloorprice * (comission + p)) / 100 +\\n                        (ofsetbottom * startfloorprice) / 100 +\\n                        (ofsettop * startfloorprice) / 100;\\n                    floors.push([\\n                        fv,\\n                        startfloorprice,\\n                        startfloorprice + height_floor,\\n                        startfloorprice + (ofsetbottom * startfloorprice) / 100,\\n                        startfloorprice +\\n                            (ofsetbottom * startfloorprice) / 100 +\\n                            (startfloorprice * comission) / 100,\\n                        startfloorprice +\\n                            (ofsetbottom * startfloorprice) / 100 +\\n                            (startfloorprice * comission) / 100 +\\n                            (ofsettop * startfloorprice) / 100,\\n                        startfloorprice +\\n                            (ofsetbottom * startfloorprice) / 100 +\\n                            (startfloorprice * (comission + p)) / 100,\\n                        0,\\n                        0,\\n                        0,\\n                        0,\\n                        0,\\n                        0,\\n                        0,\\n                        0,\\n                    ]);\\n\\n                    startfloorprice = startfloorprice + height_floor;\\n                    fv++;\\n                }\\n                if (m < mx) {\\n                    heightfirstfloor = (floors[0][2] - floors[0][1]).toFixed(digitprice);\\n                } else {\\n                    heightfirstfloor = 0;\\n                }\\n                if (m < mx) {\\n                    heightlastfloor = (floors[fv - 2][2] - floors[fv - 2][1]).toFixed(digitprice);\\n                } else {\\n                    heightlastfloor = 0;\\n                }\\n\\n                console.log(heightfirstfloor, heightlastfloor);\\n            }\\n\\n            fv = fv - 1;\\n            return fv;\\n        }\\n    }\\n\\n    $: floorsvsego = getfloorsvsego(minprice, maxprice, profitproc, ofsetbottom, ofsettop);\\n\\n    let bots = [];\\n    onMount(async () => {\\n        const res = await fetch(urlbotslist);\\n        bots = await res.json();\\n    });\\n\\n    function addNewBot() {\\n        var d = new Date();\\n        var ms = Date.parse(d) / 1000;\\n        if (bots == null) {\\n            bots = [];\\n        }\\n        let botname = quotacoin + basecoin + '-' + ms;\\n        let moneta = quotacoin + basecoin;\\n        bots = [...bots, [false, botname, 0, 0, 0, 0, 0, 0, userid]];\\n\\n        let settings = {\\n            botname,\\n            isrunning,\\n            handyzapretnazakup,\\n            comment,\\n            quotacoin,\\n            basecoin,\\n            moneta,\\n            digitq,\\n            digitprice,\\n            minprice,\\n            maxprice,\\n            profitproc,\\n            ordersize,\\n            ofsetbottom,\\n            ofsettop,\\n            ma1,\\n            ma2,\\n            maxpriceforzakup,\\n            minpriceforzakup,\\n            priceforwake,\\n            userid\\n        };\\n\\n        let finance = {\\n            startdepo: startdepo,\\n            depo: startdepo,\\n            quotanal: 0,\\n            quotainorders: 0,\\n            basenal: startdepo,\\n            baseinorders: 0,\\n            profittoday: 0,\\n        };\\n        let sales = { today: [], days: [], all: [] };\\n        let status = {\\n            currentprice: -1,\\n            lastprice: -1,\\n            currentfloor: -1,\\n            lastfloor: -1,\\n            sr_ma_big: -1,\\n            sr_ma_small: -1,\\n            rezhim: 'Стартовые настройки',\\n            updated: ms\\n        };\\n        let ttp = {\\n            raschstopprice: 0,\\n            curstop: 0,\\n            curorderid: 0,\\n            quantity: 0,\\n            ttpbusy: false,\\n            sold: false\\n        };\\n        \\n\\n    fetch(api_botcreate, {\\n        method: 'post',\\n        headers: {\\n            Accept: 'application/json, text/plain, */*',\\n            'Content-Type': 'application/json',\\n        },\\n        body: JSON.stringify({ \\n            \\\"botname\\\" : botname,\\n            \\\"busy\\\": false,\\n            \\\"onoff\\\": false,\\n            \\\"user_id_from_google\\\": userid,\\n            \\\"settings\\\": JSON.stringify(settings),\\n            \\\"floors\\\": JSON.stringify(floors),\\n            \\\"finance\\\" : JSON.stringify(finance),\\n            \\\"sales\\\" : JSON.stringify(sales),\\n            \\\"status\\\" : JSON.stringify(status),\\n            \\\"ttp\\\" : JSON.stringify(ttp),\\n            \\\"start_set\\\" : JSON.stringify({settings,floors,finance,sales,status,ttp})\\n        })\\n    });\\n\\n\\n        //fetch(api_botcreate, {\\n        //    method: 'post',\\n        //    headers: {\\n        //        Accept: 'application/json, text/plain, */*',\\n        //        'Content-Type': 'application/json',\\n        //    },\\n        //    body: JSON.stringify({ \\n        //        \\\"botname\\\" : botname,\\n        //        \\\"user_id_from_google\\\": userid,\\n        //        \\\"ttp\\\" : ttp\\n        //    }),\\n        //});\\n       //\\n        //ym(65948110,'reachGoal','createbot');\\n        //\\n        //window.location = \\\"/\\\";\\n        //console.log(Object.values(bots));\\n    }\\n    //let botsettingsall = [];\\n//\\n    //$: botsettingsall = [\\n    //    comment,\\n    //    quotacoin,\\n    //    basecoin,\\n    //    digitq,\\n    //    digitprice,\\n    //    minprice,\\n    //    maxprice,\\n    //    profitproc,\\n    //    ordersize,\\n    //    ofsetbottom,\\n    //    ofsettop,\\n    //    ma1,\\n    //    ma2,\\n    //    maxpriceforzakup,\\n    //    minpriceforzakup,\\n    //    priceforwake,\\n    //];\\n</script>\\n\\n<style type=\\\"text/scss\\\">\\n    .padtop5 {\\n        padding-top: 14px;\\n    }\\n\\n    .foolrow {\\n        width: 400px;\\n    }\\n\\n    .row {\\n        display: flex;\\n        max-width: 400px;\\n        margin-left: auto;\\n        margin-right: auto;\\n        justify-content: space-between;\\n    }\\n    .leftitem {\\n        border: 0px solid;\\n        text-align: left;\\n    }\\n    .rightitem {\\n        border: 0px solid;\\n        text-align: right;\\n    }\\n    .headblock {\\n        display: flex;\\n        max-width: 400px;\\n        margin: auto;\\n        justify-content: space-around;\\n        margin-top: 7px;\\n        color: rgb(36, 36, 36);\\n    }\\n\\n    label {\\n        margin-bottom: 7px;\\n        color: rgb(126, 126, 126);\\n    }\\n    main {\\n        text-align: center;\\n        padding: 0px;\\n    }\\n</style>\\n\\n<main>\\n    <div class=\\\"headblock\\\">\\n        <p class=\\\"text-xl text-gray-900 dark:text-gray-300\\\">Создание нового бота</p>\\n\\n    </div>\\n    <div class=\\\"row\\\">\\n        <div class=\\\"leftitem\\\">\\n            <div class=\\\"foolrow\\\">\\n                <TextField label=\\\"Комментарий\\\" outlined bind:value={comment} />\\n            </div>\\n        </div>\\n    </div>\\n    <div class=\\\"row\\\">\\n        <div class=\\\"leftitem\\\">\\n            <TextField label=\\\"Торгуемая валюта\\\" outlined bind:value={quotacoin} />\\n        </div>\\n        &nbsp;&nbsp;\\n        <div class=\\\"rightitem\\\">\\n            <TextField label=\\\"Базовая валюта\\\" outlined bind:value={basecoin} />\\n        </div>\\n    </div>\\n    <div class=\\\"row\\\">\\n        <div class=\\\"leftitem\\\">\\n            <TextField label=\\\"Округление цены\\\" outlined bind:value={digitprice} />\\n        </div>\\n        &nbsp;&nbsp;\\n        <div class=\\\"rightitem\\\">\\n            <TextField label=\\\"Округление объема\\\" outlined bind:value={digitq} />\\n        </div>\\n    </div>\\n    <div class=\\\"row\\\">\\n        <div class=\\\"leftitem\\\">\\n            <TextField label=\\\"Низ сетки\\\" outlined bind:value={minprice} />\\n        </div>\\n        &nbsp;&nbsp;\\n        <div class=\\\"rightitem\\\">\\n            <TextField label=\\\"Верх сетки\\\" outlined bind:value={maxprice} />\\n        </div>\\n    </div>\\n    <div class=\\\"row\\\">\\n        <div class=\\\"leftitem\\\">\\n            <TextField label=\\\"Стартовый депозит\\\" outlined bind:value={startdepo} />\\n        </div>\\n        &nbsp;&nbsp;\\n        <div class=\\\"rightitem\\\">\\n\\n            <TextField label=\\\"Прибыль в сделке, %\\\" outlined bind:value={profitproc} />\\n        </div>\\n    </div>\\n    <div class=\\\"row\\\">\\n        <div class=\\\"leftitem\\\">\\n            <label>Объем ордера</label>\\n            <br />\\n            <p class=\\\" text-gray-900 dark:text-gray-300\\\">\\n                ~ {ordersizeinquota ? ordersizeinquota : 0} {quotacoin}, {ordersizeinbase ? ordersizeinbase : 0}\\n                {basecoin}\\n            </p>\\n        </div>\\n        &nbsp;&nbsp;\\n        <div class=\\\"rightitem\\\">\\n            <TextField label=\\\"% от депо\\\" outlined bind:value={ordersize} size=\\\"10\\\" />\\n\\n        </div>\\n    </div>\\n    <div class=\\\"row\\\">\\n        <div class=\\\"leftitem\\\">\\n            <TextField label=\\\"Отступ снизу, %\\\" outlined bind:value={ofsetbottom} />\\n            <p class=\\\" text-gray-900 dark:text-gray-300\\\">\\n                ~ {ofsetbottomsize.toFixed(digitprice)} {basecoin}\\n            </p>\\n        </div>\\n        &nbsp;&nbsp;\\n        <div class=\\\"rightitem\\\">\\n            <TextField label=\\\"Отступ сверху, %\\\" outlined bind:value={ofsettop} />\\n            <p class=\\\" text-gray-900 dark:text-gray-300\\\">\\n                ~ {ofsettopsize.toFixed(digitprice)} {basecoin}\\n            </p>\\n        </div>\\n    </div>\\n    <div class=\\\"row\\\">\\n        <div class=\\\"leftitem\\\">\\n            <br />\\n            <label>Всего этажей</label>\\n            <p class=\\\" text-gray-900 dark:text-gray-300\\\">{floorsvsego}</p>\\n        </div>\\n    </div>\\n    <div class=\\\"row\\\">\\n        <div class=\\\"leftitem\\\">\\n            <br />\\n            <label>Высота 1-го этажа</label>\\n            <p class=\\\" text-gray-900 dark:text-gray-300\\\">{heightfirstfloor} {basecoin}</p>\\n        </div>\\n        <div class=\\\"rightitem\\\">\\n            <br />\\n            <label>Высота верхнего этажа</label>\\n            <p class=\\\" text-gray-900 dark:text-gray-300\\\">{heightlastfloor} {basecoin}</p>\\n        </div>\\n    </div>\\n    <br />\\n    <div class=\\\"row\\\">\\n        <div class=\\\"leftitem\\\">\\n            <TextField label=\\\"MA1, мин\\\" outlined bind:value={ma1} />\\n        </div>\\n        &nbsp;&nbsp;\\n        <div class=\\\"rightitem\\\">\\n            <TextField label=\\\"MA2, мин\\\" outlined bind:value={ma2} />\\n        </div>\\n    </div>\\n    <div class=\\\"row\\\">\\n        <div class=\\\"leftitem padtop5\\\">\\n            <label>Не закупать, если цена больше</label>\\n        </div>\\n        &nbsp;&nbsp;\\n        <div class=\\\"rightitem\\\">\\n            <TextField label=\\\"\\\" outlined bind:value={maxpriceforzakup} size=\\\"10\\\" />\\n        </div>\\n    </div>\\n\\n    <div class=\\\"row\\\">\\n        <div class=\\\"leftitem padtop5\\\">\\n            <label>Не закупать, если цена меньше</label>\\n        </div>\\n        <div class=\\\"rightitem\\\">\\n            <TextField label=\\\"\\\" outlined bind:value={minpriceforzakup} size=\\\"10\\\" />\\n        </div>\\n    </div>\\n    <br />\\n    <Button href=\\\"/\\\" on:click={addNewBot}>Создать</Button>\\n    <br />\\n    <br />\\n</main>\\n\"],\"names\":[],\"mappings\":\"AAwPI,uBAAS,CACL,WAAW,CAAE,IACjB,CAEA,uBAAS,CACL,KAAK,CAAE,KACX,CAEA,mBAAK,CACD,OAAO,CAAE,IAAI,CACb,SAAS,CAAE,KAAK,CAChB,WAAW,CAAE,IAAI,CACjB,YAAY,CAAE,IAAI,CAClB,eAAe,CAAE,aACrB,CACA,wBAAU,CACN,MAAM,CAAE,GAAG,CAAC,KAAK,CACjB,UAAU,CAAE,IAChB,CACA,yBAAW,CACP,MAAM,CAAE,GAAG,CAAC,KAAK,CACjB,UAAU,CAAE,KAChB,CACA,yBAAW,CACP,OAAO,CAAE,IAAI,CACb,SAAS,CAAE,KAAK,CAChB,MAAM,CAAE,IAAI,CACZ,eAAe,CAAE,YAAY,CAC7B,UAAU,CAAE,GAAG,CACf,KAAK,CAAE,IAAI,EAAE,CAAC,CAAC,EAAE,CAAC,CAAC,EAAE,CACzB,CAEA,oBAAM,CACF,aAAa,CAAE,GAAG,CAClB,KAAK,CAAE,IAAI,GAAG,CAAC,CAAC,GAAG,CAAC,CAAC,GAAG,CAC5B,CACA,mBAAK,CACD,UAAU,CAAE,MAAM,CAClB,OAAO,CAAE,GACb\"}"
 };
 
-const NewBot = create_ssr_component(($$result, $$props, $$bindings, $$slots) => {
-	let $authStore = get_store_value(authStore);
+const NewBot = create_ssr_component(($$result, $$props, $$bindings, slots) => {
+	let ordersizeinbase;
+	let ofsetbottomsize;
+	let ofsettopsize;
+	let $authStore, $$unsubscribe_authStore;
+	$$unsubscribe_authStore = subscribe(authStore, value => $authStore = value);
 	let { urlhost } = $$props;
 	let { comission } = $$props;
 	let userid = $authStore.user.uid;
-	let urlbotslist = urlhost + "botslist";
+	let urlbotslist = urlhost + 'botslist';
 	let quotacoin;
 	let basecoin;
 	let digitq;
@@ -1149,13 +1337,13 @@ const NewBot = create_ssr_component(($$result, $$props, $$bindings, $$slots) => 
 	do {
 		$$settled = true;
 		ordersizeinquota = (startdepo / 100 * ordersize / minprice).toFixed(digitq);
-		let ordersizeinbase = (startdepo / 100 * ordersize).toFixed(digitq);
-		let ofsetbottomsize = minprice / 100 * ofsetbottom;
-		let ofsettopsize = minprice * (1 + profitproc / 100) / 100 * ofsettop;
+		ordersizeinbase = (startdepo / 100 * ordersize).toFixed(digitq);
+		ofsetbottomsize = minprice / 100 * ofsetbottom;
+		ofsettopsize = minprice * (1 + profitproc / 100) / 100 * ofsettop;
 		floorsvsego = getfloorsvsego(minprice, maxprice, profitproc, ofsetbottom, ofsettop);
 
-		$$rendered = `<main class="${"svelte-1b158ah"}"><div class="${"headblock svelte-1b158ah"}"><p class="${"text-xl text-gray-900 dark:text-gray-300"}">Создание нового бота</p></div>
-    <div class="${"row svelte-1b158ah"}"><div class="${"leftitem svelte-1b158ah"}"><div class="${"foolrow svelte-1b158ah"}">${validate_component(TextField, "TextField").$$render(
+		$$rendered = `<main class="svelte-1b158ah"><div class="headblock svelte-1b158ah"><p class="text-xl text-gray-900 dark:text-gray-300">Создание нового бота</p></div>
+    <div class="row svelte-1b158ah"><div class="leftitem svelte-1b158ah"><div class="foolrow svelte-1b158ah">${validate_component(TextField, "TextField").$$render(
 			$$result,
 			{
 				label: "Комментарий",
@@ -1170,7 +1358,7 @@ const NewBot = create_ssr_component(($$result, $$props, $$bindings, $$slots) => 
 			},
 			{}
 		)}</div></div></div>
-    <div class="${"row svelte-1b158ah"}"><div class="${"leftitem svelte-1b158ah"}">${validate_component(TextField, "TextField").$$render(
+    <div class="row svelte-1b158ah"><div class="leftitem svelte-1b158ah">${validate_component(TextField, "TextField").$$render(
 			$$result,
 			{
 				label: "Торгуемая валюта",
@@ -1186,7 +1374,7 @@ const NewBot = create_ssr_component(($$result, $$props, $$bindings, $$slots) => 
 			{}
 		)}</div>
           
-        <div class="${"rightitem svelte-1b158ah"}">${validate_component(TextField, "TextField").$$render(
+        <div class="rightitem svelte-1b158ah">${validate_component(TextField, "TextField").$$render(
 			$$result,
 			{
 				label: "Базовая валюта",
@@ -1201,7 +1389,7 @@ const NewBot = create_ssr_component(($$result, $$props, $$bindings, $$slots) => 
 			},
 			{}
 		)}</div></div>
-    <div class="${"row svelte-1b158ah"}"><div class="${"leftitem svelte-1b158ah"}">${validate_component(TextField, "TextField").$$render(
+    <div class="row svelte-1b158ah"><div class="leftitem svelte-1b158ah">${validate_component(TextField, "TextField").$$render(
 			$$result,
 			{
 				label: "Округление цены",
@@ -1217,7 +1405,7 @@ const NewBot = create_ssr_component(($$result, $$props, $$bindings, $$slots) => 
 			{}
 		)}</div>
           
-        <div class="${"rightitem svelte-1b158ah"}">${validate_component(TextField, "TextField").$$render(
+        <div class="rightitem svelte-1b158ah">${validate_component(TextField, "TextField").$$render(
 			$$result,
 			{
 				label: "Округление объема",
@@ -1232,7 +1420,7 @@ const NewBot = create_ssr_component(($$result, $$props, $$bindings, $$slots) => 
 			},
 			{}
 		)}</div></div>
-    <div class="${"row svelte-1b158ah"}"><div class="${"leftitem svelte-1b158ah"}">${validate_component(TextField, "TextField").$$render(
+    <div class="row svelte-1b158ah"><div class="leftitem svelte-1b158ah">${validate_component(TextField, "TextField").$$render(
 			$$result,
 			{
 				label: "Низ сетки",
@@ -1248,7 +1436,7 @@ const NewBot = create_ssr_component(($$result, $$props, $$bindings, $$slots) => 
 			{}
 		)}</div>
           
-        <div class="${"rightitem svelte-1b158ah"}">${validate_component(TextField, "TextField").$$render(
+        <div class="rightitem svelte-1b158ah">${validate_component(TextField, "TextField").$$render(
 			$$result,
 			{
 				label: "Верх сетки",
@@ -1263,7 +1451,7 @@ const NewBot = create_ssr_component(($$result, $$props, $$bindings, $$slots) => 
 			},
 			{}
 		)}</div></div>
-    <div class="${"row svelte-1b158ah"}"><div class="${"leftitem svelte-1b158ah"}">${validate_component(TextField, "TextField").$$render(
+    <div class="row svelte-1b158ah"><div class="leftitem svelte-1b158ah">${validate_component(TextField, "TextField").$$render(
 			$$result,
 			{
 				label: "Стартовый депозит",
@@ -1279,7 +1467,7 @@ const NewBot = create_ssr_component(($$result, $$props, $$bindings, $$slots) => 
 			{}
 		)}</div>
           
-        <div class="${"rightitem svelte-1b158ah"}">${validate_component(TextField, "TextField").$$render(
+        <div class="rightitem svelte-1b158ah">${validate_component(TextField, "TextField").$$render(
 			$$result,
 			{
 				label: "Прибыль в сделке, %",
@@ -1294,12 +1482,12 @@ const NewBot = create_ssr_component(($$result, $$props, $$bindings, $$slots) => 
 			},
 			{}
 		)}</div></div>
-    <div class="${"row svelte-1b158ah"}"><div class="${"leftitem svelte-1b158ah"}"><label class="${"svelte-1b158ah"}">Объем ордера</label>
+    <div class="row svelte-1b158ah"><div class="leftitem svelte-1b158ah"><label class="svelte-1b158ah">Объем ордера</label>
             <br>
-            <p class="${" text-gray-900 dark:text-gray-300"}">~ ${escape(ordersizeinquota ? ordersizeinquota : 0)} ${escape(quotacoin)}, ${escape(ordersizeinbase ? ordersizeinbase : 0)}
+            <p class="text-gray-900 dark:text-gray-300">~ ${escape(ordersizeinquota ? ordersizeinquota : 0)} ${escape(quotacoin)}, ${escape(ordersizeinbase ? ordersizeinbase : 0)}
                 ${escape(basecoin)}</p></div>
           
-        <div class="${"rightitem svelte-1b158ah"}">${validate_component(TextField, "TextField").$$render(
+        <div class="rightitem svelte-1b158ah">${validate_component(TextField, "TextField").$$render(
 			$$result,
 			{
 				label: "% от депо",
@@ -1315,7 +1503,7 @@ const NewBot = create_ssr_component(($$result, $$props, $$bindings, $$slots) => 
 			},
 			{}
 		)}</div></div>
-    <div class="${"row svelte-1b158ah"}"><div class="${"leftitem svelte-1b158ah"}">${validate_component(TextField, "TextField").$$render(
+    <div class="row svelte-1b158ah"><div class="leftitem svelte-1b158ah">${validate_component(TextField, "TextField").$$render(
 			$$result,
 			{
 				label: "Отступ снизу, %",
@@ -1330,9 +1518,9 @@ const NewBot = create_ssr_component(($$result, $$props, $$bindings, $$slots) => 
 			},
 			{}
 		)}
-            <p class="${" text-gray-900 dark:text-gray-300"}">~ ${escape(ofsetbottomsize.toFixed(digitprice))} ${escape(basecoin)}</p></div>
+            <p class="text-gray-900 dark:text-gray-300">~ ${escape(ofsetbottomsize.toFixed(digitprice))} ${escape(basecoin)}</p></div>
           
-        <div class="${"rightitem svelte-1b158ah"}">${validate_component(TextField, "TextField").$$render(
+        <div class="rightitem svelte-1b158ah">${validate_component(TextField, "TextField").$$render(
 			$$result,
 			{
 				label: "Отступ сверху, %",
@@ -1347,18 +1535,18 @@ const NewBot = create_ssr_component(($$result, $$props, $$bindings, $$slots) => 
 			},
 			{}
 		)}
-            <p class="${" text-gray-900 dark:text-gray-300"}">~ ${escape(ofsettopsize.toFixed(digitprice))} ${escape(basecoin)}</p></div></div>
-    <div class="${"row svelte-1b158ah"}"><div class="${"leftitem svelte-1b158ah"}"><br>
-            <label class="${"svelte-1b158ah"}">Всего этажей</label>
-            <p class="${" text-gray-900 dark:text-gray-300"}">${escape(floorsvsego)}</p></div></div>
-    <div class="${"row svelte-1b158ah"}"><div class="${"leftitem svelte-1b158ah"}"><br>
-            <label class="${"svelte-1b158ah"}">Высота 1-го этажа</label>
-            <p class="${" text-gray-900 dark:text-gray-300"}">${escape(heightfirstfloor)} ${escape(basecoin)}</p></div>
-        <div class="${"rightitem svelte-1b158ah"}"><br>
-            <label class="${"svelte-1b158ah"}">Высота верхнего этажа</label>
-            <p class="${" text-gray-900 dark:text-gray-300"}">${escape(heightlastfloor)} ${escape(basecoin)}</p></div></div>
+            <p class="text-gray-900 dark:text-gray-300">~ ${escape(ofsettopsize.toFixed(digitprice))} ${escape(basecoin)}</p></div></div>
+    <div class="row svelte-1b158ah"><div class="leftitem svelte-1b158ah"><br>
+            <label class="svelte-1b158ah">Всего этажей</label>
+            <p class="text-gray-900 dark:text-gray-300">${escape(floorsvsego)}</p></div></div>
+    <div class="row svelte-1b158ah"><div class="leftitem svelte-1b158ah"><br>
+            <label class="svelte-1b158ah">Высота 1-го этажа</label>
+            <p class="text-gray-900 dark:text-gray-300">${escape(heightfirstfloor)} ${escape(basecoin)}</p></div>
+        <div class="rightitem svelte-1b158ah"><br>
+            <label class="svelte-1b158ah">Высота верхнего этажа</label>
+            <p class="text-gray-900 dark:text-gray-300">${escape(heightlastfloor)} ${escape(basecoin)}</p></div></div>
     <br>
-    <div class="${"row svelte-1b158ah"}"><div class="${"leftitem svelte-1b158ah"}">${validate_component(TextField, "TextField").$$render(
+    <div class="row svelte-1b158ah"><div class="leftitem svelte-1b158ah">${validate_component(TextField, "TextField").$$render(
 			$$result,
 			{
 				label: "MA1, мин",
@@ -1374,7 +1562,7 @@ const NewBot = create_ssr_component(($$result, $$props, $$bindings, $$slots) => 
 			{}
 		)}</div>
           
-        <div class="${"rightitem svelte-1b158ah"}">${validate_component(TextField, "TextField").$$render(
+        <div class="rightitem svelte-1b158ah">${validate_component(TextField, "TextField").$$render(
 			$$result,
 			{
 				label: "MA2, мин",
@@ -1389,9 +1577,9 @@ const NewBot = create_ssr_component(($$result, $$props, $$bindings, $$slots) => 
 			},
 			{}
 		)}</div></div>
-    <div class="${"row svelte-1b158ah"}"><div class="${"leftitem padtop5 svelte-1b158ah"}"><label class="${"svelte-1b158ah"}">Не закупать, если цена больше</label></div>
+    <div class="row svelte-1b158ah"><div class="leftitem padtop5 svelte-1b158ah"><label class="svelte-1b158ah">Не закупать, если цена больше</label></div>
           
-        <div class="${"rightitem svelte-1b158ah"}">${validate_component(TextField, "TextField").$$render(
+        <div class="rightitem svelte-1b158ah">${validate_component(TextField, "TextField").$$render(
 			$$result,
 			{
 				label: "",
@@ -1408,8 +1596,8 @@ const NewBot = create_ssr_component(($$result, $$props, $$bindings, $$slots) => 
 			{}
 		)}</div></div>
 
-    <div class="${"row svelte-1b158ah"}"><div class="${"leftitem padtop5 svelte-1b158ah"}"><label class="${"svelte-1b158ah"}">Не закупать, если цена меньше</label></div>
-        <div class="${"rightitem svelte-1b158ah"}">${validate_component(TextField, "TextField").$$render(
+    <div class="row svelte-1b158ah"><div class="leftitem padtop5 svelte-1b158ah"><label class="svelte-1b158ah">Не закупать, если цена меньше</label></div>
+        <div class="rightitem svelte-1b158ah">${validate_component(TextField, "TextField").$$render(
 			$$result,
 			{
 				label: "",
@@ -1426,22 +1614,27 @@ const NewBot = create_ssr_component(($$result, $$props, $$bindings, $$slots) => 
 			{}
 		)}</div></div>
     <br>
-    ${validate_component(Button, "Button").$$render($$result, { href: "/" }, {}, { default: () => `Создать` })}
+    ${validate_component(Button, "Button").$$render($$result, { href: "/" }, {}, {
+			default: () => {
+				return `Создать`;
+			}
+		})}
     <br>
     <br></main>`;
 	} while (!$$settled);
 
+	$$unsubscribe_authStore();
 	return $$rendered;
 });
 
-/* src/components/IndLoad.svelte generated by Svelte v3.24.0 */
+/* src/components/IndLoad.svelte generated by Svelte v3.59.2 */
 
 const css$5 = {
 	code: "main.svelte-m6qgj6{width:auto}",
-	map: "{\"version\":3,\"file\":\"IndLoad.svelte\",\"sources\":[\"IndLoad.svelte\"],\"sourcesContent\":[\"<script>\\n    export let procvlozh;\\n    export let id;\\n    export let prcvstr;\\n    export let onoff;\\n    $: if (procvlozh) {\\n        prcvstr = procvlozh + '%';\\n    } else {\\n        prcvstr = '0';\\n    }\\n\\n    let opacity;\\n    console.log(onoff);\\n    if (onoff == true || id == 'sumprocvlozh') {\\n        opacity = 0;\\n    } else {\\n        opacity = 1;\\n    }\\n</script>\\n\\n<style>\\n    main {\\n        width: auto;\\n    }\\n</style>\\n\\n<main>\\n    <svg\\n        width=\\\"100%\\\"\\n        height=\\\"100%\\\"\\n        viewBox=\\\"0 0 452 124\\\"\\n        fill=\\\"none\\\"\\n        xmlns=\\\"http://www.w3.org/2000/svg\\\"\\n        style=\\\"filter: grayscale({opacity})\\\">\\n\\n        <path\\n            fill-rule=\\\"evenodd\\\"\\n            clip-rule=\\\"evenodd\\\"\\n            d=\\\"M35.7223 5.77236C35.7223 2.58438 33.1379 0 29.9499 0V0C26.7619 0 24.1775 2.58437\\n            24.1775 5.77236V118.228C24.1775 121.416 26.7619 124 29.9499 124V124C33.1379 124 35.7223\\n            121.416 35.7223 118.228V5.77236ZM53.039 0C49.8511 0 47.2668 2.58431 47.2668\\n            5.77221V118.228C47.2668 121.416 49.8511 124 53.039 124V124C56.2269 124 58.8112 121.416\\n            58.8112 118.228V5.77221C58.8112 2.5843 56.2269 0 53.039 0V0ZM81.9005 118.228C81.9005\\n            121.416 79.3161 124 76.1281 124V124C72.9401 124 70.3558 121.416 70.3558\\n            118.228V5.77236C70.3558 2.58438 72.9401 0 76.1281 0V0C79.3161 0 81.9005 2.58437 81.9005\\n            5.77236V118.228ZM93.4451 118.228C93.4451 121.416 96.0294 124 99.2173 124V124C102.405 124\\n            104.989 121.416 104.989 118.228V5.7722C104.989 2.5843 102.405 0 99.2173 0V0C96.0294 0\\n            93.4451 2.5843 93.4451 5.7722V118.228ZM128.079 118.228C128.079 121.416 125.494 124\\n            122.306 124V124C119.118 124 116.534 121.416 116.534 118.228V5.77236C116.534 2.58438\\n            119.118 0 122.306 0V0C125.494 0 128.079 2.58437 128.079 5.77236V118.228ZM139.623\\n            118.228C139.623 121.416 142.208 124 145.396 124V124C148.583 124 151.168 121.416 151.168\\n            118.228V5.77221C151.168 2.58431 148.583 0 145.396 0V0C142.208 0 139.623 2.58431 139.623\\n            5.77221V118.228ZM174.257 118.228C174.257 121.416 171.673 124 168.485 124V124C165.297 124\\n            162.712 121.416 162.712 118.228V5.77237C162.712 2.58438 165.297 0 168.485 0V0C171.673 0\\n            174.257 2.58438 174.257 5.77237V118.228ZM185.802 118.228C185.802 121.416 188.386 124\\n            191.574 124V124C194.762 124 197.346 121.416 197.346 118.228V5.77221C197.346 2.58431\\n            194.762 0 191.574 0V0C188.386 0 185.802 2.58431 185.802 5.77221V118.228ZM220.435\\n            118.228C220.435 121.416 217.851 124 214.663 124V124C211.475 124 208.891 121.416 208.891\\n            118.228V5.77221C208.891 2.58431 211.475 0 214.663 0V0C217.851 0 220.435 2.58431 220.435\\n            5.77221V118.228ZM231.979 118.228C231.979 121.416 234.564 124 237.752 124V124C240.94 124\\n            243.524 121.416 243.524 118.228V5.77237C243.524 2.58438 240.94 0 237.752 0V0C234.564 0\\n            231.979 2.58438 231.979 5.77237V118.228ZM266.613 118.228C266.613 121.416 264.029 124\\n            260.841 124V124C257.653 124 255.069 121.416 255.069 118.228V5.77222C255.069 2.58431\\n            257.653 0 260.841 0V0C264.029 0 266.613 2.58431 266.613 5.77222V62V118.228ZM278.158\\n            118.228C278.158 121.416 280.742 124 283.93 124V124C287.118 124 289.702 121.416 289.702\\n            118.228V5.77237C289.702 2.58438 287.118 0 283.93 0V0C280.742 0 278.158 2.58438 278.158\\n            5.77237V118.228ZM312.791 118.228C312.791 121.416 310.207 124 307.019 124V124C303.831 124\\n            301.247 121.416 301.247 118.228V5.77219C301.247 2.5843 303.831 0 307.019 0V0C310.207 0\\n            312.791 2.5843 312.791 5.77219V118.228ZM324.336 118.228C324.336 121.416 326.92 124\\n            330.108 124V124C333.296 124 335.88 121.416 335.88 118.228V5.7722C335.88 2.5843 333.296 0\\n            330.108 0V0C326.92 0 324.336 2.58431 324.336 5.7722V118.228ZM358.97 118.228C358.97\\n            121.416 356.385 124 353.197 124V124C350.009 124 347.425 121.416 347.425\\n            118.228V5.77237C347.425 2.58438 350.009 0 353.197 0V0C356.385 0 358.97 2.58438 358.97\\n            5.77237V118.228ZM370.514 118.228C370.514 121.416 373.098 124 376.286 124V124C379.474 124\\n            382.059 121.416 382.059 118.228V5.7722C382.059 2.5843 379.474 0 376.286 0V0C373.098 0\\n            370.514 2.58431 370.514 5.7722V118.228ZM405.148 118.228C405.148 121.416 402.564 124\\n            399.376 124V124C396.188 124 393.603 121.416 393.603 118.228V5.77237C393.603 2.58438\\n            396.188 0 399.376 0V0C402.564 0 405.148 2.58438 405.148 5.77237V118.228ZM416.692\\n            118.228C416.692 121.416 419.277 124 422.465 124V124C425.653 124 428.237 121.416 428.237\\n            118.228V5.77219C428.237 2.5843 425.653 0 422.465 0V0C419.277 0 416.692 2.5843 416.692\\n            5.77219V118.228ZM451.326 118.228C451.326 121.416 448.742 124 445.554 124V124C442.366 124\\n            439.781 121.416 439.781 118.228V5.77237C439.781 2.58438 442.366 0 445.554 0V0C448.742 0\\n            451.326 2.58438 451.326 5.77237V118.228ZM1.08862 5.77218C1.08862 2.58429 3.67292 0\\n            6.8608 0V0C10.0487 0 12.633 2.5843 12.633 5.77218V118.228C12.633 121.416 10.0487 124\\n            6.8608 124V124C3.67292 124 1.08862 121.416 1.08862 118.228V5.77218Z\\\"\\n            fill=\\\"#E0294A\\\" />\\n        <mask\\n            id=\\\"mask{id}\\\"\\n            mask-type=\\\"alpha\\\"\\n            maskUnits=\\\"userSpaceOnUse\\\"\\n            x=\\\"0\\\"\\n            y=\\\"0\\\"\\n            width=\\\"100%\\\"\\n            height=\\\"100%\\\">\\n            <rect width={prcvstr} height=\\\"124\\\" fill=\\\"white\\\" />\\n        </mask>\\n        <g mask=\\\"url(#mask{id})\\\">\\n            <path\\n                fill-rule=\\\"evenodd\\\"\\n                clip-rule=\\\"evenodd\\\"\\n                d=\\\"M35.7223 5.77236C35.7223 2.58438 33.1379 0 29.9499 0V0C26.7619 0 24.1775 2.58437\\n                24.1775 5.77236V118.228C24.1775 121.416 26.7619 124 29.9499 124V124C33.1379 124\\n                35.7223 121.416 35.7223 118.228V5.77236ZM53.039 0C49.8511 0 47.2668 2.58431 47.2668\\n                5.77221V118.228C47.2668 121.416 49.8511 124 53.039 124V124C56.2269 124 58.8112\\n                121.416 58.8112 118.228V5.77221C58.8112 2.5843 56.2269 0 53.039 0V0ZM81.9005\\n                118.228C81.9005 121.416 79.3161 124 76.1281 124V124C72.9401 124 70.3558 121.416\\n                70.3558 118.228V5.77236C70.3558 2.58438 72.9401 0 76.1281 0V0C79.3161 0 81.9005\\n                2.58437 81.9005 5.77236V118.228ZM93.4451 118.228C93.4451 121.416 96.0294 124 99.2173\\n                124V124C102.405 124 104.989 121.416 104.989 118.228V5.7722C104.989 2.5843 102.405 0\\n                99.2173 0V0C96.0294 0 93.4451 2.5843 93.4451 5.7722V118.228ZM128.079 118.228C128.079\\n                121.416 125.494 124 122.306 124V124C119.118 124 116.534 121.416 116.534\\n                118.228V5.77236C116.534 2.58438 119.118 0 122.306 0V0C125.494 0 128.079 2.58437\\n                128.079 5.77236V118.228ZM139.623 118.228C139.623 121.416 142.208 124 145.396\\n                124V124C148.583 124 151.168 121.416 151.168 118.228V5.77221C151.168 2.58431 148.583\\n                0 145.396 0V0C142.208 0 139.623 2.58431 139.623 5.77221V118.228ZM174.257\\n                118.228C174.257 121.416 171.673 124 168.485 124V124C165.297 124 162.712 121.416\\n                162.712 118.228V5.77237C162.712 2.58438 165.297 0 168.485 0V0C171.673 0 174.257\\n                2.58438 174.257 5.77237V118.228ZM185.802 118.228C185.802 121.416 188.386 124 191.574\\n                124V124C194.762 124 197.346 121.416 197.346 118.228V5.77221C197.346 2.58431 194.762\\n                0 191.574 0V0C188.386 0 185.802 2.58431 185.802 5.77221V118.228ZM220.435\\n                118.228C220.435 121.416 217.851 124 214.663 124V124C211.475 124 208.891 121.416\\n                208.891 118.228V5.77221C208.891 2.58431 211.475 0 214.663 0V0C217.851 0 220.435\\n                2.58431 220.435 5.77221V118.228ZM231.979 118.228C231.979 121.416 234.564 124 237.752\\n                124V124C240.94 124 243.524 121.416 243.524 118.228V5.77237C243.524 2.58438 240.94 0\\n                237.752 0V0C234.564 0 231.979 2.58438 231.979 5.77237V118.228ZM266.613\\n                118.228C266.613 121.416 264.029 124 260.841 124V124C257.653 124 255.069 121.416\\n                255.069 118.228V5.77222C255.069 2.58431 257.653 0 260.841 0V0C264.029 0 266.613\\n                2.58432 266.613 5.77223V118.228ZM278.158 118.228C278.158 121.416 280.742 124 283.93\\n                124V124C287.118 124 289.702 121.416 289.702 118.228V5.77237C289.702 2.58438 287.118\\n                0 283.93 0V0C280.742 0 278.158 2.58438 278.158 5.77237V118.228ZM312.791\\n                118.228C312.791 121.416 310.207 124 307.019 124V124C303.831 124 301.247 121.416\\n                301.247 118.228V5.77219C301.247 2.5843 303.831 0 307.019 0V0C310.207 0 312.791\\n                2.5843 312.791 5.77219V118.228ZM324.336 118.228C324.336 121.416 326.92 124 330.108\\n                124V124C333.296 124 335.88 121.416 335.88 118.228V5.7722C335.88 2.5843 333.296 0\\n                330.108 0V0C326.92 0 324.336 2.58431 324.336 5.7722V118.228ZM358.97 118.228C358.97\\n                121.416 356.385 124 353.197 124V124C350.009 124 347.425 121.416 347.425\\n                118.228V5.77237C347.425 2.58438 350.009 0 353.197 0V0C356.385 0 358.97 2.58438\\n                358.97 5.77237V118.228ZM370.514 118.228C370.514 121.416 373.098 124 376.286\\n                124V124C379.474 124 382.059 121.416 382.059 118.228V5.7722C382.059 2.5843 379.474 0\\n                376.286 0V0C373.098 0 370.514 2.58431 370.514 5.7722V118.228ZM405.148\\n                118.228C405.148 121.416 402.564 124 399.376 124V124C396.188 124 393.603 121.416\\n                393.603 118.228V5.77237C393.603 2.58438 396.188 0 399.376 0V0C402.564 0 405.148\\n                2.58438 405.148 5.77237V118.228ZM416.692 118.228C416.692 121.416 419.277 124 422.465\\n                124V124C425.653 124 428.237 121.416 428.237 118.228V5.77219C428.237 2.5843 425.653 0\\n                422.465 0V0C419.277 0 416.692 2.5843 416.692 5.77219V118.228ZM451.326\\n                118.228C451.326 121.416 448.742 124 445.554 124V124C442.366 124 439.781 121.416\\n                439.781 118.228V5.77237C439.781 2.58438 442.366 0 445.554 0V0C448.742 0 451.326\\n                2.58438 451.326 5.77237V118.228ZM1.08862 5.77218C1.08862 2.58429 3.67292 0 6.8608\\n                0V0C10.0487 0 12.633 2.5843 12.633 5.77218V118.228C12.633 121.416 10.0487 124 6.8608\\n                124V124C3.67292 124 1.08862 121.416 1.08862 118.228V5.77218Z\\\"\\n                fill=\\\"#02C076\\\" />\\n        </g>\\n\\n    </svg>\\n\\n</main>\\n\"],\"names\":[],\"mappings\":\"AAqBI,IAAI,cAAC,CAAC,AACF,KAAK,CAAE,IAAI,AACf,CAAC\"}"
+	map: "{\"version\":3,\"file\":\"IndLoad.svelte\",\"sources\":[\"IndLoad.svelte\"],\"sourcesContent\":[\"<script>\\n    export let procvlozh;\\n    export let id;\\n    export let prcvstr;\\n    export let onoff;\\n    $: if (procvlozh) {\\n        prcvstr = procvlozh + '%';\\n    } else {\\n        prcvstr = '0';\\n    }\\n\\n    let opacity;\\n    console.log(onoff);\\n    if (onoff == true || id == 'sumprocvlozh') {\\n        opacity = 0;\\n    } else {\\n        opacity = 1;\\n    }\\n</script>\\n\\n<style>\\n    main {\\n        width: auto;\\n    }\\n</style>\\n\\n<main>\\n    <svg\\n        width=\\\"100%\\\"\\n        height=\\\"100%\\\"\\n        viewBox=\\\"0 0 452 124\\\"\\n        fill=\\\"none\\\"\\n        xmlns=\\\"http://www.w3.org/2000/svg\\\"\\n        style=\\\"filter: grayscale({opacity})\\\">\\n\\n        <path\\n            fill-rule=\\\"evenodd\\\"\\n            clip-rule=\\\"evenodd\\\"\\n            d=\\\"M35.7223 5.77236C35.7223 2.58438 33.1379 0 29.9499 0V0C26.7619 0 24.1775 2.58437\\n            24.1775 5.77236V118.228C24.1775 121.416 26.7619 124 29.9499 124V124C33.1379 124 35.7223\\n            121.416 35.7223 118.228V5.77236ZM53.039 0C49.8511 0 47.2668 2.58431 47.2668\\n            5.77221V118.228C47.2668 121.416 49.8511 124 53.039 124V124C56.2269 124 58.8112 121.416\\n            58.8112 118.228V5.77221C58.8112 2.5843 56.2269 0 53.039 0V0ZM81.9005 118.228C81.9005\\n            121.416 79.3161 124 76.1281 124V124C72.9401 124 70.3558 121.416 70.3558\\n            118.228V5.77236C70.3558 2.58438 72.9401 0 76.1281 0V0C79.3161 0 81.9005 2.58437 81.9005\\n            5.77236V118.228ZM93.4451 118.228C93.4451 121.416 96.0294 124 99.2173 124V124C102.405 124\\n            104.989 121.416 104.989 118.228V5.7722C104.989 2.5843 102.405 0 99.2173 0V0C96.0294 0\\n            93.4451 2.5843 93.4451 5.7722V118.228ZM128.079 118.228C128.079 121.416 125.494 124\\n            122.306 124V124C119.118 124 116.534 121.416 116.534 118.228V5.77236C116.534 2.58438\\n            119.118 0 122.306 0V0C125.494 0 128.079 2.58437 128.079 5.77236V118.228ZM139.623\\n            118.228C139.623 121.416 142.208 124 145.396 124V124C148.583 124 151.168 121.416 151.168\\n            118.228V5.77221C151.168 2.58431 148.583 0 145.396 0V0C142.208 0 139.623 2.58431 139.623\\n            5.77221V118.228ZM174.257 118.228C174.257 121.416 171.673 124 168.485 124V124C165.297 124\\n            162.712 121.416 162.712 118.228V5.77237C162.712 2.58438 165.297 0 168.485 0V0C171.673 0\\n            174.257 2.58438 174.257 5.77237V118.228ZM185.802 118.228C185.802 121.416 188.386 124\\n            191.574 124V124C194.762 124 197.346 121.416 197.346 118.228V5.77221C197.346 2.58431\\n            194.762 0 191.574 0V0C188.386 0 185.802 2.58431 185.802 5.77221V118.228ZM220.435\\n            118.228C220.435 121.416 217.851 124 214.663 124V124C211.475 124 208.891 121.416 208.891\\n            118.228V5.77221C208.891 2.58431 211.475 0 214.663 0V0C217.851 0 220.435 2.58431 220.435\\n            5.77221V118.228ZM231.979 118.228C231.979 121.416 234.564 124 237.752 124V124C240.94 124\\n            243.524 121.416 243.524 118.228V5.77237C243.524 2.58438 240.94 0 237.752 0V0C234.564 0\\n            231.979 2.58438 231.979 5.77237V118.228ZM266.613 118.228C266.613 121.416 264.029 124\\n            260.841 124V124C257.653 124 255.069 121.416 255.069 118.228V5.77222C255.069 2.58431\\n            257.653 0 260.841 0V0C264.029 0 266.613 2.58431 266.613 5.77222V62V118.228ZM278.158\\n            118.228C278.158 121.416 280.742 124 283.93 124V124C287.118 124 289.702 121.416 289.702\\n            118.228V5.77237C289.702 2.58438 287.118 0 283.93 0V0C280.742 0 278.158 2.58438 278.158\\n            5.77237V118.228ZM312.791 118.228C312.791 121.416 310.207 124 307.019 124V124C303.831 124\\n            301.247 121.416 301.247 118.228V5.77219C301.247 2.5843 303.831 0 307.019 0V0C310.207 0\\n            312.791 2.5843 312.791 5.77219V118.228ZM324.336 118.228C324.336 121.416 326.92 124\\n            330.108 124V124C333.296 124 335.88 121.416 335.88 118.228V5.7722C335.88 2.5843 333.296 0\\n            330.108 0V0C326.92 0 324.336 2.58431 324.336 5.7722V118.228ZM358.97 118.228C358.97\\n            121.416 356.385 124 353.197 124V124C350.009 124 347.425 121.416 347.425\\n            118.228V5.77237C347.425 2.58438 350.009 0 353.197 0V0C356.385 0 358.97 2.58438 358.97\\n            5.77237V118.228ZM370.514 118.228C370.514 121.416 373.098 124 376.286 124V124C379.474 124\\n            382.059 121.416 382.059 118.228V5.7722C382.059 2.5843 379.474 0 376.286 0V0C373.098 0\\n            370.514 2.58431 370.514 5.7722V118.228ZM405.148 118.228C405.148 121.416 402.564 124\\n            399.376 124V124C396.188 124 393.603 121.416 393.603 118.228V5.77237C393.603 2.58438\\n            396.188 0 399.376 0V0C402.564 0 405.148 2.58438 405.148 5.77237V118.228ZM416.692\\n            118.228C416.692 121.416 419.277 124 422.465 124V124C425.653 124 428.237 121.416 428.237\\n            118.228V5.77219C428.237 2.5843 425.653 0 422.465 0V0C419.277 0 416.692 2.5843 416.692\\n            5.77219V118.228ZM451.326 118.228C451.326 121.416 448.742 124 445.554 124V124C442.366 124\\n            439.781 121.416 439.781 118.228V5.77237C439.781 2.58438 442.366 0 445.554 0V0C448.742 0\\n            451.326 2.58438 451.326 5.77237V118.228ZM1.08862 5.77218C1.08862 2.58429 3.67292 0\\n            6.8608 0V0C10.0487 0 12.633 2.5843 12.633 5.77218V118.228C12.633 121.416 10.0487 124\\n            6.8608 124V124C3.67292 124 1.08862 121.416 1.08862 118.228V5.77218Z\\\"\\n            fill=\\\"#E0294A\\\" />\\n        <mask\\n            id=\\\"mask{id}\\\"\\n            mask-type=\\\"alpha\\\"\\n            maskUnits=\\\"userSpaceOnUse\\\"\\n            x=\\\"0\\\"\\n            y=\\\"0\\\"\\n            width=\\\"100%\\\"\\n            height=\\\"100%\\\">\\n            <rect width={prcvstr} height=\\\"124\\\" fill=\\\"white\\\" />\\n        </mask>\\n        <g mask=\\\"url(#mask{id})\\\">\\n            <path\\n                fill-rule=\\\"evenodd\\\"\\n                clip-rule=\\\"evenodd\\\"\\n                d=\\\"M35.7223 5.77236C35.7223 2.58438 33.1379 0 29.9499 0V0C26.7619 0 24.1775 2.58437\\n                24.1775 5.77236V118.228C24.1775 121.416 26.7619 124 29.9499 124V124C33.1379 124\\n                35.7223 121.416 35.7223 118.228V5.77236ZM53.039 0C49.8511 0 47.2668 2.58431 47.2668\\n                5.77221V118.228C47.2668 121.416 49.8511 124 53.039 124V124C56.2269 124 58.8112\\n                121.416 58.8112 118.228V5.77221C58.8112 2.5843 56.2269 0 53.039 0V0ZM81.9005\\n                118.228C81.9005 121.416 79.3161 124 76.1281 124V124C72.9401 124 70.3558 121.416\\n                70.3558 118.228V5.77236C70.3558 2.58438 72.9401 0 76.1281 0V0C79.3161 0 81.9005\\n                2.58437 81.9005 5.77236V118.228ZM93.4451 118.228C93.4451 121.416 96.0294 124 99.2173\\n                124V124C102.405 124 104.989 121.416 104.989 118.228V5.7722C104.989 2.5843 102.405 0\\n                99.2173 0V0C96.0294 0 93.4451 2.5843 93.4451 5.7722V118.228ZM128.079 118.228C128.079\\n                121.416 125.494 124 122.306 124V124C119.118 124 116.534 121.416 116.534\\n                118.228V5.77236C116.534 2.58438 119.118 0 122.306 0V0C125.494 0 128.079 2.58437\\n                128.079 5.77236V118.228ZM139.623 118.228C139.623 121.416 142.208 124 145.396\\n                124V124C148.583 124 151.168 121.416 151.168 118.228V5.77221C151.168 2.58431 148.583\\n                0 145.396 0V0C142.208 0 139.623 2.58431 139.623 5.77221V118.228ZM174.257\\n                118.228C174.257 121.416 171.673 124 168.485 124V124C165.297 124 162.712 121.416\\n                162.712 118.228V5.77237C162.712 2.58438 165.297 0 168.485 0V0C171.673 0 174.257\\n                2.58438 174.257 5.77237V118.228ZM185.802 118.228C185.802 121.416 188.386 124 191.574\\n                124V124C194.762 124 197.346 121.416 197.346 118.228V5.77221C197.346 2.58431 194.762\\n                0 191.574 0V0C188.386 0 185.802 2.58431 185.802 5.77221V118.228ZM220.435\\n                118.228C220.435 121.416 217.851 124 214.663 124V124C211.475 124 208.891 121.416\\n                208.891 118.228V5.77221C208.891 2.58431 211.475 0 214.663 0V0C217.851 0 220.435\\n                2.58431 220.435 5.77221V118.228ZM231.979 118.228C231.979 121.416 234.564 124 237.752\\n                124V124C240.94 124 243.524 121.416 243.524 118.228V5.77237C243.524 2.58438 240.94 0\\n                237.752 0V0C234.564 0 231.979 2.58438 231.979 5.77237V118.228ZM266.613\\n                118.228C266.613 121.416 264.029 124 260.841 124V124C257.653 124 255.069 121.416\\n                255.069 118.228V5.77222C255.069 2.58431 257.653 0 260.841 0V0C264.029 0 266.613\\n                2.58432 266.613 5.77223V118.228ZM278.158 118.228C278.158 121.416 280.742 124 283.93\\n                124V124C287.118 124 289.702 121.416 289.702 118.228V5.77237C289.702 2.58438 287.118\\n                0 283.93 0V0C280.742 0 278.158 2.58438 278.158 5.77237V118.228ZM312.791\\n                118.228C312.791 121.416 310.207 124 307.019 124V124C303.831 124 301.247 121.416\\n                301.247 118.228V5.77219C301.247 2.5843 303.831 0 307.019 0V0C310.207 0 312.791\\n                2.5843 312.791 5.77219V118.228ZM324.336 118.228C324.336 121.416 326.92 124 330.108\\n                124V124C333.296 124 335.88 121.416 335.88 118.228V5.7722C335.88 2.5843 333.296 0\\n                330.108 0V0C326.92 0 324.336 2.58431 324.336 5.7722V118.228ZM358.97 118.228C358.97\\n                121.416 356.385 124 353.197 124V124C350.009 124 347.425 121.416 347.425\\n                118.228V5.77237C347.425 2.58438 350.009 0 353.197 0V0C356.385 0 358.97 2.58438\\n                358.97 5.77237V118.228ZM370.514 118.228C370.514 121.416 373.098 124 376.286\\n                124V124C379.474 124 382.059 121.416 382.059 118.228V5.7722C382.059 2.5843 379.474 0\\n                376.286 0V0C373.098 0 370.514 2.58431 370.514 5.7722V118.228ZM405.148\\n                118.228C405.148 121.416 402.564 124 399.376 124V124C396.188 124 393.603 121.416\\n                393.603 118.228V5.77237C393.603 2.58438 396.188 0 399.376 0V0C402.564 0 405.148\\n                2.58438 405.148 5.77237V118.228ZM416.692 118.228C416.692 121.416 419.277 124 422.465\\n                124V124C425.653 124 428.237 121.416 428.237 118.228V5.77219C428.237 2.5843 425.653 0\\n                422.465 0V0C419.277 0 416.692 2.5843 416.692 5.77219V118.228ZM451.326\\n                118.228C451.326 121.416 448.742 124 445.554 124V124C442.366 124 439.781 121.416\\n                439.781 118.228V5.77237C439.781 2.58438 442.366 0 445.554 0V0C448.742 0 451.326\\n                2.58438 451.326 5.77237V118.228ZM1.08862 5.77218C1.08862 2.58429 3.67292 0 6.8608\\n                0V0C10.0487 0 12.633 2.5843 12.633 5.77218V118.228C12.633 121.416 10.0487 124 6.8608\\n                124V124C3.67292 124 1.08862 121.416 1.08862 118.228V5.77218Z\\\"\\n                fill=\\\"#02C076\\\" />\\n        </g>\\n\\n    </svg>\\n\\n</main>\\n\"],\"names\":[],\"mappings\":\"AAqBI,kBAAK,CACD,KAAK,CAAE,IACX\"}"
 };
 
-const IndLoad = create_ssr_component(($$result, $$props, $$bindings, $$slots) => {
+const IndLoad = create_ssr_component(($$result, $$props, $$bindings, slots) => {
 	let { procvlozh } = $$props;
 	let { id } = $$props;
 	let { prcvstr } = $$props;
@@ -1449,7 +1642,7 @@ const IndLoad = create_ssr_component(($$result, $$props, $$bindings, $$slots) =>
 	let opacity;
 	console.log(onoff);
 
-	if (onoff == true || id == "sumprocvlozh") {
+	if (onoff == true || id == 'sumprocvlozh') {
 		opacity = 0;
 	} else {
 		opacity = 1;
@@ -1463,20 +1656,115 @@ const IndLoad = create_ssr_component(($$result, $$props, $$bindings, $$slots) =>
 
 	 {
 		if (procvlozh) {
-			prcvstr = procvlozh + "%";
+			prcvstr = procvlozh + '%';
 		} else {
-			prcvstr = "0";
+			prcvstr = '0';
 		}
 	}
 
-	return `<main class="${"svelte-m6qgj6"}"><svg width="${"100%"}" height="${"100%"}" viewBox="${"0 0 452 124"}" fill="${"none"}" xmlns="${"http://www.w3.org/2000/svg"}" style="${"filter: grayscale(" + escape(opacity) + ")"}"><path fill-rule="${"evenodd"}" clip-rule="${"evenodd"}" d="${"M35.7223 5.77236C35.7223 2.58438 33.1379 0 29.9499 0V0C26.7619 0 24.1775 2.58437\n            24.1775 5.77236V118.228C24.1775 121.416 26.7619 124 29.9499 124V124C33.1379 124 35.7223\n            121.416 35.7223 118.228V5.77236ZM53.039 0C49.8511 0 47.2668 2.58431 47.2668\n            5.77221V118.228C47.2668 121.416 49.8511 124 53.039 124V124C56.2269 124 58.8112 121.416\n            58.8112 118.228V5.77221C58.8112 2.5843 56.2269 0 53.039 0V0ZM81.9005 118.228C81.9005\n            121.416 79.3161 124 76.1281 124V124C72.9401 124 70.3558 121.416 70.3558\n            118.228V5.77236C70.3558 2.58438 72.9401 0 76.1281 0V0C79.3161 0 81.9005 2.58437 81.9005\n            5.77236V118.228ZM93.4451 118.228C93.4451 121.416 96.0294 124 99.2173 124V124C102.405 124\n            104.989 121.416 104.989 118.228V5.7722C104.989 2.5843 102.405 0 99.2173 0V0C96.0294 0\n            93.4451 2.5843 93.4451 5.7722V118.228ZM128.079 118.228C128.079 121.416 125.494 124\n            122.306 124V124C119.118 124 116.534 121.416 116.534 118.228V5.77236C116.534 2.58438\n            119.118 0 122.306 0V0C125.494 0 128.079 2.58437 128.079 5.77236V118.228ZM139.623\n            118.228C139.623 121.416 142.208 124 145.396 124V124C148.583 124 151.168 121.416 151.168\n            118.228V5.77221C151.168 2.58431 148.583 0 145.396 0V0C142.208 0 139.623 2.58431 139.623\n            5.77221V118.228ZM174.257 118.228C174.257 121.416 171.673 124 168.485 124V124C165.297 124\n            162.712 121.416 162.712 118.228V5.77237C162.712 2.58438 165.297 0 168.485 0V0C171.673 0\n            174.257 2.58438 174.257 5.77237V118.228ZM185.802 118.228C185.802 121.416 188.386 124\n            191.574 124V124C194.762 124 197.346 121.416 197.346 118.228V5.77221C197.346 2.58431\n            194.762 0 191.574 0V0C188.386 0 185.802 2.58431 185.802 5.77221V118.228ZM220.435\n            118.228C220.435 121.416 217.851 124 214.663 124V124C211.475 124 208.891 121.416 208.891\n            118.228V5.77221C208.891 2.58431 211.475 0 214.663 0V0C217.851 0 220.435 2.58431 220.435\n            5.77221V118.228ZM231.979 118.228C231.979 121.416 234.564 124 237.752 124V124C240.94 124\n            243.524 121.416 243.524 118.228V5.77237C243.524 2.58438 240.94 0 237.752 0V0C234.564 0\n            231.979 2.58438 231.979 5.77237V118.228ZM266.613 118.228C266.613 121.416 264.029 124\n            260.841 124V124C257.653 124 255.069 121.416 255.069 118.228V5.77222C255.069 2.58431\n            257.653 0 260.841 0V0C264.029 0 266.613 2.58431 266.613 5.77222V62V118.228ZM278.158\n            118.228C278.158 121.416 280.742 124 283.93 124V124C287.118 124 289.702 121.416 289.702\n            118.228V5.77237C289.702 2.58438 287.118 0 283.93 0V0C280.742 0 278.158 2.58438 278.158\n            5.77237V118.228ZM312.791 118.228C312.791 121.416 310.207 124 307.019 124V124C303.831 124\n            301.247 121.416 301.247 118.228V5.77219C301.247 2.5843 303.831 0 307.019 0V0C310.207 0\n            312.791 2.5843 312.791 5.77219V118.228ZM324.336 118.228C324.336 121.416 326.92 124\n            330.108 124V124C333.296 124 335.88 121.416 335.88 118.228V5.7722C335.88 2.5843 333.296 0\n            330.108 0V0C326.92 0 324.336 2.58431 324.336 5.7722V118.228ZM358.97 118.228C358.97\n            121.416 356.385 124 353.197 124V124C350.009 124 347.425 121.416 347.425\n            118.228V5.77237C347.425 2.58438 350.009 0 353.197 0V0C356.385 0 358.97 2.58438 358.97\n            5.77237V118.228ZM370.514 118.228C370.514 121.416 373.098 124 376.286 124V124C379.474 124\n            382.059 121.416 382.059 118.228V5.7722C382.059 2.5843 379.474 0 376.286 0V0C373.098 0\n            370.514 2.58431 370.514 5.7722V118.228ZM405.148 118.228C405.148 121.416 402.564 124\n            399.376 124V124C396.188 124 393.603 121.416 393.603 118.228V5.77237C393.603 2.58438\n            396.188 0 399.376 0V0C402.564 0 405.148 2.58438 405.148 5.77237V118.228ZM416.692\n            118.228C416.692 121.416 419.277 124 422.465 124V124C425.653 124 428.237 121.416 428.237\n            118.228V5.77219C428.237 2.5843 425.653 0 422.465 0V0C419.277 0 416.692 2.5843 416.692\n            5.77219V118.228ZM451.326 118.228C451.326 121.416 448.742 124 445.554 124V124C442.366 124\n            439.781 121.416 439.781 118.228V5.77237C439.781 2.58438 442.366 0 445.554 0V0C448.742 0\n            451.326 2.58438 451.326 5.77237V118.228ZM1.08862 5.77218C1.08862 2.58429 3.67292 0\n            6.8608 0V0C10.0487 0 12.633 2.5843 12.633 5.77218V118.228C12.633 121.416 10.0487 124\n            6.8608 124V124C3.67292 124 1.08862 121.416 1.08862 118.228V5.77218Z"}" fill="${"#E0294A"}"></path><mask id="${"mask" + escape(id)}" mask-type="${"alpha"}" maskUnits="${"userSpaceOnUse"}" x="${"0"}" y="${"0"}" width="${"100%"}" height="${"100%"}"><rect${add_attribute("width", prcvstr, 0)} height="${"124"}" fill="${"white"}"></rect></mask><g mask="${"url(#mask" + escape(id) + ")"}"><path fill-rule="${"evenodd"}" clip-rule="${"evenodd"}" d="${"M35.7223 5.77236C35.7223 2.58438 33.1379 0 29.9499 0V0C26.7619 0 24.1775 2.58437\n                24.1775 5.77236V118.228C24.1775 121.416 26.7619 124 29.9499 124V124C33.1379 124\n                35.7223 121.416 35.7223 118.228V5.77236ZM53.039 0C49.8511 0 47.2668 2.58431 47.2668\n                5.77221V118.228C47.2668 121.416 49.8511 124 53.039 124V124C56.2269 124 58.8112\n                121.416 58.8112 118.228V5.77221C58.8112 2.5843 56.2269 0 53.039 0V0ZM81.9005\n                118.228C81.9005 121.416 79.3161 124 76.1281 124V124C72.9401 124 70.3558 121.416\n                70.3558 118.228V5.77236C70.3558 2.58438 72.9401 0 76.1281 0V0C79.3161 0 81.9005\n                2.58437 81.9005 5.77236V118.228ZM93.4451 118.228C93.4451 121.416 96.0294 124 99.2173\n                124V124C102.405 124 104.989 121.416 104.989 118.228V5.7722C104.989 2.5843 102.405 0\n                99.2173 0V0C96.0294 0 93.4451 2.5843 93.4451 5.7722V118.228ZM128.079 118.228C128.079\n                121.416 125.494 124 122.306 124V124C119.118 124 116.534 121.416 116.534\n                118.228V5.77236C116.534 2.58438 119.118 0 122.306 0V0C125.494 0 128.079 2.58437\n                128.079 5.77236V118.228ZM139.623 118.228C139.623 121.416 142.208 124 145.396\n                124V124C148.583 124 151.168 121.416 151.168 118.228V5.77221C151.168 2.58431 148.583\n                0 145.396 0V0C142.208 0 139.623 2.58431 139.623 5.77221V118.228ZM174.257\n                118.228C174.257 121.416 171.673 124 168.485 124V124C165.297 124 162.712 121.416\n                162.712 118.228V5.77237C162.712 2.58438 165.297 0 168.485 0V0C171.673 0 174.257\n                2.58438 174.257 5.77237V118.228ZM185.802 118.228C185.802 121.416 188.386 124 191.574\n                124V124C194.762 124 197.346 121.416 197.346 118.228V5.77221C197.346 2.58431 194.762\n                0 191.574 0V0C188.386 0 185.802 2.58431 185.802 5.77221V118.228ZM220.435\n                118.228C220.435 121.416 217.851 124 214.663 124V124C211.475 124 208.891 121.416\n                208.891 118.228V5.77221C208.891 2.58431 211.475 0 214.663 0V0C217.851 0 220.435\n                2.58431 220.435 5.77221V118.228ZM231.979 118.228C231.979 121.416 234.564 124 237.752\n                124V124C240.94 124 243.524 121.416 243.524 118.228V5.77237C243.524 2.58438 240.94 0\n                237.752 0V0C234.564 0 231.979 2.58438 231.979 5.77237V118.228ZM266.613\n                118.228C266.613 121.416 264.029 124 260.841 124V124C257.653 124 255.069 121.416\n                255.069 118.228V5.77222C255.069 2.58431 257.653 0 260.841 0V0C264.029 0 266.613\n                2.58432 266.613 5.77223V118.228ZM278.158 118.228C278.158 121.416 280.742 124 283.93\n                124V124C287.118 124 289.702 121.416 289.702 118.228V5.77237C289.702 2.58438 287.118\n                0 283.93 0V0C280.742 0 278.158 2.58438 278.158 5.77237V118.228ZM312.791\n                118.228C312.791 121.416 310.207 124 307.019 124V124C303.831 124 301.247 121.416\n                301.247 118.228V5.77219C301.247 2.5843 303.831 0 307.019 0V0C310.207 0 312.791\n                2.5843 312.791 5.77219V118.228ZM324.336 118.228C324.336 121.416 326.92 124 330.108\n                124V124C333.296 124 335.88 121.416 335.88 118.228V5.7722C335.88 2.5843 333.296 0\n                330.108 0V0C326.92 0 324.336 2.58431 324.336 5.7722V118.228ZM358.97 118.228C358.97\n                121.416 356.385 124 353.197 124V124C350.009 124 347.425 121.416 347.425\n                118.228V5.77237C347.425 2.58438 350.009 0 353.197 0V0C356.385 0 358.97 2.58438\n                358.97 5.77237V118.228ZM370.514 118.228C370.514 121.416 373.098 124 376.286\n                124V124C379.474 124 382.059 121.416 382.059 118.228V5.7722C382.059 2.5843 379.474 0\n                376.286 0V0C373.098 0 370.514 2.58431 370.514 5.7722V118.228ZM405.148\n                118.228C405.148 121.416 402.564 124 399.376 124V124C396.188 124 393.603 121.416\n                393.603 118.228V5.77237C393.603 2.58438 396.188 0 399.376 0V0C402.564 0 405.148\n                2.58438 405.148 5.77237V118.228ZM416.692 118.228C416.692 121.416 419.277 124 422.465\n                124V124C425.653 124 428.237 121.416 428.237 118.228V5.77219C428.237 2.5843 425.653 0\n                422.465 0V0C419.277 0 416.692 2.5843 416.692 5.77219V118.228ZM451.326\n                118.228C451.326 121.416 448.742 124 445.554 124V124C442.366 124 439.781 121.416\n                439.781 118.228V5.77237C439.781 2.58438 442.366 0 445.554 0V0C448.742 0 451.326\n                2.58438 451.326 5.77237V118.228ZM1.08862 5.77218C1.08862 2.58429 3.67292 0 6.8608\n                0V0C10.0487 0 12.633 2.5843 12.633 5.77218V118.228C12.633 121.416 10.0487 124 6.8608\n                124V124C3.67292 124 1.08862 121.416 1.08862 118.228V5.77218Z"}" fill="${"#02C076"}"></path></g></svg></main>`;
+	return `<main class="svelte-m6qgj6"><svg width="100%" height="100%" viewBox="0 0 452 124" fill="none" xmlns="http://www.w3.org/2000/svg" style="${"filter: grayscale(" + escape(opacity, true) + ")"}"><path fill-rule="evenodd" clip-rule="evenodd" d="M35.7223 5.77236C35.7223 2.58438 33.1379 0 29.9499 0V0C26.7619 0 24.1775 2.58437
+            24.1775 5.77236V118.228C24.1775 121.416 26.7619 124 29.9499 124V124C33.1379 124 35.7223
+            121.416 35.7223 118.228V5.77236ZM53.039 0C49.8511 0 47.2668 2.58431 47.2668
+            5.77221V118.228C47.2668 121.416 49.8511 124 53.039 124V124C56.2269 124 58.8112 121.416
+            58.8112 118.228V5.77221C58.8112 2.5843 56.2269 0 53.039 0V0ZM81.9005 118.228C81.9005
+            121.416 79.3161 124 76.1281 124V124C72.9401 124 70.3558 121.416 70.3558
+            118.228V5.77236C70.3558 2.58438 72.9401 0 76.1281 0V0C79.3161 0 81.9005 2.58437 81.9005
+            5.77236V118.228ZM93.4451 118.228C93.4451 121.416 96.0294 124 99.2173 124V124C102.405 124
+            104.989 121.416 104.989 118.228V5.7722C104.989 2.5843 102.405 0 99.2173 0V0C96.0294 0
+            93.4451 2.5843 93.4451 5.7722V118.228ZM128.079 118.228C128.079 121.416 125.494 124
+            122.306 124V124C119.118 124 116.534 121.416 116.534 118.228V5.77236C116.534 2.58438
+            119.118 0 122.306 0V0C125.494 0 128.079 2.58437 128.079 5.77236V118.228ZM139.623
+            118.228C139.623 121.416 142.208 124 145.396 124V124C148.583 124 151.168 121.416 151.168
+            118.228V5.77221C151.168 2.58431 148.583 0 145.396 0V0C142.208 0 139.623 2.58431 139.623
+            5.77221V118.228ZM174.257 118.228C174.257 121.416 171.673 124 168.485 124V124C165.297 124
+            162.712 121.416 162.712 118.228V5.77237C162.712 2.58438 165.297 0 168.485 0V0C171.673 0
+            174.257 2.58438 174.257 5.77237V118.228ZM185.802 118.228C185.802 121.416 188.386 124
+            191.574 124V124C194.762 124 197.346 121.416 197.346 118.228V5.77221C197.346 2.58431
+            194.762 0 191.574 0V0C188.386 0 185.802 2.58431 185.802 5.77221V118.228ZM220.435
+            118.228C220.435 121.416 217.851 124 214.663 124V124C211.475 124 208.891 121.416 208.891
+            118.228V5.77221C208.891 2.58431 211.475 0 214.663 0V0C217.851 0 220.435 2.58431 220.435
+            5.77221V118.228ZM231.979 118.228C231.979 121.416 234.564 124 237.752 124V124C240.94 124
+            243.524 121.416 243.524 118.228V5.77237C243.524 2.58438 240.94 0 237.752 0V0C234.564 0
+            231.979 2.58438 231.979 5.77237V118.228ZM266.613 118.228C266.613 121.416 264.029 124
+            260.841 124V124C257.653 124 255.069 121.416 255.069 118.228V5.77222C255.069 2.58431
+            257.653 0 260.841 0V0C264.029 0 266.613 2.58431 266.613 5.77222V62V118.228ZM278.158
+            118.228C278.158 121.416 280.742 124 283.93 124V124C287.118 124 289.702 121.416 289.702
+            118.228V5.77237C289.702 2.58438 287.118 0 283.93 0V0C280.742 0 278.158 2.58438 278.158
+            5.77237V118.228ZM312.791 118.228C312.791 121.416 310.207 124 307.019 124V124C303.831 124
+            301.247 121.416 301.247 118.228V5.77219C301.247 2.5843 303.831 0 307.019 0V0C310.207 0
+            312.791 2.5843 312.791 5.77219V118.228ZM324.336 118.228C324.336 121.416 326.92 124
+            330.108 124V124C333.296 124 335.88 121.416 335.88 118.228V5.7722C335.88 2.5843 333.296 0
+            330.108 0V0C326.92 0 324.336 2.58431 324.336 5.7722V118.228ZM358.97 118.228C358.97
+            121.416 356.385 124 353.197 124V124C350.009 124 347.425 121.416 347.425
+            118.228V5.77237C347.425 2.58438 350.009 0 353.197 0V0C356.385 0 358.97 2.58438 358.97
+            5.77237V118.228ZM370.514 118.228C370.514 121.416 373.098 124 376.286 124V124C379.474 124
+            382.059 121.416 382.059 118.228V5.7722C382.059 2.5843 379.474 0 376.286 0V0C373.098 0
+            370.514 2.58431 370.514 5.7722V118.228ZM405.148 118.228C405.148 121.416 402.564 124
+            399.376 124V124C396.188 124 393.603 121.416 393.603 118.228V5.77237C393.603 2.58438
+            396.188 0 399.376 0V0C402.564 0 405.148 2.58438 405.148 5.77237V118.228ZM416.692
+            118.228C416.692 121.416 419.277 124 422.465 124V124C425.653 124 428.237 121.416 428.237
+            118.228V5.77219C428.237 2.5843 425.653 0 422.465 0V0C419.277 0 416.692 2.5843 416.692
+            5.77219V118.228ZM451.326 118.228C451.326 121.416 448.742 124 445.554 124V124C442.366 124
+            439.781 121.416 439.781 118.228V5.77237C439.781 2.58438 442.366 0 445.554 0V0C448.742 0
+            451.326 2.58438 451.326 5.77237V118.228ZM1.08862 5.77218C1.08862 2.58429 3.67292 0
+            6.8608 0V0C10.0487 0 12.633 2.5843 12.633 5.77218V118.228C12.633 121.416 10.0487 124
+            6.8608 124V124C3.67292 124 1.08862 121.416 1.08862 118.228V5.77218Z" fill="#E0294A"></path><mask id="${"mask" + escape(id, true)}" mask-type="alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="100%" height="100%"><rect${add_attribute("width", prcvstr, 0)} height="124" fill="white"></rect></mask><g mask="${"url(#mask" + escape(id, true) + ")"}"><path fill-rule="evenodd" clip-rule="evenodd" d="M35.7223 5.77236C35.7223 2.58438 33.1379 0 29.9499 0V0C26.7619 0 24.1775 2.58437
+                24.1775 5.77236V118.228C24.1775 121.416 26.7619 124 29.9499 124V124C33.1379 124
+                35.7223 121.416 35.7223 118.228V5.77236ZM53.039 0C49.8511 0 47.2668 2.58431 47.2668
+                5.77221V118.228C47.2668 121.416 49.8511 124 53.039 124V124C56.2269 124 58.8112
+                121.416 58.8112 118.228V5.77221C58.8112 2.5843 56.2269 0 53.039 0V0ZM81.9005
+                118.228C81.9005 121.416 79.3161 124 76.1281 124V124C72.9401 124 70.3558 121.416
+                70.3558 118.228V5.77236C70.3558 2.58438 72.9401 0 76.1281 0V0C79.3161 0 81.9005
+                2.58437 81.9005 5.77236V118.228ZM93.4451 118.228C93.4451 121.416 96.0294 124 99.2173
+                124V124C102.405 124 104.989 121.416 104.989 118.228V5.7722C104.989 2.5843 102.405 0
+                99.2173 0V0C96.0294 0 93.4451 2.5843 93.4451 5.7722V118.228ZM128.079 118.228C128.079
+                121.416 125.494 124 122.306 124V124C119.118 124 116.534 121.416 116.534
+                118.228V5.77236C116.534 2.58438 119.118 0 122.306 0V0C125.494 0 128.079 2.58437
+                128.079 5.77236V118.228ZM139.623 118.228C139.623 121.416 142.208 124 145.396
+                124V124C148.583 124 151.168 121.416 151.168 118.228V5.77221C151.168 2.58431 148.583
+                0 145.396 0V0C142.208 0 139.623 2.58431 139.623 5.77221V118.228ZM174.257
+                118.228C174.257 121.416 171.673 124 168.485 124V124C165.297 124 162.712 121.416
+                162.712 118.228V5.77237C162.712 2.58438 165.297 0 168.485 0V0C171.673 0 174.257
+                2.58438 174.257 5.77237V118.228ZM185.802 118.228C185.802 121.416 188.386 124 191.574
+                124V124C194.762 124 197.346 121.416 197.346 118.228V5.77221C197.346 2.58431 194.762
+                0 191.574 0V0C188.386 0 185.802 2.58431 185.802 5.77221V118.228ZM220.435
+                118.228C220.435 121.416 217.851 124 214.663 124V124C211.475 124 208.891 121.416
+                208.891 118.228V5.77221C208.891 2.58431 211.475 0 214.663 0V0C217.851 0 220.435
+                2.58431 220.435 5.77221V118.228ZM231.979 118.228C231.979 121.416 234.564 124 237.752
+                124V124C240.94 124 243.524 121.416 243.524 118.228V5.77237C243.524 2.58438 240.94 0
+                237.752 0V0C234.564 0 231.979 2.58438 231.979 5.77237V118.228ZM266.613
+                118.228C266.613 121.416 264.029 124 260.841 124V124C257.653 124 255.069 121.416
+                255.069 118.228V5.77222C255.069 2.58431 257.653 0 260.841 0V0C264.029 0 266.613
+                2.58432 266.613 5.77223V118.228ZM278.158 118.228C278.158 121.416 280.742 124 283.93
+                124V124C287.118 124 289.702 121.416 289.702 118.228V5.77237C289.702 2.58438 287.118
+                0 283.93 0V0C280.742 0 278.158 2.58438 278.158 5.77237V118.228ZM312.791
+                118.228C312.791 121.416 310.207 124 307.019 124V124C303.831 124 301.247 121.416
+                301.247 118.228V5.77219C301.247 2.5843 303.831 0 307.019 0V0C310.207 0 312.791
+                2.5843 312.791 5.77219V118.228ZM324.336 118.228C324.336 121.416 326.92 124 330.108
+                124V124C333.296 124 335.88 121.416 335.88 118.228V5.7722C335.88 2.5843 333.296 0
+                330.108 0V0C326.92 0 324.336 2.58431 324.336 5.7722V118.228ZM358.97 118.228C358.97
+                121.416 356.385 124 353.197 124V124C350.009 124 347.425 121.416 347.425
+                118.228V5.77237C347.425 2.58438 350.009 0 353.197 0V0C356.385 0 358.97 2.58438
+                358.97 5.77237V118.228ZM370.514 118.228C370.514 121.416 373.098 124 376.286
+                124V124C379.474 124 382.059 121.416 382.059 118.228V5.7722C382.059 2.5843 379.474 0
+                376.286 0V0C373.098 0 370.514 2.58431 370.514 5.7722V118.228ZM405.148
+                118.228C405.148 121.416 402.564 124 399.376 124V124C396.188 124 393.603 121.416
+                393.603 118.228V5.77237C393.603 2.58438 396.188 0 399.376 0V0C402.564 0 405.148
+                2.58438 405.148 5.77237V118.228ZM416.692 118.228C416.692 121.416 419.277 124 422.465
+                124V124C425.653 124 428.237 121.416 428.237 118.228V5.77219C428.237 2.5843 425.653 0
+                422.465 0V0C419.277 0 416.692 2.5843 416.692 5.77219V118.228ZM451.326
+                118.228C451.326 121.416 448.742 124 445.554 124V124C442.366 124 439.781 121.416
+                439.781 118.228V5.77237C439.781 2.58438 442.366 0 445.554 0V0C448.742 0 451.326
+                2.58438 451.326 5.77237V118.228ZM1.08862 5.77218C1.08862 2.58429 3.67292 0 6.8608
+                0V0C10.0487 0 12.633 2.5843 12.633 5.77218V118.228C12.633 121.416 10.0487 124 6.8608
+                124V124C3.67292 124 1.08862 121.416 1.08862 118.228V5.77218Z" fill="#02C076"></path></g></svg></main>`;
 });
 
-/* src/components/BotsList.svelte generated by Svelte v3.24.0 */
+/* src/components/BotsList.svelte generated by Svelte v3.59.2 */
 
 const css$6 = {
 	code: ".divhr.svelte-upqpsm{display:flex;width:400px;height:10px;margin-left:auto;margin-right:auto}.balancehead.svelte-upqpsm{padding-top:28px}.rowbalanceitem.svelte-upqpsm{padding-left:10px;text-align:center;line-height:30px}.centereditem.svelte-upqpsm{text-align:center;min-width:23%;border:0px solid}.addknob.svelte-upqpsm{display:flex;justify-content:center;margin-right:10px;margin-left:10px;margin-top:10px}main.svelte-upqpsm{text-align:center}.botslist.svelte-upqpsm{width:100%;display:grid;grid-template-columns:repeat(1, 1fr);grid-gap:1px;grid-template-rows:auto 1fr;margin:0px;padding:0px}.botitem.svelte-upqpsm{display:flex;width:400px;margin-left:auto;margin-right:auto;justify-content:space-between}.textitem.svelte-upqpsm{display:flex;width:400px;margin-left:auto;margin-right:auto;justify-content:space-between}.leftitem.svelte-upqpsm{border:0px solid;text-align:left;max-width:30%}.rightitem.svelte-upqpsm{border:0px solid;text-align:right;width:40px;display:flex;flex-grow:1;align-items:center}.botitem.svelte-upqpsm:hover{background-color:rgba(255, 228, 196, 0.342)}@media(min-width: 640px){main.svelte-upqpsm{max-width:none}}",
-	map: "{\"version\":3,\"file\":\"BotsList.svelte\",\"sources\":[\"BotsList.svelte\"],\"sourcesContent\":[\"<script>\\n  import { stateStore } from \\\"../stores/statebot.js\\\";\\n  import { onMount } from \\\"svelte\\\";\\n\\n  import Switch from \\\"smelte/src/components/Switch\\\";\\n  //import \\\"smelte/src/tailwind.css\\\";\\n  import NewBot from \\\"./NewBot.svelte\\\";\\n  //import BotStatus from './BotStatus.svelte';\\n\\n  export let comission;\\n  export let show;\\n\\n\\n  import Button from \\\"smelte/src/components/Button\\\";\\n  import { authStore } from \\\"../stores/auth\\\";\\n  //import { request } from 'graphql-request';\\n\\n  import IndLoad from \\\"./IndLoad.svelte\\\";\\n\\n  let urlhost = $stateStore.urlhost;\\n  let urlhostenv = $stateStore.urlhostenv;\\n  console.log(\\\"urlhostenv \\\" + urlhostenv);\\n\\n  let bots = [];\\n  let urlbotslist = urlhost + \\\"botslist\\\";\\n  let leadsurl = urlhost + \\\"leads\\\";\\n  let newbot = urlhost + \\\"api/newbot.php\\\";\\n  let api_bots = urlbotslist;\\n\\n  let selectbot;\\n  let leadsdata;\\n  let kolvoleads;\\n  let sumleads;\\n  let srleads;\\n  /////routes\\n  let routIsBotList = true;\\n  let routIsBot = false;\\n  let routIsNewBot = false;\\n\\n  function routBotList() {\\n    $stateStore.rout = \\\"botlist\\\";\\n\\n    $stateStore.selectbotname = \\\"\\\";\\n    routIsBotList = true;\\n    routIsBot = false;\\n    routIsNewBot = false;\\n  }\\n  function routNewBot() {\\n    $stateStore.rout = \\\"newbot\\\";\\n    clearInterval($stateStore.timerIdlist);\\n    //ym(65948110, 'reachGoal', 'begin-createbot');\\n    routIsBotList = false;\\n    routIsBot = false;\\n    routIsNewBot = true;\\n  }\\n  /////end routes\\n  function ismybot(value) {\\n    return value[8] === $authStore.user.uid;\\n  }\\n  onMount(async () => {\\n    const res = await fetch(api_bots, {\\n      headers: {\\n        Accept: \\\"application/json\\\",\\n        \\\"Content-Type\\\": \\\"application/json\\\",\\n        \\\"Access-Control-Allow-Origin\\\": \\\"*\\\",\\n        \\\"Access-Control-Allow-Headers\\\": \\\"*\\\"\\n      },\\n      method: \\\"get\\\",\\n    })\\n      .then((res) => res.json())\\n      .then((json) => {\\n        if ($authStore.user.uid != \\\"d3fmoh2rVoVNgIcpLTFZBE0jHnI2\\\"){\\n          bots = json.filter(ismybot);\\n        } else {\\n          bots = json;\\n        }\\n        \\n        if (bots == null) {\\n          bots = [];\\n        }\\n        //console.log(json);\\n        console.log(bots);\\n        //console.log(\\\"s_a_hip: \\\" + process.env.SAPPER_APP_HOSTIP);\\n      });\\n\\n    const leads = await fetch(leadsurl, {\\n      headers: {\\n        Accept: \\\"application/json\\\",\\n        \\\"Content-Type\\\": \\\"application/json\\\",\\n        \\\"Access-Control-Allow-Origin\\\": \\\"*\\\",\\n        \\\"Access-Control-Allow-Headers\\\": \\\"*\\\"\\n      },\\n      method: \\\"get\\\",\\n    })\\n      .then((leads) => leads.json())\\n      .then((json) => {\\n        kolvoleads = json.count;\\n        sumleads = json.sum;\\n        srleads = json.sr;\\n      });\\n  });\\n  $:srleads = srleads;\\n\\n  async function fetch1s() {\\n    const res = await fetch(urlbotslist);\\n    bots = (await res.json()).filter(ismybot);\\n  }\\n  function entryBot(botid) {\\n    //console.log(botid);\\n\\n    clearInterval($stateStore.timerIdlist);\\n    selectbot = botid;\\n    $stateStore.selectbotid = botid;\\n    $stateStore.selectbotname = botid;\\n    localStorage.selectbot = botid;\\n    $stateStore.rout = \\\"bot\\\";\\n\\n    //window.location = \\\"/bot?selectbot=\\\"+selectbot;\\n  }\\n  function profitsumproctodaycalc(arr) {\\n    let sum = 0;\\n    arr.forEach((element) => {\\n      sum = sum + element[5];\\n    });\\n    return sum;\\n  }\\n  function profitsumproccalc(arr) {\\n    let sum = 0;\\n    arr.forEach((element) => {\\n      sum = sum + element[3];\\n    });\\n    return sum;\\n  }\\n  function startbalancescalc(arr) {\\n    let sum = 0;\\n    arr.forEach((element) => {\\n      sum = sum + element[6];\\n    });\\n    return sum;\\n  }\\n  function balancescalc(arr) {\\n    let sum = 0;\\n    arr.forEach((element) => {\\n      sum = sum + element[7];\\n    });\\n    return sum;\\n  }\\n  function vlozhcalc(arr) {\\n    let sum = 0;\\n    arr.forEach((element) => {\\n      sum = sum + element[10];\\n    });\\n    return sum;\\n  }\\n\\n  let selectbotname;\\n  $: pkg = {\\n    urlhost: urlhost,\\n    comission: comission,\\n    urlhost: urlhost,\\n    selectbotname: selectbotname,\\n    routIsBotList: routIsBotList,\\n  };\\n  //$: if (selectbot) {\\n  //    selectbotname = bots.botname;\\n  //}\\n  $: profitsumproctoday = profitsumproctodaycalc(bots).toFixed(2);\\n  $: profitsumproc = profitsumproccalc(bots).toFixed(2);\\n  $: startbalances = startbalancescalc(bots).toFixed(2);\\n  $: balances = balancescalc(bots).toFixed(2);\\n  $: sumprocvlozh = (vlozhcalc(bots) / startbalancescalc(bots)) * 100;\\n\\n  $stateStore.timerIdlist = setInterval(fetch1s, 2000);\\n\\n  $: show = $stateStore.showmenu;\\n  $: selectbotname = $stateStore.selectbotname;\\n  $: urlhost = $stateStore.urlhost;\\n\\n  clearInterval($stateStore.timerId);\\n  routBotList();\\n  //console.log($authStore.user);\\n</script>\\n\\n<main>\\n\\n  <div class=\\\"textitem px-2 py-3\\\">\\n    <div class=\\\"rowbalanceitem balancehead\\\">\\n      <label>Бbaланс</label>\\n\\n    </div>\\n    <div class=\\\"rowbalanceitem\\\">\\n      <label>Старт</label>\\n      <br />\\n      <span\\n        class=\\\"border-solid border-2 border-gray-200 bg-gray-200 rounded-full\\n        px-3 py-1 text-sm font-semibold text-gray-700\\\"\\n      >\\n        {startbalances}\\n      </span>\\n    </div>\\n    <div class=\\\"rowbalanceitem\\\">\\n      <label>Сегодня</label>\\n      <br />\\n      <span\\n        class=\\\"border-solid border-2 border-gray-200 bg-gray-200 rounded-full\\n        px-3 py-1 text-sm font-semibold text-gray-700\\\"\\n      >\\n        {balances}\\n      </span>\\n    </div>\\n    <div class=\\\"rowbalanceitem\\\">\\n      <label>Cальдо</label>\\n      <br />\\n      <span\\n        class=\\\"border-solid border-2 border-gray-600 rounded-full px-3 py-1\\n        text-sm font-semibold text-gray-700 dark:text-primary-700\\\"\\n      >\\n        {(balances - startbalances).toFixed(2)}\\n      </span>\\n    </div>\\n  </div>\\n  <div class=\\\"textitem px-2 py-3\\\">\\n    <div class=\\\"rowbalanceitem balancehead\\\">\\n      <label>Сделки</label>\\n\\n    </div>\\n    <div class=\\\"rowbalanceitem\\\">\\n      <label>Кол-во</label>\\n      <br />\\n      <span\\n        class=\\\"border-solid border-2 border-gray-200 bg-gray-200 rounded-full\\n        px-3 py-1 text-sm font-semibold text-gray-700\\\"\\n      >\\n        {kolvoleads}\\n      </span>\\n    </div>\\n    <div class=\\\"rowbalanceitem\\\">\\n      <label>Сумма</label>\\n      <br />\\n      <span\\n        class=\\\"border-solid border-2 border-gray-200 bg-gray-200 rounded-full\\n        px-3 py-1 text-sm font-semibold text-gray-700\\\"\\n      >\\n        {sumleads}\\n      </span>\\n    </div>\\n    <div class=\\\"rowbalanceitem\\\">\\n      <label>Среднее</label>\\n      <br />\\n      <span\\n        class=\\\"border-solid border-2 border-gray-200 bg-gray-200 rounded-full\\n        px-3 py-1 text-sm font-semibold text-gray-700\\\"\\n      >\\n        {srleads}\\n      </span>\\n    </div>\\n  </div>\\n\\n  <div class=\\\"textitem p-2\\\">\\n    <div class=\\\"leftitem\\\">Прибыль / просадка</div>\\n    &nbsp;&nbsp;\\n    <div class=\\\"centereditem\\\">\\n      Итог\\n      <br />\\n      {profitsumproc} %\\n    </div>\\n    <div class=\\\"centereditem\\\">\\n      Сегодня\\n      <br />\\n      {profitsumproctoday} %\\n    </div>\\n    <div class=\\\"rightitem\\\">\\n      <IndLoad procvlozh={sumprocvlozh} id=\\\"sumprocvlozh\\\" />\\n\\n    </div>\\n  </div>\\n  <div class=\\\"divhr\\\">\\n    <hr width=\\\"400px\\\" />\\n  </div>\\n\\n  <div class=\\\"botslist\\\">\\n\\n    {#each Object.entries(bots) as [id, data]}\\n      <a class=\\\"botitem p-2\\\" href=\\\"botstatuspage\\\" on:click={entryBot(data[1])}>\\n        <div class=\\\"leftitem\\\">{data[1]}</div>\\n\\n        <div class=\\\"centereditem\\\">\\n          <span>{data[2]}</span>\\n          <br />\\n          <span>({data[3]} %)</span>\\n          <br />\\n        </div>\\n        <div class=\\\"centereditem\\\">\\n          <span>{data[4]}</span>\\n          <br />\\n          <span>({data[5]} %)</span>\\n          <br />\\n        </div>\\n        <div class=\\\"rightitem\\\">\\n\\n          <IndLoad procvlozh={data[9]} {id} onoff={data[0]} />\\n\\n        </div>\\n\\n      </a>\\n    {:else}\\n      <!-- этот блок отрисовывается, пока photos.length === 0 -->\\n      <p>Ни одного бота не создано</p>\\n    {/each}\\n  </div>\\n  <div class=\\\"addknob\\\">\\n    <Button href=\\\"newbot\\\" light outlined on:click={routNewBot}>\\n      &nbsp;Новый бот&nbsp;\\n    </Button>\\n  </div>\\n\\n</main>\\n\\n<style>\\n  .divhr {\\n    display: flex;\\n    width: 400px;\\n    height: 10px;\\n    margin-left: auto;\\n    margin-right: auto;\\n  }\\n  .balancehead {\\n    padding-top: 28px;\\n  }\\n  .rowbalanceitem {\\n    padding-left: 10px;\\n    text-align: center;\\n    line-height: 30px;\\n  }\\n  .centereditem {\\n    text-align: center;\\n    min-width: 23%;\\n    border: 0px solid;\\n  }\\n  .addknob {\\n    display: flex;\\n    justify-content: center;\\n    margin-right: 10px;\\n    margin-left: 10px;\\n    margin-top: 10px;\\n  }\\n  main {\\n    text-align: center;\\n  }\\n  .botslist {\\n    width: 100%;\\n    display: grid;\\n    grid-template-columns: repeat(1, 1fr);\\n    grid-gap: 1px;\\n    grid-template-rows: auto 1fr;\\n    margin: 0px;\\n    padding: 0px;\\n  }\\n  .botitem {\\n    display: flex;\\n    width: 400px;\\n    margin-left: auto;\\n    margin-right: auto;\\n    justify-content: space-between;\\n  }\\n  .textitem {\\n    display: flex;\\n    width: 400px;\\n    margin-left: auto;\\n    margin-right: auto;\\n    justify-content: space-between;\\n  }\\n  .leftitem {\\n    border: 0px solid;\\n    text-align: left;\\n    max-width: 30%;\\n  }\\n  .rightitem {\\n    border: 0px solid;\\n    text-align: right;\\n    width: 40px;\\n    display: flex;\\n    flex-grow: 1;\\n    align-items: center;\\n  }\\n  .botitem:hover {\\n    background-color: rgba(255, 228, 196, 0.342);\\n  }\\n  @media (min-width: 640px) {\\n    main {\\n      max-width: none;\\n    }\\n  }\\n</style>\\n\"],\"names\":[],\"mappings\":\"AA+TE,MAAM,cAAC,CAAC,AACN,OAAO,CAAE,IAAI,CACb,KAAK,CAAE,KAAK,CACZ,MAAM,CAAE,IAAI,CACZ,WAAW,CAAE,IAAI,CACjB,YAAY,CAAE,IAAI,AACpB,CAAC,AACD,YAAY,cAAC,CAAC,AACZ,WAAW,CAAE,IAAI,AACnB,CAAC,AACD,eAAe,cAAC,CAAC,AACf,YAAY,CAAE,IAAI,CAClB,UAAU,CAAE,MAAM,CAClB,WAAW,CAAE,IAAI,AACnB,CAAC,AACD,aAAa,cAAC,CAAC,AACb,UAAU,CAAE,MAAM,CAClB,SAAS,CAAE,GAAG,CACd,MAAM,CAAE,GAAG,CAAC,KAAK,AACnB,CAAC,AACD,QAAQ,cAAC,CAAC,AACR,OAAO,CAAE,IAAI,CACb,eAAe,CAAE,MAAM,CACvB,YAAY,CAAE,IAAI,CAClB,WAAW,CAAE,IAAI,CACjB,UAAU,CAAE,IAAI,AAClB,CAAC,AACD,IAAI,cAAC,CAAC,AACJ,UAAU,CAAE,MAAM,AACpB,CAAC,AACD,SAAS,cAAC,CAAC,AACT,KAAK,CAAE,IAAI,CACX,OAAO,CAAE,IAAI,CACb,qBAAqB,CAAE,OAAO,CAAC,CAAC,CAAC,GAAG,CAAC,CACrC,QAAQ,CAAE,GAAG,CACb,kBAAkB,CAAE,IAAI,CAAC,GAAG,CAC5B,MAAM,CAAE,GAAG,CACX,OAAO,CAAE,GAAG,AACd,CAAC,AACD,QAAQ,cAAC,CAAC,AACR,OAAO,CAAE,IAAI,CACb,KAAK,CAAE,KAAK,CACZ,WAAW,CAAE,IAAI,CACjB,YAAY,CAAE,IAAI,CAClB,eAAe,CAAE,aAAa,AAChC,CAAC,AACD,SAAS,cAAC,CAAC,AACT,OAAO,CAAE,IAAI,CACb,KAAK,CAAE,KAAK,CACZ,WAAW,CAAE,IAAI,CACjB,YAAY,CAAE,IAAI,CAClB,eAAe,CAAE,aAAa,AAChC,CAAC,AACD,SAAS,cAAC,CAAC,AACT,MAAM,CAAE,GAAG,CAAC,KAAK,CACjB,UAAU,CAAE,IAAI,CAChB,SAAS,CAAE,GAAG,AAChB,CAAC,AACD,UAAU,cAAC,CAAC,AACV,MAAM,CAAE,GAAG,CAAC,KAAK,CACjB,UAAU,CAAE,KAAK,CACjB,KAAK,CAAE,IAAI,CACX,OAAO,CAAE,IAAI,CACb,SAAS,CAAE,CAAC,CACZ,WAAW,CAAE,MAAM,AACrB,CAAC,AACD,sBAAQ,MAAM,AAAC,CAAC,AACd,gBAAgB,CAAE,KAAK,GAAG,CAAC,CAAC,GAAG,CAAC,CAAC,GAAG,CAAC,CAAC,KAAK,CAAC,AAC9C,CAAC,AACD,MAAM,AAAC,YAAY,KAAK,CAAC,AAAC,CAAC,AACzB,IAAI,cAAC,CAAC,AACJ,SAAS,CAAE,IAAI,AACjB,CAAC,AACH,CAAC\"}"
+	map: "{\"version\":3,\"file\":\"BotsList.svelte\",\"sources\":[\"BotsList.svelte\"],\"sourcesContent\":[\"<script>\\n  import { stateStore } from \\\"../stores/statebot.js\\\";\\n  import { onMount } from \\\"svelte\\\";\\n\\n  import Switch from \\\"smelte/src/components/Switch\\\";\\n  //import \\\"smelte/src/tailwind.css\\\";\\n  import NewBot from \\\"./NewBot.svelte\\\";\\n  //import BotStatus from './BotStatus.svelte';\\n\\n  export let comission;\\n  export let show;\\n\\n\\n  import Button from \\\"smelte/src/components/Button\\\";\\n  import { authStore } from \\\"../stores/auth\\\";\\n  //import { request } from 'graphql-request';\\n\\n  import IndLoad from \\\"./IndLoad.svelte\\\";\\n\\n  let urlhost = $stateStore.urlhost;\\n  let urlhostenv = $stateStore.urlhostenv;\\n  console.log(\\\"urlhostenv \\\" + urlhostenv);\\n\\n  let bots = [];\\n  let urlbotslist = urlhost + \\\"botslist\\\";\\n  let leadsurl = urlhost + \\\"leads\\\";\\n  let newbot = urlhost + \\\"api/newbot.php\\\";\\n  let api_bots = urlbotslist;\\n\\n  let selectbot;\\n  let leadsdata;\\n  let kolvoleads;\\n  let sumleads;\\n  let srleads;\\n  /////routes\\n  let routIsBotList = true;\\n  let routIsBot = false;\\n  let routIsNewBot = false;\\n\\n  function routBotList() {\\n    $stateStore.rout = \\\"botlist\\\";\\n\\n    $stateStore.selectbotname = \\\"\\\";\\n    routIsBotList = true;\\n    routIsBot = false;\\n    routIsNewBot = false;\\n  }\\n  function routNewBot() {\\n    $stateStore.rout = \\\"newbot\\\";\\n    clearInterval($stateStore.timerIdlist);\\n    //ym(65948110, 'reachGoal', 'begin-createbot');\\n    routIsBotList = false;\\n    routIsBot = false;\\n    routIsNewBot = true;\\n  }\\n  /////end routes\\n  function ismybot(value) {\\n    return value[8] === $authStore.user.uid;\\n  }\\n  onMount(async () => {\\n    const res = await fetch(api_bots, {\\n      headers: {\\n        Accept: \\\"application/json\\\",\\n        \\\"Content-Type\\\": \\\"application/json\\\",\\n      },\\n      method: \\\"get\\\",\\n    })\\n      .then((res) => res.json())\\n      .then((json) => {\\n        if ($authStore.user.uid != \\\"d3fmoh2rVoVNgIcpLTFZBE0jHnI2\\\"){\\n          bots = json.filter(ismybot);\\n        } else {\\n          bots = json;\\n        }\\n        \\n        if (bots == null) {\\n          bots = [];\\n        }\\n        //console.log(json);\\n        console.log(bots);\\n        //console.log(\\\"s_a_hip: \\\" + process.env.SAPPER_APP_HOSTIP);\\n      });\\n\\n    const leads = await fetch(leadsurl, {\\n      headers: {\\n        Accept: \\\"application/json\\\",\\n        \\\"Content-Type\\\": \\\"application/json\\\",\\n      },\\n      method: \\\"get\\\",\\n    })\\n      .then((leads) => leads.json())\\n      .then((json) => {\\n        kolvoleads = json.count;\\n        sumleads = json.sum;\\n        srleads = json.sr;\\n      });\\n  });\\n  $:srleads = srleads;\\n\\n  async function fetch1s() {\\n    const res = await fetch(urlbotslist);\\n    bots = (await res.json()).filter(ismybot);\\n  }\\n  function entryBot(botid) {\\n    //console.log(botid);\\n\\n    clearInterval($stateStore.timerIdlist);\\n    selectbot = botid;\\n    $stateStore.selectbotid = botid;\\n    $stateStore.selectbotname = botid;\\n    localStorage.selectbot = botid;\\n    $stateStore.rout = \\\"bot\\\";\\n\\n    //window.location = \\\"/bot?selectbot=\\\"+selectbot;\\n  }\\n  function profitsumproctodaycalc(arr) {\\n    let sum = 0;\\n    arr.forEach((element) => {\\n      sum = sum + element[5];\\n    });\\n    return sum;\\n  }\\n  function profitsumproccalc(arr) {\\n    let sum = 0;\\n    arr.forEach((element) => {\\n      sum = sum + element[3];\\n    });\\n    return sum;\\n  }\\n  function startbalancescalc(arr) {\\n    let sum = 0;\\n    arr.forEach((element) => {\\n      sum = sum + element[6];\\n    });\\n    return sum;\\n  }\\n  function balancescalc(arr) {\\n    let sum = 0;\\n    arr.forEach((element) => {\\n      sum = sum + element[7];\\n    });\\n    return sum;\\n  }\\n  function vlozhcalc(arr) {\\n    let sum = 0;\\n    arr.forEach((element) => {\\n      sum = sum + element[10];\\n    });\\n    return sum;\\n  }\\n\\n  let selectbotname;\\n  $: pkg = {\\n    urlhost: urlhost,\\n    comission: comission,\\n    urlhost: urlhost,\\n    selectbotname: selectbotname,\\n    routIsBotList: routIsBotList,\\n  };\\n  //$: if (selectbot) {\\n  //    selectbotname = bots.botname;\\n  //}\\n  $: profitsumproctoday = profitsumproctodaycalc(bots).toFixed(2);\\n  $: profitsumproc = profitsumproccalc(bots).toFixed(2);\\n  $: startbalances = startbalancescalc(bots).toFixed(2);\\n  $: balances = balancescalc(bots).toFixed(2);\\n  $: sumprocvlozh = (vlozhcalc(bots) / startbalancescalc(bots)) * 100;\\n\\n  $stateStore.timerIdlist = setInterval(fetch1s, 2000);\\n\\n  $: show = $stateStore.showmenu;\\n  $: selectbotname = $stateStore.selectbotname;\\n  $: urlhost = $stateStore.urlhost;\\n\\n  clearInterval($stateStore.timerId);\\n  routBotList();\\n  //console.log($authStore.user);\\n</script>\\n\\n<main>\\n\\n  <div class=\\\"textitem px-2 py-3\\\">\\n    <div class=\\\"rowbalanceitem balancehead\\\">\\n      <label>Бbaланс</label>\\n\\n    </div>\\n    <div class=\\\"rowbalanceitem\\\">\\n      <label>Старт</label>\\n      <br />\\n      <span\\n        class=\\\"border-solid border-2 border-gray-200 bg-gray-200 rounded-full\\n        px-3 py-1 text-sm font-semibold text-gray-700\\\"\\n      >\\n        {startbalances}\\n      </span>\\n    </div>\\n    <div class=\\\"rowbalanceitem\\\">\\n      <label>Сегодня</label>\\n      <br />\\n      <span\\n        class=\\\"border-solid border-2 border-gray-200 bg-gray-200 rounded-full\\n        px-3 py-1 text-sm font-semibold text-gray-700\\\"\\n      >\\n        {balances}\\n      </span>\\n    </div>\\n    <div class=\\\"rowbalanceitem\\\">\\n      <label>Cальдо</label>\\n      <br />\\n      <span\\n        class=\\\"border-solid border-2 border-gray-600 rounded-full px-3 py-1\\n        text-sm font-semibold text-gray-700 dark:text-primary-700\\\"\\n      >\\n        {(balances - startbalances).toFixed(2)}\\n      </span>\\n    </div>\\n  </div>\\n  <div class=\\\"textitem px-2 py-3\\\">\\n    <div class=\\\"rowbalanceitem balancehead\\\">\\n      <label>Сделки</label>\\n\\n    </div>\\n    <div class=\\\"rowbalanceitem\\\">\\n      <label>Кол-во</label>\\n      <br />\\n      <span\\n        class=\\\"border-solid border-2 border-gray-200 bg-gray-200 rounded-full\\n        px-3 py-1 text-sm font-semibold text-gray-700\\\"\\n      >\\n        {kolvoleads}\\n      </span>\\n    </div>\\n    <div class=\\\"rowbalanceitem\\\">\\n      <label>Сумма</label>\\n      <br />\\n      <span\\n        class=\\\"border-solid border-2 border-gray-200 bg-gray-200 rounded-full\\n        px-3 py-1 text-sm font-semibold text-gray-700\\\"\\n      >\\n        {sumleads}\\n      </span>\\n    </div>\\n    <div class=\\\"rowbalanceitem\\\">\\n      <label>Среднее</label>\\n      <br />\\n      <span\\n        class=\\\"border-solid border-2 border-gray-200 bg-gray-200 rounded-full\\n        px-3 py-1 text-sm font-semibold text-gray-700\\\"\\n      >\\n        {srleads}\\n      </span>\\n    </div>\\n  </div>\\n\\n  <div class=\\\"textitem p-2\\\">\\n    <div class=\\\"leftitem\\\">Прибыль / просадка</div>\\n    &nbsp;&nbsp;\\n    <div class=\\\"centereditem\\\">\\n      Итог\\n      <br />\\n      {profitsumproc} %\\n    </div>\\n    <div class=\\\"centereditem\\\">\\n      Сегодня\\n      <br />\\n      {profitsumproctoday} %\\n    </div>\\n    <div class=\\\"rightitem\\\">\\n      <IndLoad procvlozh={sumprocvlozh} id=\\\"sumprocvlozh\\\" />\\n\\n    </div>\\n  </div>\\n  <div class=\\\"divhr\\\">\\n    <hr width=\\\"400px\\\" />\\n  </div>\\n\\n  <div class=\\\"botslist\\\">\\n\\n    {#each Object.entries(bots) as [id, data]}\\n      <a class=\\\"botitem p-2\\\" href=\\\"botstatuspage\\\" on:click={entryBot(data[1])}>\\n        <div class=\\\"leftitem\\\">{data[1]}</div>\\n\\n        <div class=\\\"centereditem\\\">\\n          <span>{data[2]}</span>\\n          <br />\\n          <span>({data[3]} %)</span>\\n          <br />\\n        </div>\\n        <div class=\\\"centereditem\\\">\\n          <span>{data[4]}</span>\\n          <br />\\n          <span>({data[5]} %)</span>\\n          <br />\\n        </div>\\n        <div class=\\\"rightitem\\\">\\n\\n          <IndLoad procvlozh={data[9]} {id} onoff={data[0]} />\\n\\n        </div>\\n\\n      </a>\\n    {:else}\\n      <!-- этот блок отрисовывается, пока photos.length === 0 -->\\n      <p>Ни одного бота не создано</p>\\n    {/each}\\n  </div>\\n  <div class=\\\"addknob\\\">\\n    <Button href=\\\"newbot\\\" light outlined on:click={routNewBot}>\\n      &nbsp;Новый бот&nbsp;\\n    </Button>\\n  </div>\\n\\n</main>\\n\\n<style>\\n  .divhr {\\n    display: flex;\\n    width: 400px;\\n    height: 10px;\\n    margin-left: auto;\\n    margin-right: auto;\\n  }\\n  .balancehead {\\n    padding-top: 28px;\\n  }\\n  .rowbalanceitem {\\n    padding-left: 10px;\\n    text-align: center;\\n    line-height: 30px;\\n  }\\n  .centereditem {\\n    text-align: center;\\n    min-width: 23%;\\n    border: 0px solid;\\n  }\\n  .addknob {\\n    display: flex;\\n    justify-content: center;\\n    margin-right: 10px;\\n    margin-left: 10px;\\n    margin-top: 10px;\\n  }\\n  main {\\n    text-align: center;\\n  }\\n  .botslist {\\n    width: 100%;\\n    display: grid;\\n    grid-template-columns: repeat(1, 1fr);\\n    grid-gap: 1px;\\n    grid-template-rows: auto 1fr;\\n    margin: 0px;\\n    padding: 0px;\\n  }\\n  .botitem {\\n    display: flex;\\n    width: 400px;\\n    margin-left: auto;\\n    margin-right: auto;\\n    justify-content: space-between;\\n  }\\n  .textitem {\\n    display: flex;\\n    width: 400px;\\n    margin-left: auto;\\n    margin-right: auto;\\n    justify-content: space-between;\\n  }\\n  .leftitem {\\n    border: 0px solid;\\n    text-align: left;\\n    max-width: 30%;\\n  }\\n  .rightitem {\\n    border: 0px solid;\\n    text-align: right;\\n    width: 40px;\\n    display: flex;\\n    flex-grow: 1;\\n    align-items: center;\\n  }\\n  .botitem:hover {\\n    background-color: rgba(255, 228, 196, 0.342);\\n  }\\n  @media (min-width: 640px) {\\n    main {\\n      max-width: none;\\n    }\\n  }\\n</style>\\n\"],\"names\":[],\"mappings\":\"AA2TE,oBAAO,CACL,OAAO,CAAE,IAAI,CACb,KAAK,CAAE,KAAK,CACZ,MAAM,CAAE,IAAI,CACZ,WAAW,CAAE,IAAI,CACjB,YAAY,CAAE,IAChB,CACA,0BAAa,CACX,WAAW,CAAE,IACf,CACA,6BAAgB,CACd,YAAY,CAAE,IAAI,CAClB,UAAU,CAAE,MAAM,CAClB,WAAW,CAAE,IACf,CACA,2BAAc,CACZ,UAAU,CAAE,MAAM,CAClB,SAAS,CAAE,GAAG,CACd,MAAM,CAAE,GAAG,CAAC,KACd,CACA,sBAAS,CACP,OAAO,CAAE,IAAI,CACb,eAAe,CAAE,MAAM,CACvB,YAAY,CAAE,IAAI,CAClB,WAAW,CAAE,IAAI,CACjB,UAAU,CAAE,IACd,CACA,kBAAK,CACH,UAAU,CAAE,MACd,CACA,uBAAU,CACR,KAAK,CAAE,IAAI,CACX,OAAO,CAAE,IAAI,CACb,qBAAqB,CAAE,OAAO,CAAC,CAAC,CAAC,GAAG,CAAC,CACrC,QAAQ,CAAE,GAAG,CACb,kBAAkB,CAAE,IAAI,CAAC,GAAG,CAC5B,MAAM,CAAE,GAAG,CACX,OAAO,CAAE,GACX,CACA,sBAAS,CACP,OAAO,CAAE,IAAI,CACb,KAAK,CAAE,KAAK,CACZ,WAAW,CAAE,IAAI,CACjB,YAAY,CAAE,IAAI,CAClB,eAAe,CAAE,aACnB,CACA,uBAAU,CACR,OAAO,CAAE,IAAI,CACb,KAAK,CAAE,KAAK,CACZ,WAAW,CAAE,IAAI,CACjB,YAAY,CAAE,IAAI,CAClB,eAAe,CAAE,aACnB,CACA,uBAAU,CACR,MAAM,CAAE,GAAG,CAAC,KAAK,CACjB,UAAU,CAAE,IAAI,CAChB,SAAS,CAAE,GACb,CACA,wBAAW,CACT,MAAM,CAAE,GAAG,CAAC,KAAK,CACjB,UAAU,CAAE,KAAK,CACjB,KAAK,CAAE,IAAI,CACX,OAAO,CAAE,IAAI,CACb,SAAS,CAAE,CAAC,CACZ,WAAW,CAAE,MACf,CACA,sBAAQ,MAAO,CACb,gBAAgB,CAAE,KAAK,GAAG,CAAC,CAAC,GAAG,CAAC,CAAC,GAAG,CAAC,CAAC,KAAK,CAC7C,CACA,MAAO,YAAY,KAAK,CAAE,CACxB,kBAAK,CACH,SAAS,CAAE,IACb,CACF\"}"
 };
 
 function profitsumproctodaycalc(arr) {
@@ -1529,9 +1817,16 @@ function vlozhcalc(arr) {
 	return sum;
 }
 
-const BotsList = create_ssr_component(($$result, $$props, $$bindings, $$slots) => {
-	let $stateStore = get_store_value(stateStore);
-	let $authStore = get_store_value(authStore);
+const BotsList = create_ssr_component(($$result, $$props, $$bindings, slots) => {
+	let profitsumproctoday;
+	let profitsumproc;
+	let startbalances;
+	let balances;
+	let sumprocvlozh;
+	let $stateStore, $$unsubscribe_stateStore;
+	let $authStore, $$unsubscribe_authStore;
+	$$unsubscribe_stateStore = subscribe(stateStore, value => $stateStore = value);
+	$$unsubscribe_authStore = subscribe(authStore, value => $authStore = value);
 	let { comission } = $$props;
 	let { show } = $$props;
 	let urlhost = $stateStore.urlhost;
@@ -1546,8 +1841,8 @@ const BotsList = create_ssr_component(($$result, $$props, $$bindings, $$slots) =
 	let srleads;
 
 	function routBotList() {
-		$stateStore.rout = "botlist";
-		$stateStore.selectbotname = "";
+		set_store_value(stateStore, $stateStore.rout = "botlist", $stateStore);
+		set_store_value(stateStore, $stateStore.selectbotname = "", $stateStore);
 	}
 
 	/////end routes
@@ -1559,9 +1854,7 @@ const BotsList = create_ssr_component(($$result, $$props, $$bindings, $$slots) =
 		const res = await fetch(api_bots, {
 			headers: {
 				Accept: "application/json",
-				"Content-Type": "application/json",
-				"Access-Control-Allow-Origin": "*",
-				"Access-Control-Allow-Headers": "*"
+				"Content-Type": "application/json"
 			},
 			method: "get"
 		}).then(res => res.json()).then(json => {
@@ -1582,9 +1875,7 @@ const BotsList = create_ssr_component(($$result, $$props, $$bindings, $$slots) =
 		const leads = await fetch(leadsurl, {
 			headers: {
 				Accept: "application/json",
-				"Content-Type": "application/json",
-				"Access-Control-Allow-Origin": "*",
-				"Access-Control-Allow-Headers": "*"
+				"Content-Type": "application/json"
 			},
 			method: "get"
 		}).then(leads => leads.json()).then(json => {
@@ -1600,7 +1891,7 @@ const BotsList = create_ssr_component(($$result, $$props, $$bindings, $$slots) =
 	}
 
 	let selectbotname;
-	$stateStore.timerIdlist = setInterval(fetch1s, 2000);
+	set_store_value(stateStore, $stateStore.timerIdlist = setInterval(fetch1s, 2000), $stateStore);
 	clearInterval($stateStore.timerId);
 	routBotList();
 	if ($$props.comission === void 0 && $$bindings.comission && comission !== void 0) $$bindings.comission(comission);
@@ -1610,45 +1901,47 @@ const BotsList = create_ssr_component(($$result, $$props, $$bindings, $$slots) =
 	urlhost = $stateStore.urlhost;
 	selectbotname = $stateStore.selectbotname;
 
-	let profitsumproctoday = profitsumproctodaycalc(bots).toFixed(2);
-	let profitsumproc = profitsumproccalc(bots).toFixed(2);
-	let startbalances = startbalancescalc(bots).toFixed(2);
-	let balances = balancescalc(bots).toFixed(2);
-	let sumprocvlozh = vlozhcalc(bots) / startbalancescalc(bots) * 100;
+	profitsumproctoday = profitsumproctodaycalc(bots).toFixed(2);
+	profitsumproc = profitsumproccalc(bots).toFixed(2);
+	startbalances = startbalancescalc(bots).toFixed(2);
+	balances = balancescalc(bots).toFixed(2);
+	sumprocvlozh = vlozhcalc(bots) / startbalancescalc(bots) * 100;
 	show = $stateStore.showmenu;
+	$$unsubscribe_stateStore();
+	$$unsubscribe_authStore();
 
-	return `<main class="${"svelte-upqpsm"}"><div class="${"textitem px-2 py-3 svelte-upqpsm"}"><div class="${"rowbalanceitem balancehead svelte-upqpsm"}"><label>Бbaланс</label></div>
-    <div class="${"rowbalanceitem svelte-upqpsm"}"><label>Старт</label>
+	return `<main class="svelte-upqpsm"><div class="textitem px-2 py-3 svelte-upqpsm"><div class="rowbalanceitem balancehead svelte-upqpsm"><label>Бbaланс</label></div>
+    <div class="rowbalanceitem svelte-upqpsm"><label>Старт</label>
       <br>
-      <span class="${"border-solid border-2 border-gray-200 bg-gray-200 rounded-full\n        px-3 py-1 text-sm font-semibold text-gray-700"}">${escape(startbalances)}</span></div>
-    <div class="${"rowbalanceitem svelte-upqpsm"}"><label>Сегодня</label>
+      <span class="border-solid border-2 border-gray-200 bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700">${escape(startbalances)}</span></div>
+    <div class="rowbalanceitem svelte-upqpsm"><label>Сегодня</label>
       <br>
-      <span class="${"border-solid border-2 border-gray-200 bg-gray-200 rounded-full\n        px-3 py-1 text-sm font-semibold text-gray-700"}">${escape(balances)}</span></div>
-    <div class="${"rowbalanceitem svelte-upqpsm"}"><label>Cальдо</label>
+      <span class="border-solid border-2 border-gray-200 bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700">${escape(balances)}</span></div>
+    <div class="rowbalanceitem svelte-upqpsm"><label>Cальдо</label>
       <br>
-      <span class="${"border-solid border-2 border-gray-600 rounded-full px-3 py-1\n        text-sm font-semibold text-gray-700 dark:text-primary-700"}">${escape((balances - startbalances).toFixed(2))}</span></div></div>
-  <div class="${"textitem px-2 py-3 svelte-upqpsm"}"><div class="${"rowbalanceitem balancehead svelte-upqpsm"}"><label>Сделки</label></div>
-    <div class="${"rowbalanceitem svelte-upqpsm"}"><label>Кол-во</label>
+      <span class="border-solid border-2 border-gray-600 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 dark:text-primary-700">${escape((balances - startbalances).toFixed(2))}</span></div></div>
+  <div class="textitem px-2 py-3 svelte-upqpsm"><div class="rowbalanceitem balancehead svelte-upqpsm"><label>Сделки</label></div>
+    <div class="rowbalanceitem svelte-upqpsm"><label>Кол-во</label>
       <br>
-      <span class="${"border-solid border-2 border-gray-200 bg-gray-200 rounded-full\n        px-3 py-1 text-sm font-semibold text-gray-700"}">${escape(kolvoleads)}</span></div>
-    <div class="${"rowbalanceitem svelte-upqpsm"}"><label>Сумма</label>
+      <span class="border-solid border-2 border-gray-200 bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700">${escape(kolvoleads)}</span></div>
+    <div class="rowbalanceitem svelte-upqpsm"><label>Сумма</label>
       <br>
-      <span class="${"border-solid border-2 border-gray-200 bg-gray-200 rounded-full\n        px-3 py-1 text-sm font-semibold text-gray-700"}">${escape(sumleads)}</span></div>
-    <div class="${"rowbalanceitem svelte-upqpsm"}"><label>Среднее</label>
+      <span class="border-solid border-2 border-gray-200 bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700">${escape(sumleads)}</span></div>
+    <div class="rowbalanceitem svelte-upqpsm"><label>Среднее</label>
       <br>
-      <span class="${"border-solid border-2 border-gray-200 bg-gray-200 rounded-full\n        px-3 py-1 text-sm font-semibold text-gray-700"}">${escape(srleads)}</span></div></div>
+      <span class="border-solid border-2 border-gray-200 bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700">${escape(srleads)}</span></div></div>
 
-  <div class="${"textitem p-2 svelte-upqpsm"}"><div class="${"leftitem svelte-upqpsm"}">Прибыль / просадка</div>
+  <div class="textitem p-2 svelte-upqpsm"><div class="leftitem svelte-upqpsm">Прибыль / просадка</div>
       
-    <div class="${"centereditem svelte-upqpsm"}">Итог
+    <div class="centereditem svelte-upqpsm">Итог
       <br>
       ${escape(profitsumproc)} %
     </div>
-    <div class="${"centereditem svelte-upqpsm"}">Сегодня
+    <div class="centereditem svelte-upqpsm">Сегодня
       <br>
       ${escape(profitsumproctoday)} %
     </div>
-    <div class="${"rightitem svelte-upqpsm"}">${validate_component(IndLoad, "IndLoad").$$render(
+    <div class="rightitem svelte-upqpsm">${validate_component(IndLoad, "IndLoad").$$render(
 		$$result,
 		{
 			procvlozh: sumprocvlozh,
@@ -1657,25 +1950,27 @@ const BotsList = create_ssr_component(($$result, $$props, $$bindings, $$slots) =
 		{},
 		{}
 	)}</div></div>
-  <div class="${"divhr svelte-upqpsm"}"><hr width="${"400px"}"></div>
+  <div class="divhr svelte-upqpsm"><hr width="400px"></div>
 
-  <div class="${"botslist svelte-upqpsm"}">${Object.entries(bots).length
-	? each(Object.entries(bots), ([id, data]) => `<a class="${"botitem p-2 svelte-upqpsm"}" href="${"botstatuspage"}"><div class="${"leftitem svelte-upqpsm"}">${escape(data[1])}</div>
+  <div class="botslist svelte-upqpsm">${Object.entries(bots).length
+	? each(Object.entries(bots), ([id, data]) => {
+			return `<a class="botitem p-2 svelte-upqpsm" href="botstatuspage"><div class="leftitem svelte-upqpsm">${escape(data[1])}</div>
 
-        <div class="${"centereditem svelte-upqpsm"}"><span>${escape(data[2])}</span>
+        <div class="centereditem svelte-upqpsm"><span>${escape(data[2])}</span>
           <br>
           <span>(${escape(data[3])} %)</span>
           <br></div>
-        <div class="${"centereditem svelte-upqpsm"}"><span>${escape(data[4])}</span>
+        <div class="centereditem svelte-upqpsm"><span>${escape(data[4])}</span>
           <br>
           <span>(${escape(data[5])} %)</span>
           <br></div>
-        <div class="${"rightitem svelte-upqpsm"}">${validate_component(IndLoad, "IndLoad").$$render($$result, { procvlozh: data[9], id, onoff: data[0] }, {}, {})}</div>
+        <div class="rightitem svelte-upqpsm">${validate_component(IndLoad, "IndLoad").$$render($$result, { procvlozh: data[9], id, onoff: data[0] }, {}, {})}</div>
 
-      </a>`)
+      </a>`;
+		})
 	: `
       <p>Ни одного бота не создано</p>`}</div>
-  <div class="${"addknob svelte-upqpsm"}">${validate_component(Button, "Button").$$render(
+  <div class="addknob svelte-upqpsm">${validate_component(Button, "Button").$$render(
 		$$result,
 		{
 			href: "newbot",
@@ -1684,8 +1979,10 @@ const BotsList = create_ssr_component(($$result, $$props, $$bindings, $$slots) =
 		},
 		{},
 		{
-			default: () => ` Новый бот 
-    `
+			default: () => {
+				return ` Новый бот 
+    `;
+			}
 		}
 	)}</div>
 
@@ -3032,21 +3329,26 @@ var ReplayEvent = /*@__PURE__*/ (function () {
 // create subject to replay/emit the Firebase instance to all new subscribers
 const firebaseApp$ = new ReplaySubject(1);
 
-/* src/components/SignInButton.svelte generated by Svelte v3.24.0 */
+/* src/components/SignInButton.svelte generated by Svelte v3.59.2 */
 
-const SignInButton = create_ssr_component(($$result, $$props, $$bindings, $$slots) => {
+const SignInButton = create_ssr_component(($$result, $$props, $$bindings, slots) => {
 	let { provider } = $$props;
 	if ($$props.provider === void 0 && $$bindings.provider && provider !== void 0) $$bindings.provider(provider);
 
-	return `${provider === "google"
-	? `${validate_component(Button, "Button").$$render($$result, { outlined: true }, {}, { default: () => `Sign in` })}`
+	return `${provider === 'google'
+	? `${validate_component(Button, "Button").$$render($$result, { outlined: true }, {}, {
+			default: () => {
+				return `Sign in`;
+			}
+		})}`
 	: `<div>No provider was provided as a prop</div>`}`;
 });
 
-/* src/routes/index.svelte generated by Svelte v3.24.0 */
+/* src/routes/index.svelte generated by Svelte v3.59.2 */
 
-const Routes = create_ssr_component(($$result, $$props, $$bindings, $$slots) => {
-	let $stateStore = get_store_value(stateStore);
+const Routes = create_ssr_component(($$result, $$props, $$bindings, slots) => {
+	let $stateStore, $$unsubscribe_stateStore;
+	$$unsubscribe_stateStore = subscribe(stateStore, value => $stateStore = value);
 	clearInterval($stateStore.timerId);
 	clearInterval($stateStore.timerIdlist);
 
@@ -3058,20 +3360,26 @@ const Routes = create_ssr_component(($$result, $$props, $$bindings, $$slots) => 
 		comission: 0.15
 	};
 
+	$$unsubscribe_stateStore();
+
 	return `${($$result.head += `${($$result.title = `<title>Ti Trading Bot v1</title>`, "")}`, "")}
   
 
 
-${ `${validate_component(BotsList, "BotsList").$$render($$result, Object.assign(pkg), {}, {})}`
+${ `${validate_component(BotsList, "BotsList").$$render($$result, Object.assign({}, pkg), {}, {})}`
 	}`;
 });
 
-/* src/components/Switchonoff.svelte generated by Svelte v3.24.0 */
+/* src/components/Switchonoff.svelte generated by Svelte v3.59.2 */
 const trackClassesDefault$1 = "relative w-10 h-auto z-0 rounded-full overflow-visible flex items-center justify-center";
 const thumbClassesDefault$1 = "rounded-full p-2 w-5 h-5 absolute elevation-3 duration-100";
 const labelClassesDefault$1 = "pl-2 cursor-pointer";
 
-const Switchonoff = create_ssr_component(($$result, $$props, $$bindings, $$slots) => {
+const Switchonoff = create_ssr_component(($$result, $$props, $$bindings, slots) => {
+	let c;
+	let tr;
+	let th;
+	let l;
 	const classesDefault = `inline-flex items-center mb-2 cursor-pointer z-10`;
 	let { value = false } = $$props;
 	let { label = "" } = $$props;
@@ -3094,35 +3402,37 @@ const Switchonoff = create_ssr_component(($$result, $$props, $$bindings, $$slots
 	if ($$props.thumbClasses === void 0 && $$bindings.thumbClasses && thumbClasses !== void 0) $$bindings.thumbClasses(thumbClasses);
 	if ($$props.labelClasses === void 0 && $$bindings.labelClasses && labelClasses !== void 0) $$bindings.labelClasses(labelClasses);
 	if ($$props.classes === void 0 && $$bindings.classes && classes !== void 0) $$bindings.classes(classes);
-	let c = cb.flush().add(classes, true, classesDefault).add($$props.class).get();
-	let tr = trcb.flush().add("bg-gray-700", !value).add(`bg-${color}-200`, value).add(trackClasses, true, trackClassesDefault$1).get();
-	let th = thcb.flush().add(thumbClasses, true, thumbClassesDefault$1).add("bg-white left-0", !value).add(`bg-${color}-400`, value).get();
-	let l = lcb.flush().add(labelClasses, true, labelClassesDefault$1).add("text-gray-500", disabled).add("text-gray-700", !disabled).get();
+	c = cb.flush().add(classes, true, classesDefault).add($$props.class).get();
+	tr = trcb.flush().add("bg-gray-700", !value).add(`bg-${color}-200`, value).add(trackClasses, true, trackClassesDefault$1).get();
+	th = thcb.flush().add(thumbClasses, true, thumbClassesDefault$1).add("bg-white left-0", !value).add(`bg-${color}-400`, value).get();
+	l = lcb.flush().add(labelClasses, true, labelClassesDefault$1).add("text-gray-500", disabled).add("text-gray-700", !disabled).get();
 
-	return `<div${add_attribute("class", c, 0)}><input class="${"hidden"}" type="${"checkbox"}"${add_attribute("value", value, 1)}>
-  <div${add_attribute("class", tr, 0)}><div class="${"w-full h-full absolute"}"></div>
+	return `<div${add_attribute("class", c, 0)}><input class="hidden" type="checkbox"${add_attribute("value", value, 0)}>
+  <div${add_attribute("class", tr, 0)}><div class="w-full h-full absolute"></div>
     ${validate_component(Ripple, "Ripple").$$render(
 		$$result,
 		{
-			color: value && !disabled ? color : "gray",
+			color: value && !disabled ? color : 'gray',
 			noHover: true
 		},
 		{},
 		{
-			default: () => `<div${add_attribute("class", th, 0)}${add_attribute("style", value ? "left: 1.25rem" : "", 0)}></div>`
+			default: () => {
+				return `<div${add_attribute("class", th, 0)}${add_attribute("style", value ? 'left: 1.25rem' : '', 0)}></div>`;
+			}
 		}
 	)}</div>
-  <label aria-hidden="${"true"}"${add_attribute("class", l, 0)}>${escape(label)}</label></div>`;
+  <label aria-hidden="true"${add_attribute("class", l, 0)}>${escape(label)}</label></div>`;
 });
 
-/* node_modules/smelte/src/components/ProgressLinear/ProgressLinear.svelte generated by Svelte v3.24.0 */
+/* node_modules/smelte/src/components/ProgressLinear/ProgressLinear.svelte generated by Svelte v3.59.2 */
 
 const css$7 = {
 	code: ".inc.svelte-mguqwa{animation:svelte-mguqwa-increase 2s ease-in-out infinite}.dec.svelte-mguqwa{animation:svelte-mguqwa-decrease 2s 0.9s ease-in-out infinite}@keyframes svelte-mguqwa-increase{from{left:-5%;width:5%}to{left:130%;width:150%}}@keyframes svelte-mguqwa-decrease{from{left:-90%;width:90%}to{left:110%;width:10%}}",
-	map: "{\"version\":3,\"file\":\"ProgressLinear.svelte\",\"sources\":[\"ProgressLinear.svelte\"],\"sourcesContent\":[\"<script>\\n  import { onMount } from \\\"svelte\\\";\\n  import { slide } from \\\"svelte/transition\\\";\\n\\n  export let app = false;\\n  export let progress = 0;\\n  export let color = \\\"primary\\\";\\n\\n  let initialized = false;\\n\\n  onMount(() => {\\n    if (!app) return;\\n\\n    setTimeout(() => {\\n      initialized = true;\\n    }, 200);\\n  });\\n</script>\\n\\n<style>\\n  /* kudos https://codepen.io/shalimano/pen/wBmNGJ */\\n  .inc {\\n    animation: increase 2s ease-in-out infinite;\\n  }\\n  .dec {\\n    animation: decrease 2s 0.9s ease-in-out infinite;\\n  }\\n\\n  @keyframes increase {\\n    from {\\n      left: -5%;\\n      width: 5%;\\n    }\\n    to {\\n      left: 130%;\\n      width: 150%;\\n    }\\n  }\\n  @keyframes decrease {\\n    from {\\n      left: -90%;\\n      width: 90%;\\n    }\\n    to {\\n      left: 110%;\\n      width: 10%;\\n    }\\n  }\\n</style>\\n\\n<div\\n  class:fixed={app}\\n  class:z-50={app}\\n  class=\\\"top-0 left-0 w-full h-1 bg-{color}-100 overflow-hidden relative\\\"\\n  class:hidden={app && !initialized}\\n  transition:slide={{ duration: 300 }}>\\n  <div\\n    class=\\\"bg-{color}-500 h-1 absolute\\\"\\n    class:inc={!progress}\\n    class:transition={progress}\\n    style={progress ? `width: ${progress}%` : \\\"\\\"} />\\n  <div class=\\\"bg-{color}-500 h-1 absolute dec\\\" class:hidden={progress} />\\n</div>\\n\"],\"names\":[],\"mappings\":\"AAqBE,IAAI,cAAC,CAAC,AACJ,SAAS,CAAE,sBAAQ,CAAC,EAAE,CAAC,WAAW,CAAC,QAAQ,AAC7C,CAAC,AACD,IAAI,cAAC,CAAC,AACJ,SAAS,CAAE,sBAAQ,CAAC,EAAE,CAAC,IAAI,CAAC,WAAW,CAAC,QAAQ,AAClD,CAAC,AAED,WAAW,sBAAS,CAAC,AACnB,IAAI,AAAC,CAAC,AACJ,IAAI,CAAE,GAAG,CACT,KAAK,CAAE,EAAE,AACX,CAAC,AACD,EAAE,AAAC,CAAC,AACF,IAAI,CAAE,IAAI,CACV,KAAK,CAAE,IAAI,AACb,CAAC,AACH,CAAC,AACD,WAAW,sBAAS,CAAC,AACnB,IAAI,AAAC,CAAC,AACJ,IAAI,CAAE,IAAI,CACV,KAAK,CAAE,GAAG,AACZ,CAAC,AACD,EAAE,AAAC,CAAC,AACF,IAAI,CAAE,IAAI,CACV,KAAK,CAAE,GAAG,AACZ,CAAC,AACH,CAAC\"}"
+	map: "{\"version\":3,\"file\":\"ProgressLinear.svelte\",\"sources\":[\"ProgressLinear.svelte\"],\"sourcesContent\":[\"<script>\\n  import { onMount } from \\\"svelte\\\";\\n  import { slide } from \\\"svelte/transition\\\";\\n\\n  export let app = false;\\n  export let progress = 0;\\n  export let color = \\\"primary\\\";\\n\\n  let initialized = false;\\n\\n  onMount(() => {\\n    if (!app) return;\\n\\n    setTimeout(() => {\\n      initialized = true;\\n    }, 200);\\n  });\\n</script>\\n\\n<style>\\n  /* kudos https://codepen.io/shalimano/pen/wBmNGJ */\\n  .inc {\\n    animation: increase 2s ease-in-out infinite;\\n  }\\n  .dec {\\n    animation: decrease 2s 0.9s ease-in-out infinite;\\n  }\\n\\n  @keyframes increase {\\n    from {\\n      left: -5%;\\n      width: 5%;\\n    }\\n    to {\\n      left: 130%;\\n      width: 150%;\\n    }\\n  }\\n  @keyframes decrease {\\n    from {\\n      left: -90%;\\n      width: 90%;\\n    }\\n    to {\\n      left: 110%;\\n      width: 10%;\\n    }\\n  }\\n</style>\\n\\n<div\\n  class:fixed={app}\\n  class:z-50={app}\\n  class=\\\"top-0 left-0 w-full h-1 bg-{color}-100 overflow-hidden relative\\\"\\n  class:hidden={app && !initialized}\\n  transition:slide={{ duration: 300 }}>\\n  <div\\n    class=\\\"bg-{color}-500 h-1 absolute\\\"\\n    class:inc={!progress}\\n    class:transition={progress}\\n    style={progress ? `width: ${progress}%` : \\\"\\\"} />\\n  <div class=\\\"bg-{color}-500 h-1 absolute dec\\\" class:hidden={progress} />\\n</div>\\n\"],\"names\":[],\"mappings\":\"AAqBE,kBAAK,CACH,SAAS,CAAE,sBAAQ,CAAC,EAAE,CAAC,WAAW,CAAC,QACrC,CACA,kBAAK,CACH,SAAS,CAAE,sBAAQ,CAAC,EAAE,CAAC,IAAI,CAAC,WAAW,CAAC,QAC1C,CAEA,WAAW,sBAAS,CAClB,IAAK,CACH,IAAI,CAAE,GAAG,CACT,KAAK,CAAE,EACT,CACA,EAAG,CACD,IAAI,CAAE,IAAI,CACV,KAAK,CAAE,IACT,CACF,CACA,WAAW,sBAAS,CAClB,IAAK,CACH,IAAI,CAAE,IAAI,CACV,KAAK,CAAE,GACT,CACA,EAAG,CACD,IAAI,CAAE,IAAI,CACV,KAAK,CAAE,GACT,CACF\"}"
 };
 
-const ProgressLinear = create_ssr_component(($$result, $$props, $$bindings, $$slots) => {
+const ProgressLinear = create_ssr_component(($$result, $$props, $$bindings, slots) => {
 	let { app = false } = $$props;
 	let { progress = 0 } = $$props;
 	let { color = "primary" } = $$props;
@@ -3145,23 +3455,23 @@ const ProgressLinear = create_ssr_component(($$result, $$props, $$bindings, $$sl
 	$$result.css.add(css$7);
 
 	return `<div class="${[
-		"top-0 left-0 w-full h-1 bg-" + escape(color) + "-100 overflow-hidden relative" + " svelte-mguqwa",
-		(app ? "fixed" : "") + " " + (app ? "z-50" : "") + " " + (app && !initialized ? "hidden" : "")
-	].join(" ").trim()}"><div class="${[
-		"bg-" + escape(color) + "-500 h-1 absolute" + " svelte-mguqwa",
-		(!progress ? "inc" : "") + " " + (progress ? "transition" : "")
-	].join(" ").trim()}"${add_attribute("style", progress ? `width: ${progress}%` : "", 0)}></div>
+		"top-0 left-0 w-full h-1 bg-" + escape(color, true) + "-100 overflow-hidden relative" + " svelte-mguqwa",
+		(app ? "fixed" : "") + ' ' + (app ? "z-50" : "") + ' ' + (app && !initialized ? "hidden" : "")
+	].join(' ').trim()}"><div class="${[
+		"bg-" + escape(color, true) + "-500 h-1 absolute" + " svelte-mguqwa",
+		(!progress ? "inc" : "") + ' ' + (progress ? "transition" : "")
+	].join(' ').trim()}"${add_attribute("style", progress ? `width: ${progress}%` : "", 0)}></div>
   <div class="${[
-		"bg-" + escape(color) + "-500 h-1 absolute dec" + " svelte-mguqwa",
+		"bg-" + escape(color, true) + "-500 h-1 absolute dec" + " svelte-mguqwa",
 		progress ? "hidden" : ""
-	].join(" ").trim()}"></div></div>`;
+	].join(' ').trim()}"></div></div>`;
 });
 
-/* src/components/BotStatus.svelte generated by Svelte v3.24.0 */
+/* src/components/BotStatus.svelte generated by Svelte v3.59.2 */
 
 const css$8 = {
 	code: ".foolrow.svelte-1atyj0m{width:400px}.padtop5.svelte-1atyj0m{padding-top:14px}.yelowkob.svelte-1atyj0m{border:1px solid rgba(233, 229, 132, 0.74);box-sizing:border-box;box-shadow:0px 3px 5px rgba(209, 192, 104, 0.06);border-radius:5px;margin-left:auto;margin-right:auto;max-width:430px;line-height:1.7em;margin-top:14px;padding-top:5px;padding-left:7px;padding-right:7px}.yelowkob.svelte-1atyj0m:hover{cursor:pointer}table.svelte-1atyj0m{position:relative;width:400px;border-collapse:collapse;border:0px solid;margin-top:14px}td.svelte-1atyj0m{padding:7px 7px 7px 0px}td.svelte-1atyj0m:first-child{border-right:0px solid}.cellleft.svelte-1atyj0m{text-align:left}.borderbootom.svelte-1atyj0m{border-bottom:1px solid}.borderleft.svelte-1atyj0m{border-left:1px solid}.bordernull.svelte-1atyj0m{border:0px solid}label.svelte-1atyj0m{margin-bottom:7px;color:rgb(126, 126, 126)}.foolrow.svelte-1atyj0m{width:400px}.row.svelte-1atyj0m{display:flex;max-width:400px;margin:auto;justify-content:space-between;margin-bottom:5px}.rowbalance.svelte-1atyj0m{display:flex;max-width:400px;margin-left:auto;justify-content:space-between;align-items:flex-end}.rowbalanceitem.svelte-1atyj0m{padding-left:10px;text-align:center}.leftitem.svelte-1atyj0m{border:0px solid;text-align:left}.rightitem.svelte-1atyj0m{border:0px solid;text-align:right}.centereditem.svelte-1atyj0m{border:0px solid;text-align:center}main.svelte-1atyj0m{text-align:center;padding:0px}",
-	map: "{\"version\":3,\"file\":\"BotStatus.svelte\",\"sources\":[\"BotStatus.svelte\"],\"sourcesContent\":[\"<script>\\n  import { onMount } from \\\"svelte\\\";\\n  import Switchonoff from \\\"./Switchonoff.svelte\\\";\\n  import Switch from \\\"smelte/src/components/Switch\\\";\\n  import Button from \\\"smelte/src/components/Button\\\";\\n  import TextField from \\\"smelte/src/components/TextField\\\";\\n  import ProgressLinear from \\\"smelte/src/components/ProgressLinear\\\";\\n  import { stateStore } from \\\"../stores/statebot.js\\\";\\n  import { authStore } from \\\"../stores/auth\\\";\\n\\n  var selectbotname = $stateStore.selectbotname;\\n  let urlhost = $stateStore.urlhost;\\n  let userid = $authStore.user.uid;\\n\\n  let botsettingsjson = urlhost + \\\"bot_settings\\\";\\n  let botonoffjson = urlhost + \\\"bot_onoff\\\";\\n  let botonoffjson_togle = urlhost + \\\"bot_onoff_togle\\\";\\n  //let botfinancejson = urlhost + \\\"api/data-finance.php\\\";\\n  //let botfloorsjson = urlhost + \\\"api/data-floors.php\\\";\\n  //let botsalesjson = urlhost + \\\"api/data-sales.php\\\";\\n  let botstatusjson = urlhost + \\\"bot_full\\\";\\n  let changesettingsjson = urlhost + \\\"api/changesettings.php\\\";\\n  let resetsettingsjson = urlhost + \\\"bot_reset\\\";\\n  let deleteboturl = urlhost + \\\"bot_delete\\\";\\n  //let botfullstatusurl = urlhost + \\\"api/data-fullstatus.php\\\";\\n  let panicsaleurl = urlhost + \\\"bot_panic\\\";\\n\\n  let botfullstatus = [];\\n  let botsettings = [];\\n  let botfinance = [];\\n  let botfloors = [];\\n  let botsales = [];\\n  let botstatus = [];\\n  let botonoff = [];\\n  let last_price = 0;\\n\\n  let salestodayarr = [];\\n  let salesallarr = [];\\n\\n  function loadsettings(selectbotid) {\\n    let myHeaders = new Headers();\\n    myHeaders.append(\\\"Content-Type\\\", \\\"application/json\\\");\\n    myHeaders.append(\\\"Access-Control-Allow-Origin\\\", \\\"*\\\");\\n    myHeaders.append(\\\"Access-Control-Allow-Headers\\\", \\\"*\\\");\\n\\n    let raw = JSON.stringify({ botname: selectbotid });\\n\\n    let requestOptions = {\\n      method: \\\"POST\\\",\\n      headers: myHeaders,\\n      body: raw,\\n      redirect: \\\"follow\\\",\\n    };\\n\\n    fetch(botsettingsjson, requestOptions)\\n      .then((response) => response.json())\\n      .then((result) => {\\n        console.log(result);\\n\\n        botsettings = result;\\n      })\\n      .catch((error) => console.log(\\\"error\\\", error));\\n  }\\n\\n  function getonoff(selectbotid) {\\n    let myHeaders = new Headers();\\n    myHeaders.append(\\\"Content-Type\\\", \\\"application/json\\\");\\n\\n    let raw = JSON.stringify({ botname: selectbotid });\\n\\n    let requestOptions = {\\n      method: \\\"POST\\\",\\n      headers: myHeaders,\\n      body: raw,\\n      redirect: \\\"follow\\\",\\n    };\\n\\n    fetch(botonoffjson, requestOptions)\\n      .then((response) => response.json())\\n      .then((result) => {\\n        console.log(result);\\n\\n        botonoff = result;\\n      })\\n      .catch((error) => console.log(\\\"error\\\", error));\\n  }\\n\\n  function savesettings() {\\n    //botsettings.isrunning = !botsettings.isrunning;\\n    fetch(changesettingsjson, {\\n      method: \\\"post\\\",\\n      headers: {\\n        Accept: \\\"application/json, text/plain, */*\\\",\\n        \\\"Content-Type\\\": \\\"application/json\\\",\\n      },\\n      body: JSON.stringify(botsettings),\\n    });\\n\\n    function goback() {\\n      selectbotname = \\\"\\\";\\n      $stateStore.rout = \\\"botlist\\\";\\n    }\\n    setTimeout(goback, 1000);\\n  }\\n\\n  function resetsettings() {\\n    var myHeaders = new Headers();\\n    myHeaders.append(\\\"Content-Type\\\", \\\"application/json\\\");\\n\\n    var raw = JSON.stringify({ botname: selectbotname });\\n    var requestOptions = {\\n      method: \\\"POST\\\",\\n      headers: myHeaders,\\n      body: raw,\\n      redirect: \\\"follow\\\",\\n    };\\n    fetch(resetsettingsjson, requestOptions)\\n      .then((response) => response.json())\\n      .then((result) => {\\n        console.log(result);\\n      });\\n\\n    function goback() {\\n      selectbotname = \\\"\\\";\\n      $stateStore.rout = \\\"botlist\\\";\\n    }\\n    setTimeout(goback, 1000);\\n  }\\n\\n  function deletebot() {\\n    var myHeaders = new Headers();\\n    myHeaders.append(\\\"Content-Type\\\", \\\"application/json\\\");\\n\\n    var raw = JSON.stringify({\\n      botname: selectbotname,\\n      user_id_from_google: userid,\\n    });\\n    var requestOptions = {\\n      method: \\\"POST\\\",\\n      headers: myHeaders,\\n      body: raw,\\n      redirect: \\\"follow\\\",\\n    };\\n    fetch(deleteboturl, requestOptions)\\n      .then((response) => response.json())\\n      .then((result) => {\\n        console.log(result);\\n      });\\n    //$stateStore.rout = \\\"botlist\\\";\\n    //window.location = \\\"/\\\";\\n    function goback() {\\n      selectbotname = \\\"\\\";\\n      $stateStore.rout = \\\"botlist\\\";\\n    }\\n    setTimeout(goback, 1000);\\n  }\\n\\n  function panicsale() {\\n    var myHeaders = new Headers();\\n    myHeaders.append(\\\"Content-Type\\\", \\\"application/json\\\");\\n\\n    var raw = JSON.stringify({ botname: selectbotname });\\n    var requestOptions = {\\n      method: \\\"POST\\\",\\n      headers: myHeaders,\\n      body: raw,\\n      redirect: \\\"follow\\\",\\n    };\\n    fetch(panicsaleurl, requestOptions)\\n      .then((response) => response.json())\\n      .then((result) => {\\n        console.log(result);\\n      });\\n\\n    function goback() {\\n      selectbotname = \\\"\\\";\\n      $stateStore.rout = \\\"botlist\\\";\\n    }\\n    setTimeout(goback, 1000);\\n  }\\n\\n\\n  function sumsales(arr) {\\n    let sum = 0;\\n    arr.forEach((element) => {\\n      sum = sum + element[5];\\n    });\\n    return sum;\\n  }\\n  let bot;\\n  function fetchfullstatus(selectbotid) {\\n    console.log(\\\"selectbotid:\\\" + selectbotid);\\n\\n    let myHeaders2 = new Headers();\\n    myHeaders2.append(\\\"Content-Type\\\", \\\"application/json\\\");\\n\\n    let raw2 = JSON.stringify({ botname: selectbotid });\\n\\n    let requestOptions2 = {\\n      method: \\\"POST\\\",\\n      headers: myHeaders2,\\n      body: raw2,\\n      redirect: \\\"follow\\\",\\n    };\\n\\n    fetch(botstatusjson, requestOptions2)\\n      .then((response) => response.json())\\n      .then((result) => {\\n        console.log(result);\\n        last_price = Number(result.status.currentprice);\\n        botstatus = result.status;\\n        //botsettings = result.settings;\\n        botfinance = result.finance;\\n        botfloors = result.floors;\\n        botsales = result.sales;\\n        salestodayarr = botsales.today;\\n        salesallarr = botsales.all;\\n        //botonoff = result.onoff;\\n      })\\n      .catch((error) => console.log(\\\"error\\\", error));\\n  }\\n\\n  function onofftogle() {\\n\\n    var myHeaders = new Headers();\\n    myHeaders.append(\\\"Content-Type\\\", \\\"application/json\\\");\\n\\n    var raw = JSON.stringify({ botname: selectbotname });\\n    var requestOptions = {\\n      method: \\\"POST\\\",\\n      headers: myHeaders,\\n      body: raw,\\n      redirect: \\\"follow\\\",\\n    };\\n    fetch(botonoffjson_togle, requestOptions)\\n      .then((response) => response.json())\\n      .then((result) => {});\\n  }\\n\\n  loadsettings(selectbotname);\\n  //fetch1s();\\n  fetchfullstatus(selectbotname);\\n  getonoff(selectbotname);\\n  const timerId = setInterval(fetchfullstatus, 1000, selectbotname);\\n  $stateStore.timerId = timerId;\\n\\n  $: if (!botstatus) {\\n    botstatus = [];\\n    botstatus.rezhim = \\\"Подключаемся к серверу\\\";\\n  }\\n  let profitsum = 0;\\n  let profitsumproc = 0;\\n  let quotasum = 0;\\n  let basesum = 0;\\n  $: profitsum = (botfinance.depo - botfinance.startdepo).toFixed(\\n    botsettings.digitprice\\n  );\\n  $: profitsumproc = (\\n    (botfinance.depo / botfinance.startdepo) * 100 -\\n    100\\n  ).toFixed(2);\\n  $: quotasum = +botfinance.quotanal + +botfinance.quotainorders;\\n  $: basesum = +botfinance.basenal + +botfinance.baseinorders;\\n  $: profittodayproc = ((salestodaysum / botfinance.startdepo) * 100).toFixed(\\n    2\\n  );\\n\\n  //setInterval(fetch1s, 1000);\\n\\n  let lowq;\\n  let low;\\n  let hight;\\n  let floornumber, f1, f2, f3;\\n  let salesall;\\n  let salesallsum, ordersizeinquota, ordersizeinbase, progress;\\n\\n  $: if (botstatus !== null) {\\n    lowq = botfloors[botstatus.currentfloor - 1];\\n    ordersizeinquota = (\\n      ((botfinance.depo / 100) * botsettings.ordersize) /\\n      botstatus.currentprice\\n    ).toFixed(botsettings.digitq);\\n    ordersizeinbase = (ordersizeinquota * botstatus.currentprice).toFixed(\\n      botsettings.digitprice\\n    );\\n    progress = ((botstatus.currentprice - low) / (hight - low)) * 100;\\n    if (lowq) {\\n      floornumber = lowq[0];\\n      low = lowq[1].toFixed(botsettings.digitprice);\\n      hight = lowq[2].toFixed(botsettings.digitprice);\\n      f1 = lowq[3].toFixed(botsettings.digitprice);\\n      f2 = lowq[4].toFixed(botsettings.digitprice);\\n      f3 = lowq[5].toFixed(botsettings.digitprice);\\n    }\\n  }\\n\\n  $: salestoday = salestodayarr.length;\\n  $: salestodaysum = sumsales(salestodayarr);\\n\\n  $: salesall = salesallarr.length;\\n  $: salesallsum = sumsales(salesallarr);\\n\\n  let openfloors;\\n\\n  function openfloorscalc(floors) {\\n    let count = 0;\\n    let srprice = 0;\\n    let sum = 0;\\n    let res;\\n    floors.forEach(function (item, i, floors) {\\n      if (item[7] === 2 || item[7] === 3) {\\n        count = count + 1;\\n        sum = Number(sum + Number(item[10]));\\n      }\\n    });\\n    if (count > 0) {\\n      srprice = (sum / count).toFixed(botsettings.digitprice);\\n      res = { count: count, sprice: srprice };\\n    } else {\\n      res = { count: count, sprice: srprice };\\n    }\\n\\n    return res;\\n  }\\n  $: openfloors = openfloorscalc(botfloors);\\n</script>\\n\\n<main>\\n\\n  <div class=\\\"row\\\">\\n    <div class=\\\"leftitem\\\">\\n      <div class=\\\"foolrow\\\">\\n        <TextField\\n          label=\\\"Комментарий\\\"\\n          outlined\\n          bind:value={botsettings.comment}\\n        />\\n      </div>\\n    </div>\\n  </div>\\n  <div class=\\\"row\\\">\\n    <div class=\\\"leftitem\\\">\\n      <label>Текущий режим</label>\\n      <br />\\n      <strong class=\\\"bg-white dark:bg-gray-900 text-black dark:text-white\\\">\\n        {botstatus.rezhim}\\n      </strong>\\n    </div>\\n  </div>\\n  {#if botstatus.currentfloor !== 0}\\n    <div class=\\\"row\\\">\\n      <div class=\\\"leftitem\\\">\\n        <nobr>\\n          <label>Этаж</label>\\n          <strong>{floornumber}</strong>\\n          {low} - {hight}&nbsp;&nbsp;\\n        </nobr>\\n      </div>\\n      <div\\n        class=\\\"rightitem\\\"\\n        style=\\\"margin-top: 9px;height:4px; width:100%; background-color: #f5ce54\\\"\\n      >\\n        <ProgressLinear {progress} />\\n      </div>\\n    </div>\\n  {/if}\\n  <div class=\\\"row\\\">\\n    <div class=\\\"leftitem\\\">\\n      <label>Цена</label>\\n      <br />\\n      <span\\n        class=\\\"inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-bold\\n        text-gray-800\\\"\\n      >\\n        {last_price}\\n      </span>\\n      <br />\\n    </div>\\n    <div class=\\\"rightitem rowbalance\\\">\\n      <div class=\\\"rowbalanceitem\\\">\\n        <label>Баланс</label>\\n      </div>\\n      <div class=\\\"rowbalanceitem\\\">\\n        <label>Старт</label>\\n        <br />\\n        <span\\n          class=\\\"inline-block bg-gray-200 rounded-full px-3 py-1 text-sm\\n          font-semibold text-gray-700\\\"\\n        >\\n          {botfinance.startdepo}\\n        </span>\\n      </div>\\n      <div class=\\\"rowbalanceitem\\\">\\n        <label>Сегодня</label>\\n        <br />\\n        <span\\n          class=\\\"inline-block bg-gray-200 rounded-full px-3 py-1 text-sm\\n          font-semibold text-gray-700\\\"\\n        >\\n          {botfinance.depo}\\n        </span>\\n      </div>\\n    </div>\\n  </div>\\n  <div class=\\\"yelowkob\\\">\\n    <div class=\\\"row\\\">\\n      <div class=\\\"centereditem\\\">\\n        <label>Прибыль всего</label>\\n        <br />\\n        <span>{profitsum}</span>\\n        <br />\\n        <span>({profitsumproc} %)</span>\\n        <br />\\n      </div>\\n      <div class=\\\"centereditem\\\">\\n        <label>Прибыль сегодня</label>\\n        <br />\\n        <span>{salestodaysum.toFixed(botsettings.digitprice)}</span>\\n        <br />\\n        <span>({profittodayproc} %)</span>\\n        <br />\\n      </div>\\n    </div>\\n  </div>\\n  <div class=\\\"row\\\">\\n    <div class=\\\"centereditem\\\">\\n      <table class=\\\"bordernull\\\">\\n        <tr class=\\\"bordernull\\\">\\n          <td class=\\\"cellleft\\\">\\n            <label>{botsettings.quotacoin} в наличии</label>\\n          </td>\\n          <td class=\\\"cellleft bordernull\\\">{botfinance.quotanal}</td>\\n          <td rowspan=\\\"2\\\" class=\\\"borderbootom borderleft\\\">\\n            {quotasum.toFixed(botsettings.digitq)}\\n            <br />\\n            ({(last_price * quotasum).toFixed(botsettings.digitq)} {botsettings.basecoin})\\n          </td>\\n        </tr>\\n        <tr>\\n          <td class=\\\"borderbootom cellleft\\\">\\n            <label>{botsettings.quotacoin} в ордерах</label>\\n          </td>\\n          <td class=\\\"borderbootom cellleft\\\">{botfinance.quotainorders}</td>\\n        </tr>\\n        <tr>\\n          <td class=\\\"cellleft\\\">\\n            <label>{botsettings.basecoin} в наличии</label>\\n          </td>\\n          <td class=\\\"cellleft bordernull\\\">\\n            {(botfinance.basenal * 1).toFixed(botsettings.digitprice)}\\n          </td>\\n          <td rowspan=\\\"2\\\" class=\\\"borderleft\\\">\\n            {basesum.toFixed(botsettings.digitprice)}\\n          </td>\\n        </tr>\\n        <tr>\\n          <td class=\\\"cellleft\\\">\\n            <label>{botsettings.basecoin} в ордерах</label>\\n          </td>\\n          <td class=\\\"cellleft\\\">{botfinance.baseinorders}</td>\\n        </tr>\\n      </table>\\n    </div>\\n  </div>\\n  <div class=\\\"yelowkob\\\">\\n    <div class=\\\"row\\\">\\n      <div class=\\\"leftitem\\\">\\n        <label>Продажи</label>\\n        <br />\\n        <label>Продажи сегодня</label>\\n        <br />\\n        <label>Ср. прибыль в сделке</label>\\n      </div>\\n      <div class=\\\"rightitem\\\">\\n        {salesall}\\n        <br />\\n        <strong>{salestoday}</strong>\\n        ({salestodaysum.toFixed(botsettings.digitprice)} {botsettings.basecoin})\\n        <br />\\n        {(salesallsum / salesall || 0).toFixed(botsettings.digitprice)}\\n        {botsettings.basecoin}\\n      </div>\\n\\n    </div>\\n  </div>\\n  <div class=\\\"yelowkob\\\">\\n    <div class=\\\"row\\\">\\n      <div class=\\\"leftitem\\\">\\n        <label>Открытых сделок</label>\\n        <br />\\n        <label>Средняя цена закупки</label>\\n      </div>\\n      <div class=\\\"rightitem\\\">\\n        {openfloors.count}\\n        <br />\\n        {openfloors.sprice} {botsettings.basecoin}\\n      </div>\\n\\n    </div>\\n  </div>\\n  <br />\\n  <div class=\\\"row\\\">\\n    <div class=\\\"leftitem\\\" >\\n      <label>{botonoff ? 'Включен' : 'Выключен'}</label>\\n      <br />\\n      <span on:click={onofftogle}><Switchonoff  bind:value={botonoff} /></span>\\n    </div>\\n    <div class=\\\"rightitem\\\">\\n      <label>Запрет на закуп</label>\\n      <br />\\n      <Switch\\n        classes=\\\"inline-flex items-right mb-2 cursor-pointer z-10\\\"\\n        bind:value={botsettings.handyzapretnazakup}\\n      />\\n    </div>\\n\\n  </div>\\n\\n  <!--     <div class=\\\"row\\\">\\n        <div class=\\\"leftitem\\\">\\n            <TextField outlined bind:value={botsettings.priceforwake} />\\n        </div>\\n        <div class=\\\"rightitemlabel\\\">\\n            <label>Включить когда цена пересечет уровень</label>\\n        </div>\\n    </div> -->\\n\\n  <div class=\\\"row\\\">\\n    <div class=\\\"leftitem\\\">\\n      <label>Объем ордера</label>\\n      <br />\\n      ~ {ordersizeinquota} {botsettings.quotacoin}, {ordersizeinbase} {botsettings.basecoin}\\n    </div>\\n    &nbsp;&nbsp;\\n    <div class=\\\"rightitem\\\">\\n      <TextField\\n        label=\\\"% от депо\\\"\\n        outlined\\n        bind:value={botsettings.ordersize}\\n        size=\\\"10\\\"\\n      />\\n\\n    </div>\\n  </div>\\n  <div class=\\\"row\\\">\\n    <div class=\\\"leftitem\\\">\\n      <TextField label=\\\"MA1, мин\\\" outlined bind:value={botsettings.ma1} />\\n    </div>\\n    &nbsp;&nbsp;\\n    <div class=\\\"rightitem\\\">\\n      <TextField label=\\\"MA2, мин\\\" outlined bind:value={botsettings.ma2} />\\n    </div>\\n  </div>\\n  <div class=\\\"row\\\">\\n    <div class=\\\"leftitem padtop5\\\">\\n      <label>Не закупать, если цена больше</label>\\n    </div>\\n    &nbsp;&nbsp;\\n    <div class=\\\"rightitem\\\">\\n      <TextField\\n        label=\\\"\\\"\\n        outlined\\n        bind:value={botsettings.maxpriceforzakup}\\n        size=\\\"10\\\"\\n      />\\n    </div>\\n  </div>\\n\\n  <div class=\\\"row\\\">\\n    <div class=\\\"leftitem padtop5\\\">\\n      <label>Не закупать, если цена меньше</label>\\n    </div>\\n    <div class=\\\"rightitem\\\">\\n      <TextField\\n        label=\\\"\\\"\\n        outlined\\n        bind:value={botsettings.minpriceforzakup}\\n        size=\\\"10\\\"\\n      />\\n    </div>\\n  </div>\\n\\n  <Button on:click={savesettings} href=\\\"/\\\">Сохранить</Button>\\n  <br />\\n  <br />\\n  <Button color=\\\"alert\\\" on:click={panicsale}>PANICSALE</Button>\\n  <br />\\n  <br />\\n  <Button color=\\\"alert\\\" on:click={resetsettings}>\\n    Сбросить к стартовым настройкам\\n  </Button>\\n  <br />\\n  <br />\\n  <Button color=\\\"alert\\\" on:click={deletebot} href=\\\"/\\\">Удалить</Button>\\n\\n</main>\\n\\n<style type=\\\"text/scss\\\">\\n  .foolrow {\\n    width: 400px;\\n  }\\n  .padtop5 {\\n    padding-top: 14px;\\n  }\\n  .yelowkob {\\n    border: 1px solid rgba(233, 229, 132, 0.74);\\n    box-sizing: border-box;\\n    box-shadow: 0px 3px 5px rgba(209, 192, 104, 0.06);\\n    border-radius: 5px;\\n    margin-left: auto;\\n    margin-right: auto;\\n    max-width: 430px;\\n    line-height: 1.7em;\\n    margin-top: 14px;\\n    padding-top: 5px;\\n    padding-left: 7px;\\n    padding-right: 7px;\\n  }\\n  .yelowkob:hover {\\n    cursor: pointer;\\n  }\\n  table {\\n    position: relative;\\n    width: 400px;\\n    border-collapse: collapse;\\n    border: 0px solid;\\n    margin-top: 14px;\\n  }\\n  td {\\n    padding: 7px 7px 7px 0px;\\n  }\\n  td:first-child {\\n    border-right: 0px solid;\\n  }\\n  .cellleft {\\n    text-align: left;\\n  }\\n  .borderbootom {\\n    border-bottom: 1px solid;\\n  }\\n  .borderleft {\\n    border-left: 1px solid;\\n  }\\n  .bordernull {\\n    border: 0px solid;\\n  }\\n  label {\\n    margin-bottom: 7px;\\n    color: rgb(126, 126, 126);\\n  }\\n  .foolrow {\\n    width: 400px;\\n  }\\n\\n  .row {\\n    display: flex;\\n    max-width: 400px;\\n    margin: auto;\\n    justify-content: space-between;\\n    margin-bottom: 5px;\\n  }\\n  .rowbalance {\\n    display: flex;\\n    max-width: 400px;\\n    margin-left: auto;\\n    justify-content: space-between;\\n    align-items: flex-end;\\n  }\\n  .rowbalanceitem {\\n    padding-left: 10px;\\n    text-align: center;\\n  }\\n  .leftitem {\\n    border: 0px solid;\\n    text-align: left;\\n  }\\n  .rightitem {\\n    border: 0px solid;\\n    text-align: right;\\n  }\\n  .centereditem {\\n    border: 0px solid;\\n    text-align: center;\\n  }\\n  main {\\n    text-align: center;\\n    padding: 0px;\\n  }\\n</style>\\n\"],\"names\":[],\"mappings\":\"AAslBE,QAAQ,eAAC,CAAC,AACR,KAAK,CAAE,KAAK,AACd,CAAC,AACD,QAAQ,eAAC,CAAC,AACR,WAAW,CAAE,IAAI,AACnB,CAAC,AACD,SAAS,eAAC,CAAC,AACT,MAAM,CAAE,GAAG,CAAC,KAAK,CAAC,KAAK,GAAG,CAAC,CAAC,GAAG,CAAC,CAAC,GAAG,CAAC,CAAC,IAAI,CAAC,CAC3C,UAAU,CAAE,UAAU,CACtB,UAAU,CAAE,GAAG,CAAC,GAAG,CAAC,GAAG,CAAC,KAAK,GAAG,CAAC,CAAC,GAAG,CAAC,CAAC,GAAG,CAAC,CAAC,IAAI,CAAC,CACjD,aAAa,CAAE,GAAG,CAClB,WAAW,CAAE,IAAI,CACjB,YAAY,CAAE,IAAI,CAClB,SAAS,CAAE,KAAK,CAChB,WAAW,CAAE,KAAK,CAClB,UAAU,CAAE,IAAI,CAChB,WAAW,CAAE,GAAG,CAChB,YAAY,CAAE,GAAG,CACjB,aAAa,CAAE,GAAG,AACpB,CAAC,AACD,wBAAS,MAAM,AAAC,CAAC,AACf,MAAM,CAAE,OAAO,AACjB,CAAC,AACD,KAAK,eAAC,CAAC,AACL,QAAQ,CAAE,QAAQ,CAClB,KAAK,CAAE,KAAK,CACZ,eAAe,CAAE,QAAQ,CACzB,MAAM,CAAE,GAAG,CAAC,KAAK,CACjB,UAAU,CAAE,IAAI,AAClB,CAAC,AACD,EAAE,eAAC,CAAC,AACF,OAAO,CAAE,GAAG,CAAC,GAAG,CAAC,GAAG,CAAC,GAAG,AAC1B,CAAC,AACD,iBAAE,YAAY,AAAC,CAAC,AACd,YAAY,CAAE,GAAG,CAAC,KAAK,AACzB,CAAC,AACD,SAAS,eAAC,CAAC,AACT,UAAU,CAAE,IAAI,AAClB,CAAC,AACD,aAAa,eAAC,CAAC,AACb,aAAa,CAAE,GAAG,CAAC,KAAK,AAC1B,CAAC,AACD,WAAW,eAAC,CAAC,AACX,WAAW,CAAE,GAAG,CAAC,KAAK,AACxB,CAAC,AACD,WAAW,eAAC,CAAC,AACX,MAAM,CAAE,GAAG,CAAC,KAAK,AACnB,CAAC,AACD,KAAK,eAAC,CAAC,AACL,aAAa,CAAE,GAAG,CAClB,KAAK,CAAE,IAAI,GAAG,CAAC,CAAC,GAAG,CAAC,CAAC,GAAG,CAAC,AAC3B,CAAC,AACD,QAAQ,eAAC,CAAC,AACR,KAAK,CAAE,KAAK,AACd,CAAC,AAED,IAAI,eAAC,CAAC,AACJ,OAAO,CAAE,IAAI,CACb,SAAS,CAAE,KAAK,CAChB,MAAM,CAAE,IAAI,CACZ,eAAe,CAAE,aAAa,CAC9B,aAAa,CAAE,GAAG,AACpB,CAAC,AACD,WAAW,eAAC,CAAC,AACX,OAAO,CAAE,IAAI,CACb,SAAS,CAAE,KAAK,CAChB,WAAW,CAAE,IAAI,CACjB,eAAe,CAAE,aAAa,CAC9B,WAAW,CAAE,QAAQ,AACvB,CAAC,AACD,eAAe,eAAC,CAAC,AACf,YAAY,CAAE,IAAI,CAClB,UAAU,CAAE,MAAM,AACpB,CAAC,AACD,SAAS,eAAC,CAAC,AACT,MAAM,CAAE,GAAG,CAAC,KAAK,CACjB,UAAU,CAAE,IAAI,AAClB,CAAC,AACD,UAAU,eAAC,CAAC,AACV,MAAM,CAAE,GAAG,CAAC,KAAK,CACjB,UAAU,CAAE,KAAK,AACnB,CAAC,AACD,aAAa,eAAC,CAAC,AACb,MAAM,CAAE,GAAG,CAAC,KAAK,CACjB,UAAU,CAAE,MAAM,AACpB,CAAC,AACD,IAAI,eAAC,CAAC,AACJ,UAAU,CAAE,MAAM,CAClB,OAAO,CAAE,GAAG,AACd,CAAC\"}"
+	map: "{\"version\":3,\"file\":\"BotStatus.svelte\",\"sources\":[\"BotStatus.svelte\"],\"sourcesContent\":[\"<script>\\n  import { onMount } from \\\"svelte\\\";\\n  import Switchonoff from \\\"./Switchonoff.svelte\\\";\\n  import Switch from \\\"smelte/src/components/Switch\\\";\\n  import Button from \\\"smelte/src/components/Button\\\";\\n  import TextField from \\\"smelte/src/components/TextField\\\";\\n  import ProgressLinear from \\\"smelte/src/components/ProgressLinear\\\";\\n  import { stateStore } from \\\"../stores/statebot.js\\\";\\n  import { authStore } from \\\"../stores/auth\\\";\\n\\n  var selectbotname = $stateStore.selectbotname;\\n  let urlhost = $stateStore.urlhost;\\n  let userid = $authStore.user.uid;\\n\\n  let botsettingsjson = urlhost + \\\"bot_settings\\\";\\n  let botonoffjson = urlhost + \\\"bot_onoff\\\";\\n  let botonoffjson_togle = urlhost + \\\"bot_onoff_togle\\\";\\n  //let botfinancejson = urlhost + \\\"api/data-finance.php\\\";\\n  //let botfloorsjson = urlhost + \\\"api/data-floors.php\\\";\\n  //let botsalesjson = urlhost + \\\"api/data-sales.php\\\";\\n  let botstatusjson = urlhost + \\\"bot_full\\\";\\n  let changesettingsjson = urlhost + \\\"api/changesettings.php\\\";\\n  let resetsettingsjson = urlhost + \\\"bot_reset\\\";\\n  let deleteboturl = urlhost + \\\"bot_delete\\\";\\n  //let botfullstatusurl = urlhost + \\\"api/data-fullstatus.php\\\";\\n  let panicsaleurl = urlhost + \\\"bot_panic\\\";\\n\\n  let botfullstatus = [];\\n  let botsettings = [];\\n  let botfinance = [];\\n  let botfloors = [];\\n  let botsales = [];\\n  let botstatus = [];\\n  let botonoff = [];\\n  let last_price = 0;\\n\\n  let salestodayarr = [];\\n  let salesallarr = [];\\n\\n  function loadsettings(selectbotid) {\\n    let myHeaders = new Headers();\\n    myHeaders.append(\\\"Content-Type\\\", \\\"application/json\\\");\\n\\n    let raw = JSON.stringify({ botname: selectbotid });\\n\\n    let requestOptions = {\\n      method: \\\"POST\\\",\\n      headers: myHeaders,\\n      body: raw,\\n      redirect: \\\"follow\\\",\\n    };\\n\\n    fetch(botsettingsjson, requestOptions)\\n      .then((response) => response.json())\\n      .then((result) => {\\n        console.log(result);\\n\\n        botsettings = result;\\n      })\\n      .catch((error) => console.log(\\\"error\\\", error));\\n  }\\n\\n  function getonoff(selectbotid) {\\n    let myHeaders = new Headers();\\n    myHeaders.append(\\\"Content-Type\\\", \\\"application/json\\\");\\n\\n    let raw = JSON.stringify({ botname: selectbotid });\\n\\n    let requestOptions = {\\n      method: \\\"POST\\\",\\n      headers: myHeaders,\\n      body: raw,\\n      redirect: \\\"follow\\\",\\n    };\\n\\n    fetch(botonoffjson, requestOptions)\\n      .then((response) => response.json())\\n      .then((result) => {\\n        console.log(result);\\n\\n        botonoff = result;\\n      })\\n      .catch((error) => console.log(\\\"error\\\", error));\\n  }\\n\\n  function savesettings() {\\n    //botsettings.isrunning = !botsettings.isrunning;\\n    fetch(changesettingsjson, {\\n      method: \\\"post\\\",\\n      headers: {\\n        Accept: \\\"application/json, text/plain, */*\\\",\\n        \\\"Content-Type\\\": \\\"application/json\\\",\\n      },\\n      body: JSON.stringify(botsettings),\\n    });\\n\\n    function goback() {\\n      selectbotname = \\\"\\\";\\n      $stateStore.rout = \\\"botlist\\\";\\n    }\\n    setTimeout(goback, 1000);\\n  }\\n\\n  function resetsettings() {\\n    var myHeaders = new Headers();\\n    myHeaders.append(\\\"Content-Type\\\", \\\"application/json\\\");\\n\\n    var raw = JSON.stringify({ botname: selectbotname });\\n    var requestOptions = {\\n      method: \\\"POST\\\",\\n      headers: myHeaders,\\n      body: raw,\\n      redirect: \\\"follow\\\",\\n    };\\n    fetch(resetsettingsjson, requestOptions)\\n      .then((response) => response.json())\\n      .then((result) => {\\n        console.log(result);\\n      });\\n\\n    function goback() {\\n      selectbotname = \\\"\\\";\\n      $stateStore.rout = \\\"botlist\\\";\\n    }\\n    setTimeout(goback, 1000);\\n  }\\n\\n  function deletebot() {\\n    var myHeaders = new Headers();\\n    myHeaders.append(\\\"Content-Type\\\", \\\"application/json\\\");\\n\\n    var raw = JSON.stringify({\\n      botname: selectbotname,\\n      user_id_from_google: userid,\\n    });\\n    var requestOptions = {\\n      method: \\\"POST\\\",\\n      headers: myHeaders,\\n      body: raw,\\n      redirect: \\\"follow\\\",\\n    };\\n    fetch(deleteboturl, requestOptions)\\n      .then((response) => response.json())\\n      .then((result) => {\\n        console.log(result);\\n      });\\n    //$stateStore.rout = \\\"botlist\\\";\\n    //window.location = \\\"/\\\";\\n    function goback() {\\n      selectbotname = \\\"\\\";\\n      $stateStore.rout = \\\"botlist\\\";\\n    }\\n    setTimeout(goback, 1000);\\n  }\\n\\n  function panicsale() {\\n    var myHeaders = new Headers();\\n    myHeaders.append(\\\"Content-Type\\\", \\\"application/json\\\");\\n\\n    var raw = JSON.stringify({ botname: selectbotname });\\n    var requestOptions = {\\n      method: \\\"POST\\\",\\n      headers: myHeaders,\\n      body: raw,\\n      redirect: \\\"follow\\\",\\n    };\\n    fetch(panicsaleurl, requestOptions)\\n      .then((response) => response.json())\\n      .then((result) => {\\n        console.log(result);\\n      });\\n\\n    function goback() {\\n      selectbotname = \\\"\\\";\\n      $stateStore.rout = \\\"botlist\\\";\\n    }\\n    setTimeout(goback, 1000);\\n  }\\n\\n\\n  function sumsales(arr) {\\n    let sum = 0;\\n    arr.forEach((element) => {\\n      sum = sum + element[5];\\n    });\\n    return sum;\\n  }\\n  let bot;\\n  function fetchfullstatus(selectbotid) {\\n    console.log(\\\"selectbotid:\\\" + selectbotid);\\n\\n    let myHeaders2 = new Headers();\\n    myHeaders2.append(\\\"Content-Type\\\", \\\"application/json\\\");\\n\\n    let raw2 = JSON.stringify({ botname: selectbotid });\\n\\n    let requestOptions2 = {\\n      method: \\\"POST\\\",\\n      headers: myHeaders2,\\n      body: raw2,\\n      redirect: \\\"follow\\\",\\n    };\\n\\n    fetch(botstatusjson, requestOptions2)\\n      .then((response) => response.json())\\n      .then((result) => {\\n        console.log(result);\\n        last_price = Number(result.status.currentprice);\\n        botstatus = result.status;\\n        //botsettings = result.settings;\\n        botfinance = result.finance;\\n        botfloors = result.floors;\\n        botsales = result.sales;\\n        salestodayarr = botsales.today;\\n        salesallarr = botsales.all;\\n        //botonoff = result.onoff;\\n      })\\n      .catch((error) => console.log(\\\"error\\\", error));\\n  }\\n\\n  function onofftogle() {\\n\\n    var myHeaders = new Headers();\\n    myHeaders.append(\\\"Content-Type\\\", \\\"application/json\\\");\\n\\n    var raw = JSON.stringify({ botname: selectbotname });\\n    var requestOptions = {\\n      method: \\\"POST\\\",\\n      headers: myHeaders,\\n      body: raw,\\n      redirect: \\\"follow\\\",\\n    };\\n    fetch(botonoffjson_togle, requestOptions)\\n      .then((response) => response.json())\\n      .then((result) => {});\\n  }\\n\\n  loadsettings(selectbotname);\\n  //fetch1s();\\n  fetchfullstatus(selectbotname);\\n  getonoff(selectbotname);\\n  const timerId = setInterval(fetchfullstatus, 1000, selectbotname);\\n  $stateStore.timerId = timerId;\\n\\n  $: if (!botstatus) {\\n    botstatus = [];\\n    botstatus.rezhim = \\\"Подключаемся к серверу\\\";\\n  }\\n  let profitsum = 0;\\n  let profitsumproc = 0;\\n  let quotasum = 0;\\n  let basesum = 0;\\n  $: profitsum = (botfinance.depo - botfinance.startdepo).toFixed(\\n    botsettings.digitprice\\n  );\\n  $: profitsumproc = (\\n    (botfinance.depo / botfinance.startdepo) * 100 -\\n    100\\n  ).toFixed(2);\\n  $: quotasum = +botfinance.quotanal + +botfinance.quotainorders;\\n  $: basesum = +botfinance.basenal + +botfinance.baseinorders;\\n  $: profittodayproc = ((salestodaysum / botfinance.startdepo) * 100).toFixed(\\n    2\\n  );\\n\\n  //setInterval(fetch1s, 1000);\\n\\n  let lowq;\\n  let low;\\n  let hight;\\n  let floornumber, f1, f2, f3;\\n  let salesall;\\n  let salesallsum, ordersizeinquota, ordersizeinbase, progress;\\n\\n  $: if (botstatus !== null) {\\n    lowq = botfloors[botstatus.currentfloor - 1];\\n    ordersizeinquota = (\\n      ((botfinance.depo / 100) * botsettings.ordersize) /\\n      botstatus.currentprice\\n    ).toFixed(botsettings.digitq);\\n    ordersizeinbase = (ordersizeinquota * botstatus.currentprice).toFixed(\\n      botsettings.digitprice\\n    );\\n    progress = ((botstatus.currentprice - low) / (hight - low)) * 100;\\n    if (lowq) {\\n      floornumber = lowq[0];\\n      low = lowq[1].toFixed(botsettings.digitprice);\\n      hight = lowq[2].toFixed(botsettings.digitprice);\\n      f1 = lowq[3].toFixed(botsettings.digitprice);\\n      f2 = lowq[4].toFixed(botsettings.digitprice);\\n      f3 = lowq[5].toFixed(botsettings.digitprice);\\n    }\\n  }\\n\\n  $: salestoday = salestodayarr.length;\\n  $: salestodaysum = sumsales(salestodayarr);\\n\\n  $: salesall = salesallarr.length;\\n  $: salesallsum = sumsales(salesallarr);\\n\\n  let openfloors;\\n\\n  function openfloorscalc(floors) {\\n    let count = 0;\\n    let srprice = 0;\\n    let sum = 0;\\n    let res;\\n    floors.forEach(function (item, i, floors) {\\n      if (item[7] === 2 || item[7] === 3) {\\n        count = count + 1;\\n        sum = Number(sum + Number(item[10]));\\n      }\\n    });\\n    if (count > 0) {\\n      srprice = (sum / count).toFixed(botsettings.digitprice);\\n      res = { count: count, sprice: srprice };\\n    } else {\\n      res = { count: count, sprice: srprice };\\n    }\\n\\n    return res;\\n  }\\n  $: openfloors = openfloorscalc(botfloors);\\n</script>\\n\\n<main>\\n\\n  <div class=\\\"row\\\">\\n    <div class=\\\"leftitem\\\">\\n      <div class=\\\"foolrow\\\">\\n        <TextField\\n          label=\\\"Комментарий\\\"\\n          outlined\\n          bind:value={botsettings.comment}\\n        />\\n      </div>\\n    </div>\\n  </div>\\n  <div class=\\\"row\\\">\\n    <div class=\\\"leftitem\\\">\\n      <label>Текущий режим</label>\\n      <br />\\n      <strong class=\\\"bg-white dark:bg-gray-900 text-black dark:text-white\\\">\\n        {botstatus.rezhim}\\n      </strong>\\n    </div>\\n  </div>\\n  {#if botstatus.currentfloor !== 0}\\n    <div class=\\\"row\\\">\\n      <div class=\\\"leftitem\\\">\\n        <nobr>\\n          <label>Этаж</label>\\n          <strong>{floornumber}</strong>\\n          {low} - {hight}&nbsp;&nbsp;\\n        </nobr>\\n      </div>\\n      <div\\n        class=\\\"rightitem\\\"\\n        style=\\\"margin-top: 9px;height:4px; width:100%; background-color: #f5ce54\\\"\\n      >\\n        <ProgressLinear {progress} />\\n      </div>\\n    </div>\\n  {/if}\\n  <div class=\\\"row\\\">\\n    <div class=\\\"leftitem\\\">\\n      <label>Цена</label>\\n      <br />\\n      <span\\n        class=\\\"inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-bold\\n        text-gray-800\\\"\\n      >\\n        {last_price}\\n      </span>\\n      <br />\\n    </div>\\n    <div class=\\\"rightitem rowbalance\\\">\\n      <div class=\\\"rowbalanceitem\\\">\\n        <label>Баланс</label>\\n      </div>\\n      <div class=\\\"rowbalanceitem\\\">\\n        <label>Старт</label>\\n        <br />\\n        <span\\n          class=\\\"inline-block bg-gray-200 rounded-full px-3 py-1 text-sm\\n          font-semibold text-gray-700\\\"\\n        >\\n          {botfinance.startdepo}\\n        </span>\\n      </div>\\n      <div class=\\\"rowbalanceitem\\\">\\n        <label>Сегодня</label>\\n        <br />\\n        <span\\n          class=\\\"inline-block bg-gray-200 rounded-full px-3 py-1 text-sm\\n          font-semibold text-gray-700\\\"\\n        >\\n          {botfinance.depo}\\n        </span>\\n      </div>\\n    </div>\\n  </div>\\n  <div class=\\\"yelowkob\\\">\\n    <div class=\\\"row\\\">\\n      <div class=\\\"centereditem\\\">\\n        <label>Прибыль всего</label>\\n        <br />\\n        <span>{profitsum}</span>\\n        <br />\\n        <span>({profitsumproc} %)</span>\\n        <br />\\n      </div>\\n      <div class=\\\"centereditem\\\">\\n        <label>Прибыль сегодня</label>\\n        <br />\\n        <span>{salestodaysum.toFixed(botsettings.digitprice)}</span>\\n        <br />\\n        <span>({profittodayproc} %)</span>\\n        <br />\\n      </div>\\n    </div>\\n  </div>\\n  <div class=\\\"row\\\">\\n    <div class=\\\"centereditem\\\">\\n      <table class=\\\"bordernull\\\">\\n        <tr class=\\\"bordernull\\\">\\n          <td class=\\\"cellleft\\\">\\n            <label>{botsettings.quotacoin} в наличии</label>\\n          </td>\\n          <td class=\\\"cellleft bordernull\\\">{botfinance.quotanal}</td>\\n          <td rowspan=\\\"2\\\" class=\\\"borderbootom borderleft\\\">\\n            {quotasum.toFixed(botsettings.digitq)}\\n            <br />\\n            ({(last_price * quotasum).toFixed(botsettings.digitq)} {botsettings.basecoin})\\n          </td>\\n        </tr>\\n        <tr>\\n          <td class=\\\"borderbootom cellleft\\\">\\n            <label>{botsettings.quotacoin} в ордерах</label>\\n          </td>\\n          <td class=\\\"borderbootom cellleft\\\">{botfinance.quotainorders}</td>\\n        </tr>\\n        <tr>\\n          <td class=\\\"cellleft\\\">\\n            <label>{botsettings.basecoin} в наличии</label>\\n          </td>\\n          <td class=\\\"cellleft bordernull\\\">\\n            {(botfinance.basenal * 1).toFixed(botsettings.digitprice)}\\n          </td>\\n          <td rowspan=\\\"2\\\" class=\\\"borderleft\\\">\\n            {basesum.toFixed(botsettings.digitprice)}\\n          </td>\\n        </tr>\\n        <tr>\\n          <td class=\\\"cellleft\\\">\\n            <label>{botsettings.basecoin} в ордерах</label>\\n          </td>\\n          <td class=\\\"cellleft\\\">{botfinance.baseinorders}</td>\\n        </tr>\\n      </table>\\n    </div>\\n  </div>\\n  <div class=\\\"yelowkob\\\">\\n    <div class=\\\"row\\\">\\n      <div class=\\\"leftitem\\\">\\n        <label>Продажи</label>\\n        <br />\\n        <label>Продажи сегодня</label>\\n        <br />\\n        <label>Ср. прибыль в сделке</label>\\n      </div>\\n      <div class=\\\"rightitem\\\">\\n        {salesall}\\n        <br />\\n        <strong>{salestoday}</strong>\\n        ({salestodaysum.toFixed(botsettings.digitprice)} {botsettings.basecoin})\\n        <br />\\n        {(salesallsum / salesall || 0).toFixed(botsettings.digitprice)}\\n        {botsettings.basecoin}\\n      </div>\\n\\n    </div>\\n  </div>\\n  <div class=\\\"yelowkob\\\">\\n    <div class=\\\"row\\\">\\n      <div class=\\\"leftitem\\\">\\n        <label>Открытых сделок</label>\\n        <br />\\n        <label>Средняя цена закупки</label>\\n      </div>\\n      <div class=\\\"rightitem\\\">\\n        {openfloors.count}\\n        <br />\\n        {openfloors.sprice} {botsettings.basecoin}\\n      </div>\\n\\n    </div>\\n  </div>\\n  <br />\\n  <div class=\\\"row\\\">\\n    <div class=\\\"leftitem\\\" >\\n      <label>{botonoff ? 'Включен' : 'Выключен'}</label>\\n      <br />\\n      <span on:click={onofftogle}><Switchonoff  bind:value={botonoff} /></span>\\n    </div>\\n    <div class=\\\"rightitem\\\">\\n      <label>Запрет на закуп</label>\\n      <br />\\n      <Switch\\n        classes=\\\"inline-flex items-right mb-2 cursor-pointer z-10\\\"\\n        bind:value={botsettings.handyzapretnazakup}\\n      />\\n    </div>\\n\\n  </div>\\n\\n  <!--     <div class=\\\"row\\\">\\n        <div class=\\\"leftitem\\\">\\n            <TextField outlined bind:value={botsettings.priceforwake} />\\n        </div>\\n        <div class=\\\"rightitemlabel\\\">\\n            <label>Включить когда цена пересечет уровень</label>\\n        </div>\\n    </div> -->\\n\\n  <div class=\\\"row\\\">\\n    <div class=\\\"leftitem\\\">\\n      <label>Объем ордера</label>\\n      <br />\\n      ~ {ordersizeinquota} {botsettings.quotacoin}, {ordersizeinbase} {botsettings.basecoin}\\n    </div>\\n    &nbsp;&nbsp;\\n    <div class=\\\"rightitem\\\">\\n      <TextField\\n        label=\\\"% от депо\\\"\\n        outlined\\n        bind:value={botsettings.ordersize}\\n        size=\\\"10\\\"\\n      />\\n\\n    </div>\\n  </div>\\n  <div class=\\\"row\\\">\\n    <div class=\\\"leftitem\\\">\\n      <TextField label=\\\"MA1, мин\\\" outlined bind:value={botsettings.ma1} />\\n    </div>\\n    &nbsp;&nbsp;\\n    <div class=\\\"rightitem\\\">\\n      <TextField label=\\\"MA2, мин\\\" outlined bind:value={botsettings.ma2} />\\n    </div>\\n  </div>\\n  <div class=\\\"row\\\">\\n    <div class=\\\"leftitem padtop5\\\">\\n      <label>Не закупать, если цена больше</label>\\n    </div>\\n    &nbsp;&nbsp;\\n    <div class=\\\"rightitem\\\">\\n      <TextField\\n        label=\\\"\\\"\\n        outlined\\n        bind:value={botsettings.maxpriceforzakup}\\n        size=\\\"10\\\"\\n      />\\n    </div>\\n  </div>\\n\\n  <div class=\\\"row\\\">\\n    <div class=\\\"leftitem padtop5\\\">\\n      <label>Не закупать, если цена меньше</label>\\n    </div>\\n    <div class=\\\"rightitem\\\">\\n      <TextField\\n        label=\\\"\\\"\\n        outlined\\n        bind:value={botsettings.minpriceforzakup}\\n        size=\\\"10\\\"\\n      />\\n    </div>\\n  </div>\\n\\n  <Button on:click={savesettings} href=\\\"/\\\">Сохранить</Button>\\n  <br />\\n  <br />\\n  <Button color=\\\"alert\\\" on:click={panicsale}>PANICSALE</Button>\\n  <br />\\n  <br />\\n  <Button color=\\\"alert\\\" on:click={resetsettings}>\\n    Сбросить к стартовым настройкам\\n  </Button>\\n  <br />\\n  <br />\\n  <Button color=\\\"alert\\\" on:click={deletebot} href=\\\"/\\\">Удалить</Button>\\n\\n</main>\\n\\n<style type=\\\"text/scss\\\">\\n  .foolrow {\\n    width: 400px;\\n  }\\n  .padtop5 {\\n    padding-top: 14px;\\n  }\\n  .yelowkob {\\n    border: 1px solid rgba(233, 229, 132, 0.74);\\n    box-sizing: border-box;\\n    box-shadow: 0px 3px 5px rgba(209, 192, 104, 0.06);\\n    border-radius: 5px;\\n    margin-left: auto;\\n    margin-right: auto;\\n    max-width: 430px;\\n    line-height: 1.7em;\\n    margin-top: 14px;\\n    padding-top: 5px;\\n    padding-left: 7px;\\n    padding-right: 7px;\\n  }\\n  .yelowkob:hover {\\n    cursor: pointer;\\n  }\\n  table {\\n    position: relative;\\n    width: 400px;\\n    border-collapse: collapse;\\n    border: 0px solid;\\n    margin-top: 14px;\\n  }\\n  td {\\n    padding: 7px 7px 7px 0px;\\n  }\\n  td:first-child {\\n    border-right: 0px solid;\\n  }\\n  .cellleft {\\n    text-align: left;\\n  }\\n  .borderbootom {\\n    border-bottom: 1px solid;\\n  }\\n  .borderleft {\\n    border-left: 1px solid;\\n  }\\n  .bordernull {\\n    border: 0px solid;\\n  }\\n  label {\\n    margin-bottom: 7px;\\n    color: rgb(126, 126, 126);\\n  }\\n  .foolrow {\\n    width: 400px;\\n  }\\n\\n  .row {\\n    display: flex;\\n    max-width: 400px;\\n    margin: auto;\\n    justify-content: space-between;\\n    margin-bottom: 5px;\\n  }\\n  .rowbalance {\\n    display: flex;\\n    max-width: 400px;\\n    margin-left: auto;\\n    justify-content: space-between;\\n    align-items: flex-end;\\n  }\\n  .rowbalanceitem {\\n    padding-left: 10px;\\n    text-align: center;\\n  }\\n  .leftitem {\\n    border: 0px solid;\\n    text-align: left;\\n  }\\n  .rightitem {\\n    border: 0px solid;\\n    text-align: right;\\n  }\\n  .centereditem {\\n    border: 0px solid;\\n    text-align: center;\\n  }\\n  main {\\n    text-align: center;\\n    padding: 0px;\\n  }\\n</style>\\n\"],\"names\":[],\"mappings\":\"AAolBE,uBAAS,CACP,KAAK,CAAE,KACT,CACA,uBAAS,CACP,WAAW,CAAE,IACf,CACA,wBAAU,CACR,MAAM,CAAE,GAAG,CAAC,KAAK,CAAC,KAAK,GAAG,CAAC,CAAC,GAAG,CAAC,CAAC,GAAG,CAAC,CAAC,IAAI,CAAC,CAC3C,UAAU,CAAE,UAAU,CACtB,UAAU,CAAE,GAAG,CAAC,GAAG,CAAC,GAAG,CAAC,KAAK,GAAG,CAAC,CAAC,GAAG,CAAC,CAAC,GAAG,CAAC,CAAC,IAAI,CAAC,CACjD,aAAa,CAAE,GAAG,CAClB,WAAW,CAAE,IAAI,CACjB,YAAY,CAAE,IAAI,CAClB,SAAS,CAAE,KAAK,CAChB,WAAW,CAAE,KAAK,CAClB,UAAU,CAAE,IAAI,CAChB,WAAW,CAAE,GAAG,CAChB,YAAY,CAAE,GAAG,CACjB,aAAa,CAAE,GACjB,CACA,wBAAS,MAAO,CACd,MAAM,CAAE,OACV,CACA,oBAAM,CACJ,QAAQ,CAAE,QAAQ,CAClB,KAAK,CAAE,KAAK,CACZ,eAAe,CAAE,QAAQ,CACzB,MAAM,CAAE,GAAG,CAAC,KAAK,CACjB,UAAU,CAAE,IACd,CACA,iBAAG,CACD,OAAO,CAAE,GAAG,CAAC,GAAG,CAAC,GAAG,CAAC,GACvB,CACA,iBAAE,YAAa,CACb,YAAY,CAAE,GAAG,CAAC,KACpB,CACA,wBAAU,CACR,UAAU,CAAE,IACd,CACA,4BAAc,CACZ,aAAa,CAAE,GAAG,CAAC,KACrB,CACA,0BAAY,CACV,WAAW,CAAE,GAAG,CAAC,KACnB,CACA,0BAAY,CACV,MAAM,CAAE,GAAG,CAAC,KACd,CACA,oBAAM,CACJ,aAAa,CAAE,GAAG,CAClB,KAAK,CAAE,IAAI,GAAG,CAAC,CAAC,GAAG,CAAC,CAAC,GAAG,CAC1B,CACA,uBAAS,CACP,KAAK,CAAE,KACT,CAEA,mBAAK,CACH,OAAO,CAAE,IAAI,CACb,SAAS,CAAE,KAAK,CAChB,MAAM,CAAE,IAAI,CACZ,eAAe,CAAE,aAAa,CAC9B,aAAa,CAAE,GACjB,CACA,0BAAY,CACV,OAAO,CAAE,IAAI,CACb,SAAS,CAAE,KAAK,CAChB,WAAW,CAAE,IAAI,CACjB,eAAe,CAAE,aAAa,CAC9B,WAAW,CAAE,QACf,CACA,8BAAgB,CACd,YAAY,CAAE,IAAI,CAClB,UAAU,CAAE,MACd,CACA,wBAAU,CACR,MAAM,CAAE,GAAG,CAAC,KAAK,CACjB,UAAU,CAAE,IACd,CACA,yBAAW,CACT,MAAM,CAAE,GAAG,CAAC,KAAK,CACjB,UAAU,CAAE,KACd,CACA,4BAAc,CACZ,MAAM,CAAE,GAAG,CAAC,KAAK,CACjB,UAAU,CAAE,MACd,CACA,mBAAK,CACH,UAAU,CAAE,MAAM,CAClB,OAAO,CAAE,GACX\"}"
 };
 
 function sumsales(arr) {
@@ -3174,9 +3484,14 @@ function sumsales(arr) {
 	return sum;
 }
 
-const BotStatus = create_ssr_component(($$result, $$props, $$bindings, $$slots) => {
-	let $stateStore = get_store_value(stateStore);
-	let $authStore = get_store_value(authStore);
+const BotStatus = create_ssr_component(($$result, $$props, $$bindings, slots) => {
+	let profittodayproc;
+	let salestoday;
+	let salestodaysum;
+	let $stateStore, $$unsubscribe_stateStore;
+	let $authStore, $$unsubscribe_authStore;
+	$$unsubscribe_stateStore = subscribe(stateStore, value => $stateStore = value);
+	$$unsubscribe_authStore = subscribe(authStore, value => $authStore = value);
 	var selectbotname = $stateStore.selectbotname;
 	let urlhost = $stateStore.urlhost;
 	let userid = $authStore.user.uid;
@@ -3200,8 +3515,6 @@ const BotStatus = create_ssr_component(($$result, $$props, $$bindings, $$slots) 
 	function loadsettings(selectbotid) {
 		let myHeaders = new Headers();
 		myHeaders.append("Content-Type", "application/json");
-		myHeaders.append("Access-Control-Allow-Origin", "*");
-		myHeaders.append("Access-Control-Allow-Headers", "*");
 		let raw = JSON.stringify({ botname: selectbotid });
 
 		let requestOptions = {
@@ -3270,7 +3583,7 @@ const BotStatus = create_ssr_component(($$result, $$props, $$bindings, $$slots) 
 
 	getonoff(selectbotname);
 	const timerId = setInterval(fetchfullstatus, 1000, selectbotname);
-	$stateStore.timerId = timerId;
+	set_store_value(stateStore, $stateStore.timerId = timerId, $stateStore);
 	let profitsum = 0;
 	let profitsumproc = 0;
 	let quotasum = 0;
@@ -3327,8 +3640,8 @@ const BotStatus = create_ssr_component(($$result, $$props, $$bindings, $$slots) 
 		profitsumproc = (botfinance.depo / botfinance.startdepo * 100 - 100).toFixed(2);
 		quotasum = +botfinance.quotanal + +botfinance.quotainorders;
 		basesum = +botfinance.basenal + +botfinance.baseinorders;
-		let salestodaysum = sumsales(salestodayarr);
-		let profittodayproc = (salestodaysum / botfinance.startdepo * 100).toFixed(2);
+		salestodaysum = sumsales(salestodayarr);
+		profittodayproc = (salestodaysum / botfinance.startdepo * 100).toFixed(2);
 
 		 {
 			if (botstatus !== null) {
@@ -3348,12 +3661,12 @@ const BotStatus = create_ssr_component(($$result, $$props, $$bindings, $$slots) 
 			}
 		}
 
-		let salestoday = salestodayarr.length;
+		salestoday = salestodayarr.length;
 		salesall = salesallarr.length;
 		salesallsum = sumsales(salesallarr);
 		openfloors = openfloorscalc(botfloors);
 
-		$$rendered = `<main class="${"svelte-1atyj0m"}"><div class="${"row svelte-1atyj0m"}"><div class="${"leftitem svelte-1atyj0m"}"><div class="${"foolrow svelte-1atyj0m"}">${validate_component(TextField, "TextField").$$render(
+		$$rendered = `<main class="svelte-1atyj0m"><div class="row svelte-1atyj0m"><div class="leftitem svelte-1atyj0m"><div class="foolrow svelte-1atyj0m">${validate_component(TextField, "TextField").$$render(
 			$$result,
 			{
 				label: "Комментарий",
@@ -3368,72 +3681,72 @@ const BotStatus = create_ssr_component(($$result, $$props, $$bindings, $$slots) 
 			},
 			{}
 		)}</div></div></div>
-  <div class="${"row svelte-1atyj0m"}"><div class="${"leftitem svelte-1atyj0m"}"><label class="${"svelte-1atyj0m"}">Текущий режим</label>
+  <div class="row svelte-1atyj0m"><div class="leftitem svelte-1atyj0m"><label class="svelte-1atyj0m">Текущий режим</label>
       <br>
-      <strong class="${"bg-white dark:bg-gray-900 text-black dark:text-white"}">${escape(botstatus.rezhim)}</strong></div></div>
+      <strong class="bg-white dark:bg-gray-900 text-black dark:text-white">${escape(botstatus.rezhim)}</strong></div></div>
   ${botstatus.currentfloor !== 0
-		? `<div class="${"row svelte-1atyj0m"}"><div class="${"leftitem svelte-1atyj0m"}"><nobr><label class="${"svelte-1atyj0m"}">Этаж</label>
+		? `<div class="row svelte-1atyj0m"><div class="leftitem svelte-1atyj0m"><nobr><label class="svelte-1atyj0m">Этаж</label>
           <strong>${escape(floornumber)}</strong>
           ${escape(low)} - ${escape(hight)}  
         </nobr></div>
-      <div class="${"rightitem svelte-1atyj0m"}" style="${"margin-top: 9px;height:4px; width:100%; background-color: #f5ce54"}">${validate_component(ProgressLinear, "ProgressLinear").$$render($$result, { progress }, {}, {})}</div></div>`
+      <div class="rightitem svelte-1atyj0m" style="margin-top: 9px;height:4px; width:100%; background-color: #f5ce54">${validate_component(ProgressLinear, "ProgressLinear").$$render($$result, { progress }, {}, {})}</div></div>`
 		: ``}
-  <div class="${"row svelte-1atyj0m"}"><div class="${"leftitem svelte-1atyj0m"}"><label class="${"svelte-1atyj0m"}">Цена</label>
+  <div class="row svelte-1atyj0m"><div class="leftitem svelte-1atyj0m"><label class="svelte-1atyj0m">Цена</label>
       <br>
-      <span class="${"inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-bold\n        text-gray-800"}">${escape(last_price)}</span>
+      <span class="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-bold text-gray-800">${escape(last_price)}</span>
       <br></div>
-    <div class="${"rightitem rowbalance svelte-1atyj0m"}"><div class="${"rowbalanceitem svelte-1atyj0m"}"><label class="${"svelte-1atyj0m"}">Баланс</label></div>
-      <div class="${"rowbalanceitem svelte-1atyj0m"}"><label class="${"svelte-1atyj0m"}">Старт</label>
+    <div class="rightitem rowbalance svelte-1atyj0m"><div class="rowbalanceitem svelte-1atyj0m"><label class="svelte-1atyj0m">Баланс</label></div>
+      <div class="rowbalanceitem svelte-1atyj0m"><label class="svelte-1atyj0m">Старт</label>
         <br>
-        <span class="${"inline-block bg-gray-200 rounded-full px-3 py-1 text-sm\n          font-semibold text-gray-700"}">${escape(botfinance.startdepo)}</span></div>
-      <div class="${"rowbalanceitem svelte-1atyj0m"}"><label class="${"svelte-1atyj0m"}">Сегодня</label>
+        <span class="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700">${escape(botfinance.startdepo)}</span></div>
+      <div class="rowbalanceitem svelte-1atyj0m"><label class="svelte-1atyj0m">Сегодня</label>
         <br>
-        <span class="${"inline-block bg-gray-200 rounded-full px-3 py-1 text-sm\n          font-semibold text-gray-700"}">${escape(botfinance.depo)}</span></div></div></div>
-  <div class="${"yelowkob svelte-1atyj0m"}"><div class="${"row svelte-1atyj0m"}"><div class="${"centereditem svelte-1atyj0m"}"><label class="${"svelte-1atyj0m"}">Прибыль всего</label>
+        <span class="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700">${escape(botfinance.depo)}</span></div></div></div>
+  <div class="yelowkob svelte-1atyj0m"><div class="row svelte-1atyj0m"><div class="centereditem svelte-1atyj0m"><label class="svelte-1atyj0m">Прибыль всего</label>
         <br>
         <span>${escape(profitsum)}</span>
         <br>
         <span>(${escape(profitsumproc)} %)</span>
         <br></div>
-      <div class="${"centereditem svelte-1atyj0m"}"><label class="${"svelte-1atyj0m"}">Прибыль сегодня</label>
+      <div class="centereditem svelte-1atyj0m"><label class="svelte-1atyj0m">Прибыль сегодня</label>
         <br>
         <span>${escape(salestodaysum.toFixed(botsettings.digitprice))}</span>
         <br>
         <span>(${escape(profittodayproc)} %)</span>
         <br></div></div></div>
-  <div class="${"row svelte-1atyj0m"}"><div class="${"centereditem svelte-1atyj0m"}"><table class="${"bordernull svelte-1atyj0m"}"><tr class="${"bordernull svelte-1atyj0m"}"><td class="${"cellleft svelte-1atyj0m"}"><label class="${"svelte-1atyj0m"}">${escape(botsettings.quotacoin)} в наличии</label></td>
-          <td class="${"cellleft bordernull svelte-1atyj0m"}">${escape(botfinance.quotanal)}</td>
-          <td rowspan="${"2"}" class="${"borderbootom borderleft svelte-1atyj0m"}">${escape(quotasum.toFixed(botsettings.digitq))}
+  <div class="row svelte-1atyj0m"><div class="centereditem svelte-1atyj0m"><table class="bordernull svelte-1atyj0m"><tr class="bordernull svelte-1atyj0m"><td class="cellleft svelte-1atyj0m"><label class="svelte-1atyj0m">${escape(botsettings.quotacoin)} в наличии</label></td>
+          <td class="cellleft bordernull svelte-1atyj0m">${escape(botfinance.quotanal)}</td>
+          <td rowspan="2" class="borderbootom borderleft svelte-1atyj0m">${escape(quotasum.toFixed(botsettings.digitq))}
             <br>
             (${escape((last_price * quotasum).toFixed(botsettings.digitq))} ${escape(botsettings.basecoin)})
           </td></tr>
-        <tr><td class="${"borderbootom cellleft svelte-1atyj0m"}"><label class="${"svelte-1atyj0m"}">${escape(botsettings.quotacoin)} в ордерах</label></td>
-          <td class="${"borderbootom cellleft svelte-1atyj0m"}">${escape(botfinance.quotainorders)}</td></tr>
-        <tr><td class="${"cellleft svelte-1atyj0m"}"><label class="${"svelte-1atyj0m"}">${escape(botsettings.basecoin)} в наличии</label></td>
-          <td class="${"cellleft bordernull svelte-1atyj0m"}">${escape((botfinance.basenal * 1).toFixed(botsettings.digitprice))}</td>
-          <td rowspan="${"2"}" class="${"borderleft svelte-1atyj0m"}">${escape(basesum.toFixed(botsettings.digitprice))}</td></tr>
-        <tr><td class="${"cellleft svelte-1atyj0m"}"><label class="${"svelte-1atyj0m"}">${escape(botsettings.basecoin)} в ордерах</label></td>
-          <td class="${"cellleft svelte-1atyj0m"}">${escape(botfinance.baseinorders)}</td></tr></table></div></div>
-  <div class="${"yelowkob svelte-1atyj0m"}"><div class="${"row svelte-1atyj0m"}"><div class="${"leftitem svelte-1atyj0m"}"><label class="${"svelte-1atyj0m"}">Продажи</label>
+        <tr><td class="borderbootom cellleft svelte-1atyj0m"><label class="svelte-1atyj0m">${escape(botsettings.quotacoin)} в ордерах</label></td>
+          <td class="borderbootom cellleft svelte-1atyj0m">${escape(botfinance.quotainorders)}</td></tr>
+        <tr><td class="cellleft svelte-1atyj0m"><label class="svelte-1atyj0m">${escape(botsettings.basecoin)} в наличии</label></td>
+          <td class="cellleft bordernull svelte-1atyj0m">${escape((botfinance.basenal * 1).toFixed(botsettings.digitprice))}</td>
+          <td rowspan="2" class="borderleft svelte-1atyj0m">${escape(basesum.toFixed(botsettings.digitprice))}</td></tr>
+        <tr><td class="cellleft svelte-1atyj0m"><label class="svelte-1atyj0m">${escape(botsettings.basecoin)} в ордерах</label></td>
+          <td class="cellleft svelte-1atyj0m">${escape(botfinance.baseinorders)}</td></tr></table></div></div>
+  <div class="yelowkob svelte-1atyj0m"><div class="row svelte-1atyj0m"><div class="leftitem svelte-1atyj0m"><label class="svelte-1atyj0m">Продажи</label>
         <br>
-        <label class="${"svelte-1atyj0m"}">Продажи сегодня</label>
+        <label class="svelte-1atyj0m">Продажи сегодня</label>
         <br>
-        <label class="${"svelte-1atyj0m"}">Ср. прибыль в сделке</label></div>
-      <div class="${"rightitem svelte-1atyj0m"}">${escape(salesall)}
+        <label class="svelte-1atyj0m">Ср. прибыль в сделке</label></div>
+      <div class="rightitem svelte-1atyj0m">${escape(salesall)}
         <br>
         <strong>${escape(salestoday)}</strong>
         (${escape(salestodaysum.toFixed(botsettings.digitprice))} ${escape(botsettings.basecoin)})
         <br>
         ${escape((salesallsum / salesall || 0).toFixed(botsettings.digitprice))}
         ${escape(botsettings.basecoin)}</div></div></div>
-  <div class="${"yelowkob svelte-1atyj0m"}"><div class="${"row svelte-1atyj0m"}"><div class="${"leftitem svelte-1atyj0m"}"><label class="${"svelte-1atyj0m"}">Открытых сделок</label>
+  <div class="yelowkob svelte-1atyj0m"><div class="row svelte-1atyj0m"><div class="leftitem svelte-1atyj0m"><label class="svelte-1atyj0m">Открытых сделок</label>
         <br>
-        <label class="${"svelte-1atyj0m"}">Средняя цена закупки</label></div>
-      <div class="${"rightitem svelte-1atyj0m"}">${escape(openfloors.count)}
+        <label class="svelte-1atyj0m">Средняя цена закупки</label></div>
+      <div class="rightitem svelte-1atyj0m">${escape(openfloors.count)}
         <br>
         ${escape(openfloors.sprice)} ${escape(botsettings.basecoin)}</div></div></div>
   <br>
-  <div class="${"row svelte-1atyj0m"}"><div class="${"leftitem svelte-1atyj0m"}"><label class="${"svelte-1atyj0m"}">${escape(botonoff ? "Включен" : "Выключен")}</label>
+  <div class="row svelte-1atyj0m"><div class="leftitem svelte-1atyj0m"><label class="svelte-1atyj0m">${escape(botonoff ? 'Включен' : 'Выключен')}</label>
       <br>
       <span>${validate_component(Switchonoff, "Switchonoff").$$render(
 			$$result,
@@ -3446,7 +3759,7 @@ const BotStatus = create_ssr_component(($$result, $$props, $$bindings, $$slots) 
 			},
 			{}
 		)}</span></div>
-    <div class="${"rightitem svelte-1atyj0m"}"><label class="${"svelte-1atyj0m"}">Запрет на закуп</label>
+    <div class="rightitem svelte-1atyj0m"><label class="svelte-1atyj0m">Запрет на закуп</label>
       <br>
       ${validate_component(Switch, "Switch").$$render(
 			$$result,
@@ -3465,11 +3778,11 @@ const BotStatus = create_ssr_component(($$result, $$props, $$bindings, $$slots) 
 
   
 
-  <div class="${"row svelte-1atyj0m"}"><div class="${"leftitem svelte-1atyj0m"}"><label class="${"svelte-1atyj0m"}">Объем ордера</label>
+  <div class="row svelte-1atyj0m"><div class="leftitem svelte-1atyj0m"><label class="svelte-1atyj0m">Объем ордера</label>
       <br>
       ~ ${escape(ordersizeinquota)} ${escape(botsettings.quotacoin)}, ${escape(ordersizeinbase)} ${escape(botsettings.basecoin)}</div>
       
-    <div class="${"rightitem svelte-1atyj0m"}">${validate_component(TextField, "TextField").$$render(
+    <div class="rightitem svelte-1atyj0m">${validate_component(TextField, "TextField").$$render(
 			$$result,
 			{
 				label: "% от депо",
@@ -3485,7 +3798,7 @@ const BotStatus = create_ssr_component(($$result, $$props, $$bindings, $$slots) 
 			},
 			{}
 		)}</div></div>
-  <div class="${"row svelte-1atyj0m"}"><div class="${"leftitem svelte-1atyj0m"}">${validate_component(TextField, "TextField").$$render(
+  <div class="row svelte-1atyj0m"><div class="leftitem svelte-1atyj0m">${validate_component(TextField, "TextField").$$render(
 			$$result,
 			{
 				label: "MA1, мин",
@@ -3501,7 +3814,7 @@ const BotStatus = create_ssr_component(($$result, $$props, $$bindings, $$slots) 
 			{}
 		)}</div>
       
-    <div class="${"rightitem svelte-1atyj0m"}">${validate_component(TextField, "TextField").$$render(
+    <div class="rightitem svelte-1atyj0m">${validate_component(TextField, "TextField").$$render(
 			$$result,
 			{
 				label: "MA2, мин",
@@ -3516,9 +3829,9 @@ const BotStatus = create_ssr_component(($$result, $$props, $$bindings, $$slots) 
 			},
 			{}
 		)}</div></div>
-  <div class="${"row svelte-1atyj0m"}"><div class="${"leftitem padtop5 svelte-1atyj0m"}"><label class="${"svelte-1atyj0m"}">Не закупать, если цена больше</label></div>
+  <div class="row svelte-1atyj0m"><div class="leftitem padtop5 svelte-1atyj0m"><label class="svelte-1atyj0m">Не закупать, если цена больше</label></div>
       
-    <div class="${"rightitem svelte-1atyj0m"}">${validate_component(TextField, "TextField").$$render(
+    <div class="rightitem svelte-1atyj0m">${validate_component(TextField, "TextField").$$render(
 			$$result,
 			{
 				label: "",
@@ -3535,8 +3848,8 @@ const BotStatus = create_ssr_component(($$result, $$props, $$bindings, $$slots) 
 			{}
 		)}</div></div>
 
-  <div class="${"row svelte-1atyj0m"}"><div class="${"leftitem padtop5 svelte-1atyj0m"}"><label class="${"svelte-1atyj0m"}">Не закупать, если цена меньше</label></div>
-    <div class="${"rightitem svelte-1atyj0m"}">${validate_component(TextField, "TextField").$$render(
+  <div class="row svelte-1atyj0m"><div class="leftitem padtop5 svelte-1atyj0m"><label class="svelte-1atyj0m">Не закупать, если цена меньше</label></div>
+    <div class="rightitem svelte-1atyj0m">${validate_component(TextField, "TextField").$$render(
 			$$result,
 			{
 				label: "",
@@ -3553,82 +3866,101 @@ const BotStatus = create_ssr_component(($$result, $$props, $$bindings, $$slots) 
 			{}
 		)}</div></div>
 
-  ${validate_component(Button, "Button").$$render($$result, { href: "/" }, {}, { default: () => `Сохранить` })}
-  <br>
-  <br>
-  ${validate_component(Button, "Button").$$render($$result, { color: "alert" }, {}, { default: () => `PANICSALE` })}
-  <br>
-  <br>
-  ${validate_component(Button, "Button").$$render($$result, { color: "alert" }, {}, {
-			default: () => `Сбросить к стартовым настройкам
-  `
+  ${validate_component(Button, "Button").$$render($$result, { href: "/" }, {}, {
+			default: () => {
+				return `Сохранить`;
+			}
 		})}
   <br>
   <br>
-  ${validate_component(Button, "Button").$$render($$result, { color: "alert", href: "/" }, {}, { default: () => `Удалить` })}
+  ${validate_component(Button, "Button").$$render($$result, { color: "alert" }, {}, {
+			default: () => {
+				return `PANICSALE`;
+			}
+		})}
+  <br>
+  <br>
+  ${validate_component(Button, "Button").$$render($$result, { color: "alert" }, {}, {
+			default: () => {
+				return `Сбросить к стартовым настройкам
+  `;
+			}
+		})}
+  <br>
+  <br>
+  ${validate_component(Button, "Button").$$render($$result, { color: "alert", href: "/" }, {}, {
+			default: () => {
+				return `Удалить`;
+			}
+		})}
 
 </main>`;
 	} while (!$$settled);
 
+	$$unsubscribe_stateStore();
+	$$unsubscribe_authStore();
 	return $$rendered;
 });
 
-/* src/routes/botstatuspage.svelte generated by Svelte v3.24.0 */
+/* src/routes/botstatuspage.svelte generated by Svelte v3.59.2 */
 
 const css$9 = {
 	code: ".headblock.svelte-15qh2zc{display:flex;max-width:400px;margin-left:auto;margin-right:auto;justify-content:flex-start;margin-bottom:7px}.itemgrow.svelte-15qh2zc{flex-grow:2}.mainflex.svelte-15qh2zc{display:flex}",
-	map: "{\"version\":3,\"file\":\"botstatuspage.svelte\",\"sources\":[\"botstatuspage.svelte\"],\"sourcesContent\":[\"<script context=\\\"module\\\">\\n\\n    import { stateStore }  from \\\"../stores/statebot.js\\\"\\n    import BotStatus from '../components/BotStatus.svelte';\\n    import { authStore } from '../stores/auth';\\n\\n    import SignInButton from '../components/SignInButton.svelte';\\n</script>\\n\\n\\n<style>\\n    .headblock {\\n        display: flex;\\n        max-width: 400px;\\n        margin-left: auto;\\n        margin-right: auto;\\n        justify-content: flex-start;\\n        margin-bottom: 7px;\\n        \\n    }\\n    .itemgrow {\\n        flex-grow: 2;\\n    }\\n\\n    .mainflex {\\n        display: flex;\\n    }\\n</style>\\n\\n<svelte:head>\\n    <title>Ti Trading Bot</title>\\n</svelte:head>\\n\\n<div class=\\\"mainflex\\\">\\n\\n\\n    <!-- {#if $authStore.status === 'in'} -->\\n    {#if true}\\n        <div class=\\\"headblock\\\">\\n\\n            <div class=\\\"itemgrow\\\">\\n               <BotStatus/>\\n            </div>\\n        </div>\\n    {:else}\\n        <div class=\\\"headblock\\\">\\n\\n            <div class=\\\"itemgrow\\\">\\n                Скачайте бесплатно или войдите в облако\\n                <br />\\n                <br />\\n                <br />\\n                <SignInButton provider={'google'} />\\n            </div>\\n        </div>\\n    {/if}\\n</div>\\n\"],\"names\":[],\"mappings\":\"AAWI,UAAU,eAAC,CAAC,AACR,OAAO,CAAE,IAAI,CACb,SAAS,CAAE,KAAK,CAChB,WAAW,CAAE,IAAI,CACjB,YAAY,CAAE,IAAI,CAClB,eAAe,CAAE,UAAU,CAC3B,aAAa,CAAE,GAAG,AAEtB,CAAC,AACD,SAAS,eAAC,CAAC,AACP,SAAS,CAAE,CAAC,AAChB,CAAC,AAED,SAAS,eAAC,CAAC,AACP,OAAO,CAAE,IAAI,AACjB,CAAC\"}"
+	map: "{\"version\":3,\"file\":\"botstatuspage.svelte\",\"sources\":[\"botstatuspage.svelte\"],\"sourcesContent\":[\"<script context=\\\"module\\\">\\n\\n    import { stateStore }  from \\\"../stores/statebot.js\\\"\\n    import BotStatus from '../components/BotStatus.svelte';\\n    import { authStore } from '../stores/auth';\\n\\n    import SignInButton from '../components/SignInButton.svelte';\\n</script>\\n\\n\\n<style>\\n    .headblock {\\n        display: flex;\\n        max-width: 400px;\\n        margin-left: auto;\\n        margin-right: auto;\\n        justify-content: flex-start;\\n        margin-bottom: 7px;\\n        \\n    }\\n    .itemgrow {\\n        flex-grow: 2;\\n    }\\n\\n    .mainflex {\\n        display: flex;\\n    }\\n</style>\\n\\n<svelte:head>\\n    <title>Ti Trading Bot</title>\\n</svelte:head>\\n\\n<div class=\\\"mainflex\\\">\\n\\n\\n    <!-- {#if $authStore.status === 'in'} -->\\n    {#if true}\\n        <div class=\\\"headblock\\\">\\n\\n            <div class=\\\"itemgrow\\\">\\n               <BotStatus/>\\n            </div>\\n        </div>\\n    {:else}\\n        <div class=\\\"headblock\\\">\\n\\n            <div class=\\\"itemgrow\\\">\\n                Скачайте бесплатно или войдите в облако\\n                <br />\\n                <br />\\n                <br />\\n                <SignInButton provider={'google'} />\\n            </div>\\n        </div>\\n    {/if}\\n</div>\\n\"],\"names\":[],\"mappings\":\"AAWI,yBAAW,CACP,OAAO,CAAE,IAAI,CACb,SAAS,CAAE,KAAK,CAChB,WAAW,CAAE,IAAI,CACjB,YAAY,CAAE,IAAI,CAClB,eAAe,CAAE,UAAU,CAC3B,aAAa,CAAE,GAEnB,CACA,wBAAU,CACN,SAAS,CAAE,CACf,CAEA,wBAAU,CACN,OAAO,CAAE,IACb\"}"
 };
 
-const Botstatuspage = create_ssr_component(($$result, $$props, $$bindings, $$slots) => {
+const Botstatuspage = create_ssr_component(($$result, $$props, $$bindings, slots) => {
 	$$result.css.add(css$9);
 
 	return `${($$result.head += `${($$result.title = `<title>Ti Trading Bot</title>`, "")}`, "")}
 
-<div class="${"mainflex svelte-15qh2zc"}">
-    ${ `<div class="${"headblock svelte-15qh2zc"}"><div class="${"itemgrow svelte-15qh2zc"}">${validate_component(BotStatus, "BotStatus").$$render($$result, {}, {}, {})}</div></div>`
+<div class="mainflex svelte-15qh2zc">
+    ${ `<div class="headblock svelte-15qh2zc"><div class="itemgrow svelte-15qh2zc">${validate_component(BotStatus, "BotStatus").$$render($$result, {}, {}, {})}</div></div>`
 	}</div>`;
 });
 
-/* src/routes/instruction.svelte generated by Svelte v3.24.0 */
+/* src/routes/instruction.svelte generated by Svelte v3.59.2 */
 
-const Instruction = create_ssr_component(($$result, $$props, $$bindings, $$slots) => {
-	let $stateStore = get_store_value(stateStore);
+const Instruction = create_ssr_component(($$result, $$props, $$bindings, slots) => {
+	let $stateStore, $$unsubscribe_stateStore;
+	$$unsubscribe_stateStore = subscribe(stateStore, value => $stateStore = value);
 	clearInterval($stateStore.timerId);
 	clearInterval($stateStore.timerIdlist);
+	$$unsubscribe_stateStore();
 
 	return `${($$result.head += `${($$result.title = `<title>Инструкция</title>`, "")}`, "")}
-<div><h1 class="${"text-2xl text-center mb-4"}">Инструкция</h1>
+<div><h1 class="text-2xl text-center mb-4">Инструкция</h1>
 
-    <p class="${"text-center"}">This is the &#39;about&#39; page. There&#39;s not much here.</p></div>`;
+    <p class="text-center">This is the &#39;about&#39; page. There&#39;s not much here.</p></div>`;
 });
 
-/* src/components/Sett.svelte generated by Svelte v3.24.0 */
+/* src/components/Sett.svelte generated by Svelte v3.59.2 */
 
 const css$a = {
 	code: "main.svelte-2uud3p{text-align:center;padding:0px}.foolrow.svelte-2uud3p{width:400px}.row.svelte-2uud3p{display:flex;max-width:400px;margin:auto;justify-content:space-between;margin-bottom:5px}.leftitem.svelte-2uud3p{border:0px solid;text-align:left}.headblock.svelte-2uud3p{display:flex;max-width:400px;margin:auto;justify-content:flex-start;margin-bottom:7px}",
-	map: "{\"version\":3,\"file\":\"Sett.svelte\",\"sources\":[\"Sett.svelte\"],\"sourcesContent\":[\"<script>\\n    import { onMount } from 'svelte';\\n    import Switch from 'smelte/src/components/Switch';\\n    import Button from 'smelte/src/components/Button';\\n    import TextField from 'smelte/src/components/TextField';\\n    import { authStore } from '../stores/auth';\\n    //import \\\"smelte/src/tailwind.css\\\";\\n    export let urlhost;\\n\\n    let usersettings = [];\\n    let binancekey, binancesecret, comission;\\n    let getusset = urlhost + 'api/getusersettings.php';\\n    let setusset = urlhost + 'api/setusersettings.php';\\n\\n    console.log(getusset);\\n    onMount(async () => {\\n        let au = $authStore.user.uid;\\n        const res = await fetch(getusset, {\\n            method: 'post',\\n            body: JSON.stringify({ au }),\\n            headers: {\\n                Accept: 'application/json, text/plain, */*',\\n                'Content-Type': 'application/json',\\n                'Access-Control-Allow-Origin': '*',\\n                'Access-Control-Allow-Headers': '*',\\n            },\\n        });\\n        usersettings = await res.json();\\n        console.log(usersettings);\\n        binancekey = usersettings[1];\\n        binancesecret = usersettings[2];\\n        comission = usersettings[3];\\n    });\\n\\n    async function saveSettings() {\\n        await fetch(setusset, {\\n            method: 'post',\\n            headers: {\\n                Accept: 'application/json, text/plain, */*',\\n                'Content-Type': 'application/json',\\n            },\\n            body: JSON.stringify(usersettings),\\n        });\\n        console.log(usersettings, setusset);\\n    }\\n    $: usersettings = [$authStore.user.uid, binancekey, binancesecret, comission];\\n</script>\\n\\n<style type=\\\"text/scss\\\">\\n    main {\\n        text-align: center;\\n\\n        padding: 0px;\\n    }\\n    .foolrow {\\n        width: 400px;\\n    }\\n\\n    .row {\\n        display: flex;\\n        max-width: 400px;\\n        margin: auto;\\n        justify-content: space-between;\\n        margin-bottom: 5px;\\n    }\\n\\n    .leftitem {\\n        border: 0px solid;\\n        text-align: left;\\n    }\\n\\n    .headblock {\\n        display: flex;\\n        max-width: 400px;\\n        margin: auto;\\n        justify-content: flex-start;\\n        margin-bottom: 7px;\\n    }\\n</style>\\n\\n<main>\\n    <br />\\n    <p class=\\\"text-2xl\\\">Настройки</p>\\n    <br />\\n    <div class=\\\"headblock\\\">\\n        <p>Binance API keys</p>\\n        <br />\\n    </div>\\n    <div class=\\\"row\\\">\\n        <div class=\\\"leftitem\\\">\\n            <div class=\\\"foolrow\\\">\\n                <TextField label=\\\"Key\\\" outlined bind:value={binancekey} />\\n            </div>\\n        </div>\\n    </div>\\n    <div class=\\\"row\\\">\\n        <div class=\\\"leftitem\\\">\\n            <div class=\\\"foolrow\\\">\\n                <TextField bind:value={binancesecret} label=\\\"Secret\\\" outlined />\\n            </div>\\n        </div>\\n    </div>\\n    <div class=\\\"headblock\\\">\\n        <p>Прочие</p>\\n        <br />\\n    </div>\\n    <div class=\\\"row\\\">\\n        <div class=\\\"leftitem\\\">\\n            <div class=\\\"foolrow\\\">\\n                <TextField label=\\\"Comission\\\" outlined bind:value={comission} />\\n            </div>\\n        </div>\\n    </div>\\n    <Button on:click={saveSettings}>Сохранить</Button>\\n</main>\\n\"],\"names\":[],\"mappings\":\"AAiDI,IAAI,cAAC,CAAC,AACF,UAAU,CAAE,MAAM,CAElB,OAAO,CAAE,GAAG,AAChB,CAAC,AACD,QAAQ,cAAC,CAAC,AACN,KAAK,CAAE,KAAK,AAChB,CAAC,AAED,IAAI,cAAC,CAAC,AACF,OAAO,CAAE,IAAI,CACb,SAAS,CAAE,KAAK,CAChB,MAAM,CAAE,IAAI,CACZ,eAAe,CAAE,aAAa,CAC9B,aAAa,CAAE,GAAG,AACtB,CAAC,AAED,SAAS,cAAC,CAAC,AACP,MAAM,CAAE,GAAG,CAAC,KAAK,CACjB,UAAU,CAAE,IAAI,AACpB,CAAC,AAED,UAAU,cAAC,CAAC,AACR,OAAO,CAAE,IAAI,CACb,SAAS,CAAE,KAAK,CAChB,MAAM,CAAE,IAAI,CACZ,eAAe,CAAE,UAAU,CAC3B,aAAa,CAAE,GAAG,AACtB,CAAC\"}"
+	map: "{\"version\":3,\"file\":\"Sett.svelte\",\"sources\":[\"Sett.svelte\"],\"sourcesContent\":[\"<script>\\n    import { onMount } from 'svelte';\\n    import Switch from 'smelte/src/components/Switch';\\n    import Button from 'smelte/src/components/Button';\\n    import TextField from 'smelte/src/components/TextField';\\n    import { authStore } from '../stores/auth';\\n    //import \\\"smelte/src/tailwind.css\\\";\\n    export let urlhost;\\n\\n    let usersettings = [];\\n    let binancekey, binancesecret, comission;\\n    let getusset = urlhost + 'api/getusersettings.php';\\n    let setusset = urlhost + 'api/setusersettings.php';\\n\\n    console.log(getusset);\\n    onMount(async () => {\\n        let au = $authStore.user.uid;\\n        const res = await fetch(getusset, {\\n            method: 'post',\\n            body: JSON.stringify({ au }),\\n            headers: {\\n                Accept: 'application/json, text/plain, */*',\\n                'Content-Type': 'application/json',\\n                'Access-Control-Allow-Origin': '*',\\n                'Access-Control-Allow-Headers': '*',\\n            },\\n        });\\n        usersettings = await res.json();\\n        console.log(usersettings);\\n        binancekey = usersettings[1];\\n        binancesecret = usersettings[2];\\n        comission = usersettings[3];\\n    });\\n\\n    async function saveSettings() {\\n        await fetch(setusset, {\\n            method: 'post',\\n            headers: {\\n                Accept: 'application/json, text/plain, */*',\\n                'Content-Type': 'application/json',\\n            },\\n            body: JSON.stringify(usersettings),\\n        });\\n        console.log(usersettings, setusset);\\n    }\\n    $: usersettings = [$authStore.user.uid, binancekey, binancesecret, comission];\\n</script>\\n\\n<style type=\\\"text/scss\\\">\\n    main {\\n        text-align: center;\\n\\n        padding: 0px;\\n    }\\n    .foolrow {\\n        width: 400px;\\n    }\\n\\n    .row {\\n        display: flex;\\n        max-width: 400px;\\n        margin: auto;\\n        justify-content: space-between;\\n        margin-bottom: 5px;\\n    }\\n\\n    .leftitem {\\n        border: 0px solid;\\n        text-align: left;\\n    }\\n\\n    .headblock {\\n        display: flex;\\n        max-width: 400px;\\n        margin: auto;\\n        justify-content: flex-start;\\n        margin-bottom: 7px;\\n    }\\n</style>\\n\\n<main>\\n    <br />\\n    <p class=\\\"text-2xl\\\">Настройки</p>\\n    <br />\\n    <div class=\\\"headblock\\\">\\n        <p>Binance API keys</p>\\n        <br />\\n    </div>\\n    <div class=\\\"row\\\">\\n        <div class=\\\"leftitem\\\">\\n            <div class=\\\"foolrow\\\">\\n                <TextField label=\\\"Key\\\" outlined bind:value={binancekey} />\\n            </div>\\n        </div>\\n    </div>\\n    <div class=\\\"row\\\">\\n        <div class=\\\"leftitem\\\">\\n            <div class=\\\"foolrow\\\">\\n                <TextField bind:value={binancesecret} label=\\\"Secret\\\" outlined />\\n            </div>\\n        </div>\\n    </div>\\n    <div class=\\\"headblock\\\">\\n        <p>Прочие</p>\\n        <br />\\n    </div>\\n    <div class=\\\"row\\\">\\n        <div class=\\\"leftitem\\\">\\n            <div class=\\\"foolrow\\\">\\n                <TextField label=\\\"Comission\\\" outlined bind:value={comission} />\\n            </div>\\n        </div>\\n    </div>\\n    <Button on:click={saveSettings}>Сохранить</Button>\\n</main>\\n\"],\"names\":[],\"mappings\":\"AAiDI,kBAAK,CACD,UAAU,CAAE,MAAM,CAElB,OAAO,CAAE,GACb,CACA,sBAAS,CACL,KAAK,CAAE,KACX,CAEA,kBAAK,CACD,OAAO,CAAE,IAAI,CACb,SAAS,CAAE,KAAK,CAChB,MAAM,CAAE,IAAI,CACZ,eAAe,CAAE,aAAa,CAC9B,aAAa,CAAE,GACnB,CAEA,uBAAU,CACN,MAAM,CAAE,GAAG,CAAC,KAAK,CACjB,UAAU,CAAE,IAChB,CAEA,wBAAW,CACP,OAAO,CAAE,IAAI,CACb,SAAS,CAAE,KAAK,CAChB,MAAM,CAAE,IAAI,CACZ,eAAe,CAAE,UAAU,CAC3B,aAAa,CAAE,GACnB\"}"
 };
 
-const Sett = create_ssr_component(($$result, $$props, $$bindings, $$slots) => {
-	let $authStore = get_store_value(authStore);
+const Sett = create_ssr_component(($$result, $$props, $$bindings, slots) => {
+	let $authStore, $$unsubscribe_authStore;
+	$$unsubscribe_authStore = subscribe(authStore, value => $authStore = value);
 	let { urlhost } = $$props;
 	let usersettings = [];
 	let binancekey, binancesecret, comission;
-	let getusset = urlhost + "api/getusersettings.php";
+	let getusset = urlhost + 'api/getusersettings.php';
 	console.log(getusset);
 
 	onMount(async () => {
 		let au = $authStore.user.uid;
 
 		const res = await fetch(getusset, {
-			method: "post",
+			method: 'post',
 			body: JSON.stringify({ au }),
 			headers: {
-				Accept: "application/json, text/plain, */*",
-				"Content-Type": "application/json",
-				"Access-Control-Allow-Origin": "*",
-				"Access-Control-Allow-Headers": "*"
+				Accept: 'application/json, text/plain, */*',
+				'Content-Type': 'application/json',
+				'Access-Control-Allow-Origin': '*',
+				'Access-Control-Allow-Headers': '*'
 			}
 		});
 
@@ -3648,12 +3980,12 @@ const Sett = create_ssr_component(($$result, $$props, $$bindings, $$slots) => {
 		$$settled = true;
 		usersettings = [$authStore.user.uid, binancekey, binancesecret, comission];
 
-		$$rendered = `<main class="${"svelte-2uud3p"}"><br>
-    <p class="${"text-2xl"}">Настройки</p>
+		$$rendered = `<main class="svelte-2uud3p"><br>
+    <p class="text-2xl">Настройки</p>
     <br>
-    <div class="${"headblock svelte-2uud3p"}"><p>Binance API keys</p>
+    <div class="headblock svelte-2uud3p"><p>Binance API keys</p>
         <br></div>
-    <div class="${"row svelte-2uud3p"}"><div class="${"leftitem svelte-2uud3p"}"><div class="${"foolrow svelte-2uud3p"}">${validate_component(TextField, "TextField").$$render(
+    <div class="row svelte-2uud3p"><div class="leftitem svelte-2uud3p"><div class="foolrow svelte-2uud3p">${validate_component(TextField, "TextField").$$render(
 			$$result,
 			{
 				label: "Key",
@@ -3668,7 +4000,7 @@ const Sett = create_ssr_component(($$result, $$props, $$bindings, $$slots) => {
 			},
 			{}
 		)}</div></div></div>
-    <div class="${"row svelte-2uud3p"}"><div class="${"leftitem svelte-2uud3p"}"><div class="${"foolrow svelte-2uud3p"}">${validate_component(TextField, "TextField").$$render(
+    <div class="row svelte-2uud3p"><div class="leftitem svelte-2uud3p"><div class="foolrow svelte-2uud3p">${validate_component(TextField, "TextField").$$render(
 			$$result,
 			{
 				label: "Secret",
@@ -3683,9 +4015,9 @@ const Sett = create_ssr_component(($$result, $$props, $$bindings, $$slots) => {
 			},
 			{}
 		)}</div></div></div>
-    <div class="${"headblock svelte-2uud3p"}"><p>Прочие</p>
+    <div class="headblock svelte-2uud3p"><p>Прочие</p>
         <br></div>
-    <div class="${"row svelte-2uud3p"}"><div class="${"leftitem svelte-2uud3p"}"><div class="${"foolrow svelte-2uud3p"}">${validate_component(TextField, "TextField").$$render(
+    <div class="row svelte-2uud3p"><div class="leftitem svelte-2uud3p"><div class="foolrow svelte-2uud3p">${validate_component(TextField, "TextField").$$render(
 			$$result,
 			{
 				label: "Comission",
@@ -3700,67 +4032,83 @@ const Sett = create_ssr_component(($$result, $$props, $$bindings, $$slots) => {
 			},
 			{}
 		)}</div></div></div>
-    ${validate_component(Button, "Button").$$render($$result, {}, {}, { default: () => `Сохранить` })}</main>`;
+    ${validate_component(Button, "Button").$$render($$result, {}, {}, {
+			default: () => {
+				return `Сохранить`;
+			}
+		})}</main>`;
 	} while (!$$settled);
 
+	$$unsubscribe_authStore();
 	return $$rendered;
 });
 
-/* src/routes/settings.svelte generated by Svelte v3.24.0 */
+/* src/routes/settings.svelte generated by Svelte v3.59.2 */
 
-const Settings = create_ssr_component(($$result, $$props, $$bindings, $$slots) => {
-	let $stateStore = get_store_value(stateStore);
-	let $authStore = get_store_value(authStore);
+const Settings = create_ssr_component(($$result, $$props, $$bindings, slots) => {
+	let $stateStore, $$unsubscribe_stateStore;
+	let $authStore, $$unsubscribe_authStore;
+	$$unsubscribe_stateStore = subscribe(stateStore, value => $stateStore = value);
+	$$unsubscribe_authStore = subscribe(authStore, value => $authStore = value);
 	clearInterval($stateStore.timerId);
 	clearInterval($stateStore.timerIdlist);
 
 	const pkg = {
-		urlhost: "https://91.228.118.92/back/",
-		urlhostkeys: "https://91.228.118.92/usersettings/"
+		urlhost: 'https://91.228.118.92/back/',
+		urlhostkeys: 'https://91.228.118.92/usersettings/'
 	};
+
+	$$unsubscribe_stateStore();
+	$$unsubscribe_authStore();
 
 	return `${($$result.head += `${($$result.title = `<title>Настройки</title>`, "")}`, "")}
 
-${$authStore.status === "in"
-	? `${validate_component(Sett, "Sett").$$render($$result, Object.assign(pkg), {}, {})}`
+${$authStore.status === 'in'
+	? `${validate_component(Sett, "Sett").$$render($$result, Object.assign({}, pkg), {}, {})}`
 	: ``}`;
 });
 
-/* src/routes/newbot.svelte generated by Svelte v3.24.0 */
+/* src/routes/newbot.svelte generated by Svelte v3.59.2 */
 
-const Newbot = create_ssr_component(($$result, $$props, $$bindings, $$slots) => {
-	let $stateStore = get_store_value(stateStore);
+const Newbot = create_ssr_component(($$result, $$props, $$bindings, slots) => {
+	let pkg;
+	let $stateStore, $$unsubscribe_stateStore;
+	$$unsubscribe_stateStore = subscribe(stateStore, value => $stateStore = value);
 	clearInterval($stateStore.timerId);
 	clearInterval($stateStore.timerIdlist);
 
-	let pkg = {
+	pkg = {
 		urlhost: $stateStore.urlhost,
 		comission: 0.15
 	};
 
+	$$unsubscribe_stateStore();
+
 	return `${($$result.head += `${($$result.title = `<title>newbot</title>`, "")}`, "")}
 
-<div class="${"container mx-auto"}">${validate_component(NewBot, "NewBot").$$render($$result, Object.assign(pkg), {}, {})}</div>`;
+<div class="container mx-auto">${validate_component(NewBot, "NewBot").$$render($$result, Object.assign({}, pkg), {}, {})}</div>`;
 });
 
-/* src/routes/about.svelte generated by Svelte v3.24.0 */
+/* src/routes/about.svelte generated by Svelte v3.59.2 */
 
-const About = create_ssr_component(($$result, $$props, $$bindings, $$slots) => {
-	let $stateStore = get_store_value(stateStore);
+const About = create_ssr_component(($$result, $$props, $$bindings, slots) => {
+	let $stateStore, $$unsubscribe_stateStore;
+	$$unsubscribe_stateStore = subscribe(stateStore, value => $stateStore = value);
 	clearInterval($stateStore.timerId);
 	clearInterval($stateStore.timerIdlist);
+	$$unsubscribe_stateStore();
 
 	return `${($$result.head += `${($$result.title = `<title>About</title>`, "")}`, "")}
-<div><h1 class="${"text-2xl text-center mb-4"}">About this site</h1>
+<div><h1 class="text-2xl text-center mb-4">About this site</h1>
 
-    <p class="${"text-center"}">This is the &#39;about&#39; page. There&#39;s not much here.</p></div>`;
+    <p class="text-center">This is the &#39;about&#39; page. There&#39;s not much here.</p></div>`;
 });
 
-/* src/routes/blog/index.svelte generated by Svelte v3.24.0 */
+/* src/routes/blog/index.svelte generated by Svelte v3.59.2 */
 
 const css$b = {
 	code: "ul.svelte-1hkq7r7{margin:0 0 1em 0;line-height:1.5}",
-	map: "{\"version\":3,\"file\":\"index.svelte\",\"sources\":[\"index.svelte\"],\"sourcesContent\":[\"<script context=\\\"module\\\">\\n    export function preload({ params, query }) {\\n        return this.fetch(`blog.json`)\\n            .then(r => r.json())\\n            .then(posts => {\\n                return { posts };\\n            });\\n    }\\n</script>\\n\\n<script>\\n    import { stateStore } from '../../stores/statebot.js';\\n    clearInterval($stateStore.timerId);\\n    clearInterval($stateStore.timerIdlist);\\n    \\n    export let posts;\\n</script>\\n\\n<style>\\n    ul {\\n        margin: 0 0 1em 0;\\n        line-height: 1.5;\\n    }\\n</style>\\n\\n<svelte:head>\\n    <title>Blog</title>\\n</svelte:head>\\n\\n<div class=\\\"container mx-auto\\\">\\n    <h1 class=\\\"text-2xl text-center mb-4\\\">Recent posts</h1>\\n\\n    <ul class=\\\"text-center\\\">\\n        {#each posts as post}\\n            <!-- we're using the non-standard `rel=prefetch` attribute to\\ntell Sapper to load the data for the page as soon as\\nthe user hovers over the link or taps it, instead of\\nwaiting for the 'click' event -->\\n            <li>\\n                <a rel=\\\"prefetch\\\" href=\\\"blog/{post.slug}\\\">{post.title}</a>\\n            </li>\\n        {/each}\\n    </ul>\\n</div>\\n\"],\"names\":[],\"mappings\":\"AAmBI,EAAE,eAAC,CAAC,AACA,MAAM,CAAE,CAAC,CAAC,CAAC,CAAC,GAAG,CAAC,CAAC,CACjB,WAAW,CAAE,GAAG,AACpB,CAAC\"}"
+	map: "{\"version\":3,\"file\":\"index.svelte\",\"sources\":[\"index.svelte\"],\"sourcesContent\":[\"<script context=\\\"module\\\">\\n    export function preload({ params, query }) {\\n        return this.fetch(`blog.json`)\\n            .then(r => r.json())\\n            .then(posts => {\\n                return { posts };\\n            });\\n    }\\n</script>\\n\\n<script>\\n    import { stateStore } from '../../stores/statebot.js';\\n    clearInterval($stateStore.timerId);\\n    clearInterval($stateStore.timerIdlist);\\n    \\n    export let posts;\\n</script>\\n\\n<style>\\n    ul {\\n        margin: 0 0 1em 0;\\n        line-height: 1.5;\\n    }\\n</style>\\n\\n<svelte:head>\\n    <title>Blog</title>\\n</svelte:head>\\n\\n<div class=\\\"container mx-auto\\\">\\n    <h1 class=\\\"text-2xl text-center mb-4\\\">Recent posts</h1>\\n\\n    <ul class=\\\"text-center\\\">\\n        {#each posts as post}\\n            <!-- we're using the non-standard `rel=prefetch` attribute to\\ntell Sapper to load the data for the page as soon as\\nthe user hovers over the link or taps it, instead of\\nwaiting for the 'click' event -->\\n            <li>\\n                <a rel=\\\"prefetch\\\" href=\\\"blog/{post.slug}\\\">{post.title}</a>\\n            </li>\\n        {/each}\\n    </ul>\\n</div>\\n\"],\"names\":[],\"mappings\":\"AAmBI,iBAAG,CACC,MAAM,CAAE,CAAC,CAAC,CAAC,CAAC,GAAG,CAAC,CAAC,CACjB,WAAW,CAAE,GACjB\"}"
 };
 
 function preload({ params, query }) {
@@ -3769,24 +4117,28 @@ function preload({ params, query }) {
 	});
 }
 
-const Blog = create_ssr_component(($$result, $$props, $$bindings, $$slots) => {
-	let $stateStore = get_store_value(stateStore);
+const Blog = create_ssr_component(($$result, $$props, $$bindings, slots) => {
+	let $stateStore, $$unsubscribe_stateStore;
+	$$unsubscribe_stateStore = subscribe(stateStore, value => $stateStore = value);
 	clearInterval($stateStore.timerId);
 	clearInterval($stateStore.timerIdlist);
 	let { posts } = $$props;
 	if ($$props.posts === void 0 && $$bindings.posts && posts !== void 0) $$bindings.posts(posts);
 	$$result.css.add(css$b);
+	$$unsubscribe_stateStore();
 
 	return `${($$result.head += `${($$result.title = `<title>Blog</title>`, "")}`, "")}
 
-<div class="${"container mx-auto"}"><h1 class="${"text-2xl text-center mb-4"}">Recent posts</h1>
+<div class="container mx-auto"><h1 class="text-2xl text-center mb-4">Recent posts</h1>
 
-    <ul class="${"text-center svelte-1hkq7r7"}">${each(posts, post => `
-            <li><a rel="${"prefetch"}" href="${"blog/" + escape(post.slug)}">${escape(post.title)}</a>
-            </li>`)}</ul></div>`;
+    <ul class="text-center svelte-1hkq7r7">${each(posts, post => {
+		return `
+            <li><a rel="prefetch" href="${"blog/" + escape(post.slug, true)}">${escape(post.title)}</a>
+            </li>`;
+	})}</ul></div>`;
 });
 
-/* src/routes/blog/[slug].svelte generated by Svelte v3.24.0 */
+/* src/routes/blog/[slug].svelte generated by Svelte v3.59.2 */
 
 async function preload$1({ params, query }) {
 	// the `slug` parameter is available because
@@ -3802,28 +4154,30 @@ async function preload$1({ params, query }) {
 	}
 }
 
-const U5Bslugu5D = create_ssr_component(($$result, $$props, $$bindings, $$slots) => {
+const U5Bslugu5D = create_ssr_component(($$result, $$props, $$bindings, slots) => {
 	let { post } = $$props;
 	if ($$props.post === void 0 && $$bindings.post && post !== void 0) $$bindings.post(post);
 
 	return `${($$result.head += `${($$result.title = `<title>${escape(post.title)}</title>`, "")}`, "")}
 
-<h1 class="${"text-2xl"}">${escape(post.title)}</h1>
+<h1 class="text-2xl">${escape(post.title)}</h1>
 
-<div class="${"content"}">${post.html}</div>`;
+<div class="content">${post.html}</div>`;
 });
 
-/* src/components/MenuUser.svelte generated by Svelte v3.24.0 */
+/* src/components/MenuUser.svelte generated by Svelte v3.59.2 */
 
 const css$c = {
 	code: ".absmenu.svelte-15jeqdb{position:absolute}",
-	map: "{\"version\":3,\"file\":\"MenuUser.svelte\",\"sources\":[\"MenuUser.svelte\"],\"sourcesContent\":[\"<script>\\n  import { createEventDispatcher } from 'svelte';\\n  //import { fly } from \\\"svelte/transition\\\";\\n  import { quadOut, quadIn } from 'svelte/easing';\\n  //import List from \\\"../List\\\";\\n  //import TextField from \\\"../TextField\\\";\\n  import { ClassBuilder } from 'smelte/src/utils/classes.js';\\n\\n  const classesDefault = \\\"absolute cursor-pointer\\\";\\n  const listClassesDefault = \\\"absolute top-3 rounded elevation-3 z-20 dark:bg-dark-500\\\";\\n\\n\\n  export let open = false;\\n\\n  export let classes = classesDefault;\\n  export let listClasses = listClassesDefault;\\n\\n\\n\\n\\n  const cb = new ClassBuilder($$props.class);\\n\\n  $: c = cb\\n    .flush()\\n    .add(classes, true, classesDefault)\\n    .add($$props.class)\\n    .get();\\n\\n  const lcb = new ClassBuilder(listClasses, listClassesDefault);\\n\\n  $: l = lcb\\n      .flush()\\n      .get();\\n\\n  const dispatch = createEventDispatcher();\\n\\n  const inProps = { y: 10, duration: 200, easing: quadIn };\\n  const outProps = { y: -10, duration: 100, easing: quadOut, delay: 100 };\\n</script>\\n\\n<style>\\n.absmenu{\\n  position: absolute;\\n}\\n</style>\\n\\n<svelte:window on:click={() => (open = false)} />\\n\\n<div class={c} on:click|stopPropagation>\\n  <slot name=\\\"activator\\\" />\\n  {#if open}\\n  <slot />\\n\\n      {/if}\\n</div>\\n\"],\"names\":[],\"mappings\":\"AAyCA,uBAAQ,CAAC,AACP,QAAQ,CAAE,QAAQ,AACpB,CAAC\"}"
+	map: "{\"version\":3,\"file\":\"MenuUser.svelte\",\"sources\":[\"MenuUser.svelte\"],\"sourcesContent\":[\"<script>\\n  import { createEventDispatcher } from 'svelte';\\n  //import { fly } from \\\"svelte/transition\\\";\\n  import { quadOut, quadIn } from 'svelte/easing';\\n  //import List from \\\"../List\\\";\\n  //import TextField from \\\"../TextField\\\";\\n  import { ClassBuilder } from 'smelte/src/utils/classes.js';\\n\\n  const classesDefault = \\\"absolute cursor-pointer\\\";\\n  const listClassesDefault = \\\"absolute top-3 rounded elevation-3 z-20 dark:bg-dark-500\\\";\\n\\n\\n  export let open = false;\\n\\n  export let classes = classesDefault;\\n  export let listClasses = listClassesDefault;\\n\\n\\n\\n\\n  const cb = new ClassBuilder($$props.class);\\n\\n  $: c = cb\\n    .flush()\\n    .add(classes, true, classesDefault)\\n    .add($$props.class)\\n    .get();\\n\\n  const lcb = new ClassBuilder(listClasses, listClassesDefault);\\n\\n  $: l = lcb\\n      .flush()\\n      .get();\\n\\n  const dispatch = createEventDispatcher();\\n\\n  const inProps = { y: 10, duration: 200, easing: quadIn };\\n  const outProps = { y: -10, duration: 100, easing: quadOut, delay: 100 };\\n</script>\\n\\n<style>\\n.absmenu{\\n  position: absolute;\\n}\\n</style>\\n\\n<svelte:window on:click={() => (open = false)} />\\n\\n<div class={c} on:click|stopPropagation>\\n  <slot name=\\\"activator\\\" />\\n  {#if open}\\n  <slot />\\n\\n      {/if}\\n</div>\\n\"],\"names\":[],\"mappings\":\"AAyCA,uBAAQ,CACN,QAAQ,CAAE,QACZ\"}"
 };
 
 const classesDefault$3 = "absolute cursor-pointer";
 const listClassesDefault = "absolute top-3 rounded elevation-3 z-20 dark:bg-dark-500";
 
-const MenuUser = create_ssr_component(($$result, $$props, $$bindings, $$slots) => {
+const MenuUser = create_ssr_component(($$result, $$props, $$bindings, slots) => {
+	let c;
+	let l;
 	let { open = false } = $$props;
 	let { classes = classesDefault$3 } = $$props;
 	let { listClasses = listClassesDefault } = $$props;
@@ -3835,25 +4189,23 @@ const MenuUser = create_ssr_component(($$result, $$props, $$bindings, $$slots) =
 	if ($$props.classes === void 0 && $$bindings.classes && classes !== void 0) $$bindings.classes(classes);
 	if ($$props.listClasses === void 0 && $$bindings.listClasses && listClasses !== void 0) $$bindings.listClasses(listClasses);
 	$$result.css.add(css$c);
-	let c = cb.flush().add(classes, true, classesDefault$3).add($$props.class).get();
-	let l = lcb.flush().get();
+	c = cb.flush().add(classes, true, classesDefault$3).add($$props.class).get();
+	l = lcb.flush().get();
 
 	return `
 
-<div class="${escape(null_to_empty(c)) + " svelte-15jeqdb"}">${$$slots.activator ? $$slots.activator({}) : ``}
-  ${open
-	? `${$$slots.default ? $$slots.default({}) : ``}`
-	: ``}</div>`;
+<div class="${escape(null_to_empty(c), true) + " svelte-15jeqdb"}">${slots.activator ? slots.activator({}) : ``}
+  ${open ? `${slots.default ? slots.default({}) : ``}` : ``}</div>`;
 });
 
-/* src/components/Profile.svelte generated by Svelte v3.24.0 */
+/* src/components/Profile.svelte generated by Svelte v3.59.2 */
 
 const css$d = {
 	code: "button.svelte-1djjzqq:active,button.svelte-1djjzqq:focus{outline:none}button.svelte-1djjzqq::-moz-focus-inner{border:0}.menu.svelte-1djjzqq{width:auto;min-width:auto;max-width:14rem;margin-left:-12rem;z-index:1000;padding:0.5rem;border:1px solid #85898b;box-shadow:0 2px 8px 0 rgba(0, 0, 0, 0.15);-moz-box-shadow:0 2px 8px 0 rgba(0, 0, 0, 0.15);-webkit-box-shadow:0 2px 8px 0 rgba(0, 0, 0, 0.15);border-radius:5px;color:#ebebeb}.my-1.svelte-1djjzqq{display:flex;justify-content:flex-end}.fill-current.svelte-1djjzqq:hover{fill:#f0b90b}",
-	map: "{\"version\":3,\"file\":\"Profile.svelte\",\"sources\":[\"Profile.svelte\"],\"sourcesContent\":[\"<script>\\n    import Button from 'smelte/src/components/Button';\\n    import MenuUser from './MenuUser.svelte';\\n    import { signOut } from '../firebase';\\n    ///import List from 'smelte/src/components/List';\\n\\n    export let displayName;\\n    export let photoURL;\\n    //export let uid;\\n\\n    let open = false;\\n</script>\\n\\n<style>\\n    button:active,\\n    button:focus {\\n        outline: none;\\n    }\\n    button::-moz-focus-inner {\\n        border: 0;\\n    }\\n\\n    .menu {\\n        width: auto;\\n        min-width: auto;\\n        max-width: 14rem;\\n        margin-left: -12rem;\\n\\n        z-index: 1000;\\n        padding: 0.5rem;\\n\\n        border: 1px solid #85898b;\\n        box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.15);\\n        -moz-box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.15);\\n        -webkit-box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.15);\\n\\n        border-radius: 5px;\\n        color: #ebebeb;\\n    }\\n    .my-1 {\\n        display: flex;\\n        justify-content: flex-end;\\n    }\\n    .fill-current:hover {\\n        fill: #f0b90b;\\n    }\\n</style>\\n\\n<MenuUser bind:open>\\n\\n    <div class=\\\"bg-dark-400 dark:bg-dark-400 menu\\\">\\n\\n        <img src={photoURL} class=\\\"h-10 w-10 rounded-full mx-5\\\" alt=\\\"user avatar\\\" />\\n        {displayName}\\n        <hr class=\\\"text-dark-700 m-2\\\" />\\n\\n        <p>Баланс: 100000$</p>\\n        <hr class=\\\"text-dark-700 m-2\\\" />\\n        <a href=\\\"settings\\\">Настройки</a>\\n        <br />\\n        <br />\\n        <button class=\\\"bg-primary-500 hover:bg-primary-300 rounded-lg px-4\\\" on:click={signOut}>\\n            Logout\\n        </button>\\n    </div>\\n    <div slot=\\\"activator\\\" class=\\\"my-1\\\">\\n        <button on:click={() => (open = !open)}>\\n            <svg class=\\\"fill-current w-6 h-6\\\" viewBox=\\\"0 0 20 20\\\">\\n                <path\\n                    fill-rule=\\\"evenodd\\\"\\n                    d=\\\"M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z\\\"\\n                    clip-rule=\\\"evenodd\\\" />\\n            </svg>\\n        </button>\\n    </div>\\n</MenuUser>\\n\"],\"names\":[],\"mappings\":\"AAcI,qBAAM,OAAO,CACb,qBAAM,MAAM,AAAC,CAAC,AACV,OAAO,CAAE,IAAI,AACjB,CAAC,AACD,qBAAM,kBAAkB,AAAC,CAAC,AACtB,MAAM,CAAE,CAAC,AACb,CAAC,AAED,KAAK,eAAC,CAAC,AACH,KAAK,CAAE,IAAI,CACX,SAAS,CAAE,IAAI,CACf,SAAS,CAAE,KAAK,CAChB,WAAW,CAAE,MAAM,CAEnB,OAAO,CAAE,IAAI,CACb,OAAO,CAAE,MAAM,CAEf,MAAM,CAAE,GAAG,CAAC,KAAK,CAAC,OAAO,CACzB,UAAU,CAAE,CAAC,CAAC,GAAG,CAAC,GAAG,CAAC,CAAC,CAAC,KAAK,CAAC,CAAC,CAAC,CAAC,CAAC,CAAC,CAAC,CAAC,CAAC,IAAI,CAAC,CAC3C,eAAe,CAAE,CAAC,CAAC,GAAG,CAAC,GAAG,CAAC,CAAC,CAAC,KAAK,CAAC,CAAC,CAAC,CAAC,CAAC,CAAC,CAAC,CAAC,CAAC,IAAI,CAAC,CAChD,kBAAkB,CAAE,CAAC,CAAC,GAAG,CAAC,GAAG,CAAC,CAAC,CAAC,KAAK,CAAC,CAAC,CAAC,CAAC,CAAC,CAAC,CAAC,CAAC,CAAC,IAAI,CAAC,CAEnD,aAAa,CAAE,GAAG,CAClB,KAAK,CAAE,OAAO,AAClB,CAAC,AACD,KAAK,eAAC,CAAC,AACH,OAAO,CAAE,IAAI,CACb,eAAe,CAAE,QAAQ,AAC7B,CAAC,AACD,4BAAa,MAAM,AAAC,CAAC,AACjB,IAAI,CAAE,OAAO,AACjB,CAAC\"}"
+	map: "{\"version\":3,\"file\":\"Profile.svelte\",\"sources\":[\"Profile.svelte\"],\"sourcesContent\":[\"<script>\\n    import Button from 'smelte/src/components/Button';\\n    import MenuUser from './MenuUser.svelte';\\n    import { signOut } from '../firebase';\\n    ///import List from 'smelte/src/components/List';\\n\\n    export let displayName;\\n    export let photoURL;\\n    //export let uid;\\n\\n    let open = false;\\n</script>\\n\\n<style>\\n    button:active,\\n    button:focus {\\n        outline: none;\\n    }\\n    button::-moz-focus-inner {\\n        border: 0;\\n    }\\n\\n    .menu {\\n        width: auto;\\n        min-width: auto;\\n        max-width: 14rem;\\n        margin-left: -12rem;\\n\\n        z-index: 1000;\\n        padding: 0.5rem;\\n\\n        border: 1px solid #85898b;\\n        box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.15);\\n        -moz-box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.15);\\n        -webkit-box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.15);\\n\\n        border-radius: 5px;\\n        color: #ebebeb;\\n    }\\n    .my-1 {\\n        display: flex;\\n        justify-content: flex-end;\\n    }\\n    .fill-current:hover {\\n        fill: #f0b90b;\\n    }\\n</style>\\n\\n<MenuUser bind:open>\\n\\n    <div class=\\\"bg-dark-400 dark:bg-dark-400 menu\\\">\\n\\n        <img src={photoURL} class=\\\"h-10 w-10 rounded-full mx-5\\\" alt=\\\"user avatar\\\" />\\n        {displayName}\\n        <hr class=\\\"text-dark-700 m-2\\\" />\\n\\n        <p>Баланс: 100000$</p>\\n        <hr class=\\\"text-dark-700 m-2\\\" />\\n        <a href=\\\"settings\\\">Настройки</a>\\n        <br />\\n        <br />\\n        <button class=\\\"bg-primary-500 hover:bg-primary-300 rounded-lg px-4\\\" on:click={signOut}>\\n            Logout\\n        </button>\\n    </div>\\n    <div slot=\\\"activator\\\" class=\\\"my-1\\\">\\n        <button on:click={() => (open = !open)}>\\n            <svg class=\\\"fill-current w-6 h-6\\\" viewBox=\\\"0 0 20 20\\\">\\n                <path\\n                    fill-rule=\\\"evenodd\\\"\\n                    d=\\\"M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z\\\"\\n                    clip-rule=\\\"evenodd\\\" />\\n            </svg>\\n        </button>\\n    </div>\\n</MenuUser>\\n\"],\"names\":[],\"mappings\":\"AAcI,qBAAM,OAAO,CACb,qBAAM,MAAO,CACT,OAAO,CAAE,IACb,CACA,qBAAM,kBAAmB,CACrB,MAAM,CAAE,CACZ,CAEA,oBAAM,CACF,KAAK,CAAE,IAAI,CACX,SAAS,CAAE,IAAI,CACf,SAAS,CAAE,KAAK,CAChB,WAAW,CAAE,MAAM,CAEnB,OAAO,CAAE,IAAI,CACb,OAAO,CAAE,MAAM,CAEf,MAAM,CAAE,GAAG,CAAC,KAAK,CAAC,OAAO,CACzB,UAAU,CAAE,CAAC,CAAC,GAAG,CAAC,GAAG,CAAC,CAAC,CAAC,KAAK,CAAC,CAAC,CAAC,CAAC,CAAC,CAAC,CAAC,CAAC,CAAC,IAAI,CAAC,CAC3C,eAAe,CAAE,CAAC,CAAC,GAAG,CAAC,GAAG,CAAC,CAAC,CAAC,KAAK,CAAC,CAAC,CAAC,CAAC,CAAC,CAAC,CAAC,CAAC,CAAC,IAAI,CAAC,CAChD,kBAAkB,CAAE,CAAC,CAAC,GAAG,CAAC,GAAG,CAAC,CAAC,CAAC,KAAK,CAAC,CAAC,CAAC,CAAC,CAAC,CAAC,CAAC,CAAC,CAAC,IAAI,CAAC,CAEnD,aAAa,CAAE,GAAG,CAClB,KAAK,CAAE,OACX,CACA,oBAAM,CACF,OAAO,CAAE,IAAI,CACb,eAAe,CAAE,QACrB,CACA,4BAAa,MAAO,CAChB,IAAI,CAAE,OACV\"}"
 };
 
-const Profile = create_ssr_component(($$result, $$props, $$bindings, $$slots) => {
+const Profile = create_ssr_component(($$result, $$props, $$bindings, slots) => {
 	let { displayName } = $$props;
 	let { photoURL } = $$props;
 
@@ -3879,19 +4231,22 @@ const Profile = create_ssr_component(($$result, $$props, $$bindings, $$slots) =>
 				}
 			},
 			{
-				activator: () => `<div slot="${"activator"}" class="${"my-1 svelte-1djjzqq"}"><button class="${"svelte-1djjzqq"}"><svg class="${"fill-current w-6 h-6 svelte-1djjzqq"}" viewBox="${"0 0 20 20"}"><path fill-rule="${"evenodd"}" d="${"M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"}" clip-rule="${"evenodd"}"></path></svg></button></div>`,
-				default: () => `<div class="${"bg-dark-400 dark:bg-dark-400 menu svelte-1djjzqq"}"><img${add_attribute("src", photoURL, 0)} class="${"h-10 w-10 rounded-full mx-5"}" alt="${"user avatar"}">
+				activator: () => {
+					return `<div slot="activator" class="my-1 svelte-1djjzqq"><button class="svelte-1djjzqq"><svg class="fill-current w-6 h-6 svelte-1djjzqq" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg></button></div>`;
+				},
+				default: () => {
+					return `<div class="bg-dark-400 dark:bg-dark-400 menu svelte-1djjzqq"><img${add_attribute("src", photoURL, 0)} class="h-10 w-10 rounded-full mx-5" alt="user avatar">
         ${escape(displayName)}
-        <hr class="${"text-dark-700 m-2"}">
+        <hr class="text-dark-700 m-2">
 
         <p>Баланс: 100000$</p>
-        <hr class="${"text-dark-700 m-2"}">
-        <a href="${"settings"}">Настройки</a>
+        <hr class="text-dark-700 m-2">
+        <a href="settings">Настройки</a>
         <br>
         <br>
-        <button class="${"bg-primary-500 hover:bg-primary-300 rounded-lg px-4 svelte-1djjzqq"}">Logout
-        </button></div>
-    `
+        <button class="bg-primary-500 hover:bg-primary-300 rounded-lg px-4 svelte-1djjzqq">Logout
+        </button></div>`;
+				}
 			}
 		)}`;
 	} while (!$$settled);
@@ -3899,20 +4254,22 @@ const Profile = create_ssr_component(($$result, $$props, $$bindings, $$slots) =>
 	return $$rendered;
 });
 
-/* src/components/Login.svelte generated by Svelte v3.24.0 */
+/* src/components/Login.svelte generated by Svelte v3.59.2 */
 
 const css$e = {
 	code: ".knob.svelte-155m2yj{width:auto;display:flex;justify-content:flex-end}.mtmt.svelte-155m2yj{margin-top:-1.1rem;margin-right:2rem}",
-	map: "{\"version\":3,\"file\":\"Login.svelte\",\"sources\":[\"Login.svelte\"],\"sourcesContent\":[\"<script>\\n    import { signOut } from '../firebase';\\n    import { authStore } from '../stores/auth';\\n    import Profile from './Profile.svelte';\\n    import SignInButton from './SignInButton.svelte';\\n</script>\\n\\n<style>\\n    .knob {\\n        width: auto;\\n\\n        display: flex;\\n        justify-content: flex-end;\\n    }\\n    .mtmt {\\n        margin-top: -1.1rem;\\n        margin-right: 2rem;\\n    }\\n</style>\\n\\n<section class=\\\"knob\\\">\\n    {#if $authStore.status === 'in'}\\n        <div class=\\\"mtmt\\\">\\n            <Profile {...$authStore.user} />\\n        </div>\\n    {:else}\\n        <SignInButton provider={'google'} />\\n    {/if}\\n</section>\\n\"],\"names\":[],\"mappings\":\"AAQI,KAAK,eAAC,CAAC,AACH,KAAK,CAAE,IAAI,CAEX,OAAO,CAAE,IAAI,CACb,eAAe,CAAE,QAAQ,AAC7B,CAAC,AACD,KAAK,eAAC,CAAC,AACH,UAAU,CAAE,OAAO,CACnB,YAAY,CAAE,IAAI,AACtB,CAAC\"}"
+	map: "{\"version\":3,\"file\":\"Login.svelte\",\"sources\":[\"Login.svelte\"],\"sourcesContent\":[\"<script>\\n    import { signOut } from '../firebase';\\n    import { authStore } from '../stores/auth';\\n    import Profile from './Profile.svelte';\\n    import SignInButton from './SignInButton.svelte';\\n</script>\\n\\n<style>\\n    .knob {\\n        width: auto;\\n\\n        display: flex;\\n        justify-content: flex-end;\\n    }\\n    .mtmt {\\n        margin-top: -1.1rem;\\n        margin-right: 2rem;\\n    }\\n</style>\\n\\n<section class=\\\"knob\\\">\\n    {#if $authStore.status === 'in'}\\n        <div class=\\\"mtmt\\\">\\n            <Profile {...$authStore.user} />\\n        </div>\\n    {:else}\\n        <SignInButton provider={'google'} />\\n    {/if}\\n</section>\\n\"],\"names\":[],\"mappings\":\"AAQI,oBAAM,CACF,KAAK,CAAE,IAAI,CAEX,OAAO,CAAE,IAAI,CACb,eAAe,CAAE,QACrB,CACA,oBAAM,CACF,UAAU,CAAE,OAAO,CACnB,YAAY,CAAE,IAClB\"}"
 };
 
-const Login = create_ssr_component(($$result, $$props, $$bindings, $$slots) => {
-	let $authStore = get_store_value(authStore);
+const Login = create_ssr_component(($$result, $$props, $$bindings, slots) => {
+	let $authStore, $$unsubscribe_authStore;
+	$$unsubscribe_authStore = subscribe(authStore, value => $authStore = value);
 	$$result.css.add(css$e);
+	$$unsubscribe_authStore();
 
-	return `<section class="${"knob svelte-155m2yj"}">${$authStore.status === "in"
-	? `<div class="${"mtmt svelte-155m2yj"}">${validate_component(Profile, "Profile").$$render($$result, Object.assign($authStore.user), {}, {})}</div>`
-	: `${validate_component(SignInButton, "SignInButton").$$render($$result, { provider: "google" }, {}, {})}`}</section>`;
+	return `<section class="knob svelte-155m2yj">${$authStore.status === 'in'
+	? `<div class="mtmt svelte-155m2yj">${validate_component(Profile, "Profile").$$render($$result, Object.assign({}, $authStore.user), {}, {})}</div>`
+	: `${validate_component(SignInButton, "SignInButton").$$render($$result, { provider: 'google' }, {}, {})}`}</section>`;
 });
 
 let darkMode;
@@ -3948,16 +4305,16 @@ function dark(value = false, bodyClasses = "mode-dark") {
   };
 }
 
-/* node_modules/smelte/src/components/Util/Scrim.svelte generated by Svelte v3.24.0 */
+/* node_modules/smelte/src/components/Util/Scrim.svelte generated by Svelte v3.59.2 */
 
-const Scrim = create_ssr_component(($$result, $$props, $$bindings, $$slots) => {
+const Scrim = create_ssr_component(($$result, $$props, $$bindings, slots) => {
 	let { opacity = 0.5 } = $$props;
 	let { inProps = { duration: 200, easing: quadIn } } = $$props;
 	let { outProps = { duration: 200, easing: quadOut } } = $$props;
 	if ($$props.opacity === void 0 && $$bindings.opacity && opacity !== void 0) $$bindings.opacity(opacity);
 	if ($$props.inProps === void 0 && $$bindings.inProps && inProps !== void 0) $$bindings.inProps(inProps);
 	if ($$props.outProps === void 0 && $$bindings.outProps && outProps !== void 0) $$bindings.outProps(outProps);
-	return `<div class="${"bg-black fixed top-0 left-0 z-10 w-full h-full"}" style="${"opacity: " + escape(opacity)}"></div>`;
+	return `<div class="bg-black fixed top-0 left-0 z-10 w-full h-full" style="${"opacity: " + escape(opacity, true)}"></div>`;
 });
 
 const Scrim$1 = Scrim;
@@ -3983,26 +4340,28 @@ function breakpoint(calcBreakpoint = defaultCalc) {
   const onResize = ({ target }) => store.set(calcBreakpoint(target.innerWidth));
 
   window.addEventListener("resize", onResize);
-  onDestroy(() => window.removeListener(onResize));
+  onDestroy(() => window.removeEventListener("resize", onResize));
 
   return {
     subscribe: store.subscribe
   };
 }
 
-/* node_modules/smelte/src/components/NavigationDrawer/NavigationDrawer.svelte generated by Svelte v3.24.0 */
+/* node_modules/smelte/src/components/NavigationDrawer/NavigationDrawer.svelte generated by Svelte v3.59.2 */
 
 const css$f = {
 	code: ".drawer.svelte-6qcjcu{min-width:250px}aside.svelte-6qcjcu{height:100vh}",
-	map: "{\"version\":3,\"file\":\"NavigationDrawer.svelte\",\"sources\":[\"NavigationDrawer.svelte\"],\"sourcesContent\":[\"<script>\\n  import { fly } from \\\"svelte/transition\\\";\\n  import { quadIn } from \\\"svelte/easing\\\";\\n  import { Scrim } from \\\"../Util\\\";\\n  import breakpoints from \\\"../../breakpoints\\\";\\n  import { ClassBuilder } from \\\"../../utils/classes.js\\\";\\n\\n  const bp = breakpoints();\\n\\n  const classesDefault = \\\"fixed top-0 md:mt-16 w-auto drawer overflow-hidden h-full\\\";\\n  const navClassesDefault = `h-full w-full bg-white dark:bg-gray-900 dark:text-gray-200 absolute flex w-auto z-20 drawer\\n    pointer-events-auto overflow-y-auto`;\\n\\n  export let right = false;\\n  export let persistent = false;\\n  export let elevation = true;\\n  export let show = true;\\n  export let classes = classesDefault;\\n  export let navClasses = navClassesDefault;\\n  export let borderClasses = `border-gray-600 ${right ? \\\"border-l\\\" : \\\"border-r\\\"}`;\\n\\n\\n\\n\\n  export let transitionProps = {\\n    duration: 200,\\n    x: -300,\\n    easing: quadIn,\\n    opacity: 1,\\n  };\\n\\n  $: transitionProps.x = right ? 300 : -300;\\n  $: persistent = show = $bp !== \\\"sm\\\";\\n\\n  const cb = new ClassBuilder(classes, classesDefault);\\n\\n  if ($bp === 'sm') show = false;\\n\\n  $: c = cb\\n    .flush()\\n    .add(classes, true, classesDefault)\\n    .add(borderClasses, !elevation && persistent)\\n    .add($$props.class)\\n    .add(\\\"right-0\\\", right)\\n    .add(\\\"left-0\\\", !right)\\n    .add(\\\"pointer-events-none\\\", persistent)\\n    .add(\\\"z-50\\\", !persistent)\\n    .add(\\\"elevation-4\\\", elevation)\\n    .add(\\\"z-20\\\", persistent)\\n    .get();\\n\\n  const ncb = new ClassBuilder(navClasses, navClassesDefault);\\n\\n  $: n = ncb\\n    .flush()\\n    .get();\\n\\n</script>\\n\\n<style>\\n  .drawer {\\n    min-width: 250px;\\n  }\\n\\n  aside {\\n    height: 100vh;\\n  }\\n</style>\\n\\n{#if show}\\n  <aside\\n    class={c}\\n    transition:fly={transitionProps}\\n  >\\n    {#if !persistent}\\n      <Scrim on:click={() => show = false} />\\n    {/if}\\n    <nav\\n      role=\\\"navigation\\\"\\n      class={n}\\n    >\\n      <div class=\\\"w-full\\\">\\n        <slot />\\n      </div>\\n    </nav>\\n  </aside>\\n{/if}\\n\"],\"names\":[],\"mappings\":\"AA4DE,OAAO,cAAC,CAAC,AACP,SAAS,CAAE,KAAK,AAClB,CAAC,AAED,KAAK,cAAC,CAAC,AACL,MAAM,CAAE,KAAK,AACf,CAAC\"}"
+	map: "{\"version\":3,\"file\":\"NavigationDrawer.svelte\",\"sources\":[\"NavigationDrawer.svelte\"],\"sourcesContent\":[\"<script>\\n  import { fly } from \\\"svelte/transition\\\";\\n  import { quadIn } from \\\"svelte/easing\\\";\\n  import { Scrim } from \\\"../Util\\\";\\n  import breakpoints from \\\"../../breakpoints\\\";\\n  import { ClassBuilder } from \\\"../../utils/classes.js\\\";\\n\\n  const bp = breakpoints();\\n\\n  const classesDefault = \\\"fixed top-0 md:mt-16 w-auto drawer overflow-hidden h-full\\\";\\n  const navClassesDefault = `h-full w-full bg-white dark:bg-gray-900 dark:text-gray-200 absolute flex w-auto z-20 drawer\\n    pointer-events-auto overflow-y-auto`;\\n\\n  export let right = false;\\n  export let persistent = false;\\n  export let elevation = true;\\n  export let show = true;\\n  export let classes = classesDefault;\\n  export let navClasses = navClassesDefault;\\n  export let borderClasses = `border-gray-600 ${right ? \\\"border-l\\\" : \\\"border-r\\\"}`;\\n\\n\\n\\n\\n  export let transitionProps = {\\n    duration: 200,\\n    x: -300,\\n    easing: quadIn,\\n    opacity: 1,\\n  };\\n\\n  $: transitionProps.x = right ? 300 : -300;\\n\\n  // Is the drawer deliberately hidden? Don't let the $bp check make it visible if so.\\n  let hidden = !show;\\n  $: if (!hidden) persistent = show = $bp !== \\\"sm\\\";\\n\\n  const cb = new ClassBuilder(classes, classesDefault);\\n\\n  if ($bp === 'sm') show = false;\\n\\n  $: c = cb\\n    .flush()\\n    .add(classes, true, classesDefault)\\n    .add(borderClasses, !elevation && persistent)\\n    .add($$props.class)\\n    .add(\\\"right-0\\\", right)\\n    .add(\\\"left-0\\\", !right)\\n    .add(\\\"pointer-events-none\\\", persistent)\\n    .add(\\\"z-50\\\", !persistent)\\n    .add(\\\"shadow\\\", elevation)\\n    .add(\\\"z-20\\\", persistent)\\n    .get();\\n\\n  const ncb = new ClassBuilder(navClasses, navClassesDefault);\\n\\n  $: n = ncb\\n    .flush()\\n    .get();\\n\\n</script>\\n\\n<style>\\n  .drawer {\\n    min-width: 250px;\\n  }\\n\\n  aside {\\n    height: 100vh;\\n  }\\n</style>\\n\\n{#if show}\\n  <aside\\n    class={c}\\n    transition:fly={transitionProps}\\n  >\\n    {#if !persistent}\\n      <Scrim on:click={() => show = false} />\\n    {/if}\\n    <nav\\n      role=\\\"navigation\\\"\\n      class={n}\\n    >\\n      <div class=\\\"w-full\\\">\\n        <slot />\\n      </div>\\n    </nav>\\n  </aside>\\n{/if}\\n\"],\"names\":[],\"mappings\":\"AA+DE,qBAAQ,CACN,SAAS,CAAE,KACb,CAEA,mBAAM,CACJ,MAAM,CAAE,KACV\"}"
 };
 
 const classesDefault$4 = "fixed top-0 md:mt-16 w-auto drawer overflow-hidden h-full";
 
-const NavigationDrawer = create_ssr_component(($$result, $$props, $$bindings, $$slots) => {
-	let $bp;
+const NavigationDrawer = create_ssr_component(($$result, $$props, $$bindings, slots) => {
+	let c;
+	let n;
+	let $bp, $$unsubscribe_bp;
 	const bp = breakpoint();
-	$bp = get_store_value(bp);
+	$$unsubscribe_bp = subscribe(bp, value => $bp = value);
 
 	const navClassesDefault = `h-full w-full bg-white dark:bg-gray-900 dark:text-gray-200 absolute flex w-auto z-20 drawer
     pointer-events-auto overflow-y-auto`;
@@ -4022,8 +4381,11 @@ const NavigationDrawer = create_ssr_component(($$result, $$props, $$bindings, $$
 		opacity: 1
 	} } = $$props;
 
+	// Is the drawer deliberately hidden? Don't let the $bp check make it visible if so.
+	let hidden = !show;
+
 	const cb = new ClassBuilder(classes, classesDefault$4);
-	if ($bp === "sm") show = false;
+	if ($bp === 'sm') show = false;
 	const ncb = new ClassBuilder(navClasses, navClassesDefault);
 	if ($$props.right === void 0 && $$bindings.right && right !== void 0) $$bindings.right(right);
 	if ($$props.persistent === void 0 && $$bindings.persistent && persistent !== void 0) $$bindings.persistent(persistent);
@@ -4034,48 +4396,55 @@ const NavigationDrawer = create_ssr_component(($$result, $$props, $$bindings, $$
 	if ($$props.borderClasses === void 0 && $$bindings.borderClasses && borderClasses !== void 0) $$bindings.borderClasses(borderClasses);
 	if ($$props.transitionProps === void 0 && $$bindings.transitionProps && transitionProps !== void 0) $$bindings.transitionProps(transitionProps);
 	$$result.css.add(css$f);
-	$bp = get_store_value(bp);
 	transitionProps.x = right ? 300 : -300;
-	persistent = show = $bp !== "sm";
-	let c = cb.flush().add(classes, true, classesDefault$4).add(borderClasses, !elevation && persistent).add($$props.class).add("right-0", right).add("left-0", !right).add("pointer-events-none", persistent).add("z-50", !persistent).add("elevation-4", elevation).add("z-20", persistent).get();
-	let n = ncb.flush().get();
+
+	 {
+		if (!hidden) persistent = show = $bp !== "sm";
+	}
+
+	c = cb.flush().add(classes, true, classesDefault$4).add(borderClasses, !elevation && persistent).add($$props.class).add("right-0", right).add("left-0", !right).add("pointer-events-none", persistent).add("z-50", !persistent).add("shadow", elevation).add("z-20", persistent).get();
+	n = ncb.flush().get();
+	$$unsubscribe_bp();
 
 	return `${show
-	? `<aside class="${escape(null_to_empty(c)) + " svelte-6qcjcu"}">${!persistent
+	? `<aside class="${escape(null_to_empty(c), true) + " svelte-6qcjcu"}">${!persistent
 		? `${validate_component(Scrim$1, "Scrim").$$render($$result, {}, {}, {})}`
 		: ``}
-    <nav role="${"navigation"}" class="${escape(null_to_empty(n)) + " svelte-6qcjcu"}"><div class="${"w-full"}">${$$slots.default ? $$slots.default({}) : ``}</div></nav></aside>`
+    <nav role="navigation" class="${escape(null_to_empty(n), true) + " svelte-6qcjcu"}"><div class="w-full">${slots.default ? slots.default({}) : ``}</div></nav></aside>`
 	: ``}`;
 });
 
-/* node_modules/smelte/src/components/AppBar/AppBar.svelte generated by Svelte v3.24.0 */
-let classesDefault$5 = "fixed top-0 w-full items-center flex-wrap flex left-0 z-30 p-0 h-16 elevation-3 bg-primary-300 dark:bg-dark-600";
+/* node_modules/smelte/src/components/AppBar/AppBar.svelte generated by Svelte v3.59.2 */
+let classesDefault$5 = "fixed top-0 w-full items-center flex-wrap flex left-0 z-30 p-0 h-16 shadow bg-primary-300 dark:bg-dark-600";
 
-const AppBar = create_ssr_component(($$result, $$props, $$bindings, $$slots) => {
+const AppBar = create_ssr_component(($$result, $$props, $$bindings, slots) => {
+	let c;
 	let { classes = classesDefault$5 } = $$props;
 	const cb = new ClassBuilder(classes, classesDefault$5);
 	if ($$props.classes === void 0 && $$bindings.classes && classes !== void 0) $$bindings.classes(classes);
-	let c = cb.flush().add($$props.class).get();
-	return `<header${add_attribute("class", c, 0)}>${$$slots.default ? $$slots.default({}) : ``}</header>`;
+	c = cb.flush().add($$props.class).get();
+	return `<header${add_attribute("class", c, 0)}>${slots.default ? slots.default({}) : ``}</header>`;
 });
 
-/* src/routes/_layout.svelte generated by Svelte v3.24.0 */
+/* src/routes/_layout.svelte generated by Svelte v3.59.2 */
 
 const css$g = {
 	code: ".menu.svelte-1fao8wd{display:flex;flex-direction:column;justify-content:space-between;height:100vh;border-right:1px solid #85898b}.menulast.svelte-1fao8wd{flex:none;text-align:center;margin-bottom:2rem}.chatpriglos.svelte-1fao8wd{display:inline-flex;flex-grow:2;text-align:center;border:1px solid #85898b;border-radius:5px;margin:1rem}.usermenu.svelte-1fao8wd{line-height:inherit}.rastyazhka.svelte-1fao8wd{display:inline-flex;flex-grow:2}.backknob.svelte-1fao8wd{margin-top:1rem;margin-right:1rem}.zagl.svelte-1fao8wd{width:16rem;height:100vh}.mainflex.svelte-1fao8wd{display:flex;margin-left:auto;margin-right:auto;margin-top:3.5rem;justify-content:center}.fill-current.svelte-1fao8wd:hover{fill:#f0b90b}.text-current.svelte-1fao8wd:hover{color:#f0b90b;background-color:#f0bb0b0c}",
-	map: "{\"version\":3,\"file\":\"_layout.svelte\",\"sources\":[\"_layout.svelte\"],\"sourcesContent\":[\"\\n<script>\\n\\n//console.log(process.env.SAPPER_APP_HOSTIP);\\n\\n    import { stateStore } from '../stores/statebot.js';\\n    import { authStore } from '../stores/auth';\\n    import Nav from '../components/Nav.svelte';\\n    import Login from '../components/Login.svelte';\\n    import NavigationDrawer from 'smelte/src/components/NavigationDrawer';\\n    import AppBar from 'smelte/src/components/AppBar';\\n    import breakpoints from 'smelte/src/breakpoints';\\n    export let segment;\\n    const bp = breakpoints();\\n    import 'smelte/src/tailwind.css';\\n\\n    import dark from 'smelte/src/dark';\\n\\n    let darkMode = dark();\\n    let showzagl;\\n    \\n    import Button from 'smelte/src/components/Button';\\n    // export let segment;\\n\\n    function showtogle() {\\n        $stateStore.showmenu = !$stateStore.showmenu;\\n        //console.log ($stateStore.show);\\n        return $stateStore.showmenu;\\n    }\\n    //console.log(\\\"s_a_hip: \\\" + process.env.SAPPER_APP_HOSTIP);\\n    \\n \\n    //localStorage.setItem('darkmode', 'on');\\n    if ($bp === 'sm') showzagl = false;\\n\\n    function menucloseifnotsm() {\\n        if ($stateStore.showmenu && $bp === 'sm') {\\n            $stateStore.showmenu = false;\\n        }\\n    }\\n\\n     function gohome() {\\n            $stateStore.rout = 'botlist';\\n        }\\n</script>\\n\\n<style>\\n    .menu {\\n        display: flex;\\n        flex-direction: column;\\n        justify-content: space-between;\\n        height: 100vh;\\n        border-right: 1px solid #85898b;\\n    }\\n    .menulast {\\n        flex: none;\\n        text-align: center;\\n        margin-bottom: 2rem;\\n    }\\n    .chatpriglos {\\n       display: inline-flex;\\n        flex-grow: 2;\\n        text-align: center;\\n        border: 1px solid #85898b;\\n        border-radius: 5px;\\n        margin : 1rem;\\n    }\\n    .usermenu {\\n        line-height: inherit;\\n    }\\n    .rastyazhka {\\n        display: inline-flex;\\n        flex-grow: 2;\\n    }\\n    .backknob {\\n        margin-top: 1rem;\\n        margin-right: 1rem;\\n    }\\n\\n    .zagl {\\n        width: 16rem;\\n        height: 100vh;\\n    }\\n    .mainflex {\\n        display: flex;\\n        margin-left: auto;\\n        margin-right: auto;\\n        margin-top: 3.5rem;\\n        justify-content: center;\\n    }\\n    .fill-current:hover {\\n        fill: #f0b90b;\\n    }\\n    .text-current:hover {\\n        color: #f0b90b;\\n        background-color: #f0bb0b0c;\\n    }\\n</style>\\n\\n<AppBar class=\\\"bg-gray-200 dark:bg-dark-500 flex p-0 fixed w-full z-10 top-0\\\">\\n    <div class=\\\"text-white flex-none\\\">\\n        <a\\n            class=\\\"text-white no-underline hover:text-white hover:no-underline\\\"\\n            aria-current={segment === undefined ? 'page' : undefined}\\n            href=\\\".\\\"\\n            on:click={gohome}>\\n            <svg\\n                width=\\\"45\\\"\\n                height=\\\"45\\\"\\n                viewBox=\\\"0 0 45 45\\\"\\n                fill=\\\"none\\\"\\n                xmlns=\\\"http://www.w3.org/2000/svg\\\">\\n                <g clip-path=\\\"url(#clip0)\\\">\\n                    <path\\n                        fill-rule=\\\"evenodd\\\"\\n                        clip-rule=\\\"evenodd\\\"\\n                        d=\\\"M8.96631 8.65552L36.6553 8.65551L36.6553 36.3445L8.96631 36.3445L8.96631\\n                        8.65552ZM35.2663 18.3618L35.2663 21.6912H30.9552L30.9552 18.3618L35.2663\\n                        18.3618ZM35.2663 34.9937L35.2663 22.571L30.9552 22.571L30.9552\\n                        29.7173C30.7305 32.6744 32.6316 34.8393 35.2663 34.9937ZM29.9591\\n                        21.7293V18.4119L17.1564 18.4119L17.1564 21.729L21.5194 21.729L21.5194\\n                        34.9937H25.8293L25.8293 21.7293L29.9591 21.7293Z\\\"\\n                        fill=\\\"#F0B90B\\\" />\\n                </g>\\n                <defs>\\n                    <clipPath id=\\\"clip0\\\">\\n                        <rect width=\\\"45\\\" height=\\\"45\\\" fill=\\\"white\\\" />\\n                    </clipPath>\\n                </defs>\\n            </svg>\\n\\n        </a>\\n    </div>\\n    <div class=\\\"pr-2 flex-none\\\">\\n        <div on:click={showtogle}>\\n            <svg\\n                class=\\\"fill-current h-6 w-6\\\"\\n                viewBox=\\\"0 0 20 20\\\"\\n                xmlns=\\\"http://www.w3.org/2000/svg\\\">\\n                <title>Menu</title>\\n                <path d=\\\"M0 3h20v2H0V3zm0 6h20v2H0V9zm0 6h20v2H0v-2z\\\" />\\n            </svg>\\n        </div>\\n    </div>\\n    <div class=\\\"flex-grow text-center\\\">{$stateStore.selectbotname} </div>\\n\\n    <div class=\\\"usermenu flex-none\\\">\\n        <Login />\\n    </div>\\n\\n    <div class=\\\"flex-none\\\">\\n        <Button bind:value={$darkMode} class=\\\"mr-2 ml-2\\\">\\n            <svg\\n                class=\\\"fill-current w-6 h-6\\\"\\n                xmlns=\\\"http://www.w3.org/2000/svg\\\"\\n                viewBox=\\\"0 0 20 20\\\">\\n                <path\\n                    fill-rule=\\\"evenodd\\\"\\n                    d=\\\"M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018\\n                    0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414\\n                    1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1\\n                    0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2\\n                    0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414\\n                    1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0\\n                    011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z\\\"\\n                    clip-rule=\\\"evenodd\\\" />\\n            </svg>\\n        </Button>\\n    </div>\\n\\n</AppBar>\\n<NavigationDrawer class=\\\"bg-gray-200 dark:bg-black\\\" bind:show={$stateStore.showmenu} {segment}>\\n    <div class=\\\"menu\\\">\\n        <div class=\\\"flex justify-between\\\">\\n            <a\\n                class=\\\"text-white no-underline hover:text-white hover:no-underline\\\"\\n                aria-current={segment === undefined ? 'page' : undefined}\\n                href=\\\".\\\">\\n                <svg\\n                    width=\\\"95\\\"\\n                    height=\\\"95\\\"\\n                    viewBox=\\\"0 0 45 45\\\"\\n                    fill=\\\"none\\\"\\n                    xmlns=\\\"http://www.w3.org/2000/svg\\\">\\n                    <g clip-path=\\\"url(#clip0)\\\">\\n                        <path\\n                            fill-rule=\\\"evenodd\\\"\\n                            clip-rule=\\\"evenodd\\\"\\n                            d=\\\"M8.96631 8.65552L36.6553 8.65551L36.6553 36.3445L8.96631\\n                            36.3445L8.96631 8.65552ZM35.2663 18.3618L35.2663 21.6912H30.9552L30.9552\\n                            18.3618L35.2663 18.3618ZM35.2663 34.9937L35.2663 22.571L30.9552\\n                            22.571L30.9552 29.7173C30.7305 32.6744 32.6316 34.8393 35.2663\\n                            34.9937ZM29.9591 21.7293V18.4119L17.1564 18.4119L17.1564 21.729L21.5194\\n                            21.729L21.5194 34.9937H25.8293L25.8293 21.7293L29.9591 21.7293Z\\\"\\n                            fill=\\\"#F0B90B\\\" />\\n                    </g>\\n                    <defs>\\n                        <clipPath id=\\\"clip0\\\">\\n                            <rect width=\\\"45\\\" height=\\\"45\\\" fill=\\\"white\\\" />\\n                        </clipPath>\\n                    </defs>\\n                </svg>\\n\\n            </a>\\n            <div class=\\\"backknob\\\">\\n                <div on:click={showtogle}>\\n                    <svg\\n                        class=\\\"fill-current h-6 w-6\\\"\\n                        viewBox=\\\"0 0 20 20\\\"\\n                        xmlns=\\\"http://www.w3.org/2000/svg\\\">\\n                        <path\\n                            d=\\\"M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414\\n                            1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z\\\" />\\n                    </svg>\\n                </div>\\n            </div>\\n        </div>\\n\\n        <a\\n            class=\\\"text-current py-4 px-4 flex-none\\\"\\n            aria-current={segment === 'about' ? 'page' : undefined}\\n            href=\\\"/\\\"\\n            on:click={menucloseifnotsm}>\\n            Главная\\n        </a>\\n        <a\\n            class=\\\"text-current py-4 px-4 flex-none\\\"\\n            aria-current={segment === 'about' ? 'page' : undefined}\\n            href=\\\"about\\\"\\n            on:click={menucloseifnotsm}>\\n            О программе\\n        </a>\\n\\n        <a\\n            class=\\\"py-4 px-4 text-current flex-none\\\"\\n            rel=\\\"prefetch\\\"\\n            aria-current={segment === 'blog' ? 'page' : undefined}\\n            href=\\\"blog\\\"\\n            on:click={menucloseifnotsm}>\\n            Блог\\n        </a>\\n\\n        {#if $authStore.status === 'in'}\\n            <hr />\\n            <a\\n                class=\\\"py-4 px-4 text-current flex-none\\\"\\n                rel=\\\"prefetch\\\"\\n                aria-current={segment === 'blog' ? 'page' : undefined}\\n                href=\\\"/\\\"\\n                on:click={menucloseifnotsm}>\\n                GRID LONG Бот\\n            </a>\\n            <a\\n                class=\\\"py-4 px-4 text-current flex-none\\\"\\n                rel=\\\"prefetch\\\"\\n                aria-current={segment === 'blog' ? 'page' : undefined}\\n                href=\\\"settings\\\"\\n                on:click={menucloseifnotsm}>\\n                Настройки\\n            </a>\\n            <hr />\\n        {/if}\\n\\n        <div class=\\\"rastyazhka\\\">&nbsp;</div>\\n        <div class=\\\"chatpriglos py-4 px-4 text-current flex-none\\\">Вступай в наш чат!</div>\\n        <a\\n            class=\\\"menulast py-4 px-4 text-current flex-none\\\"\\n            rel=\\\"prefetch\\\"\\n            aria-current={segment === 'blog' ? 'page' : undefined}\\n            href=\\\"instruction\\\"\\n            on:click={menucloseifnotsm}>\\n            Инструкция\\n        </a>\\n\\n    </div>\\n</NavigationDrawer>\\n\\n<div class=\\\"mainflex\\\">\\n\\n    {#if $stateStore.showmenu && $bp != 'sm'}\\n        <div class=\\\"zagl\\\">&nbsp;</div>\\n\\n        <slot />\\n    {:else}\\n        <slot />\\n    {/if}\\n</div>\\n\"],\"names\":[],\"mappings\":\"AA+CI,KAAK,eAAC,CAAC,AACH,OAAO,CAAE,IAAI,CACb,cAAc,CAAE,MAAM,CACtB,eAAe,CAAE,aAAa,CAC9B,MAAM,CAAE,KAAK,CACb,YAAY,CAAE,GAAG,CAAC,KAAK,CAAC,OAAO,AACnC,CAAC,AACD,SAAS,eAAC,CAAC,AACP,IAAI,CAAE,IAAI,CACV,UAAU,CAAE,MAAM,CAClB,aAAa,CAAE,IAAI,AACvB,CAAC,AACD,YAAY,eAAC,CAAC,AACX,OAAO,CAAE,WAAW,CACnB,SAAS,CAAE,CAAC,CACZ,UAAU,CAAE,MAAM,CAClB,MAAM,CAAE,GAAG,CAAC,KAAK,CAAC,OAAO,CACzB,aAAa,CAAE,GAAG,CAClB,MAAM,CAAG,IAAI,AACjB,CAAC,AACD,SAAS,eAAC,CAAC,AACP,WAAW,CAAE,OAAO,AACxB,CAAC,AACD,WAAW,eAAC,CAAC,AACT,OAAO,CAAE,WAAW,CACpB,SAAS,CAAE,CAAC,AAChB,CAAC,AACD,SAAS,eAAC,CAAC,AACP,UAAU,CAAE,IAAI,CAChB,YAAY,CAAE,IAAI,AACtB,CAAC,AAED,KAAK,eAAC,CAAC,AACH,KAAK,CAAE,KAAK,CACZ,MAAM,CAAE,KAAK,AACjB,CAAC,AACD,SAAS,eAAC,CAAC,AACP,OAAO,CAAE,IAAI,CACb,WAAW,CAAE,IAAI,CACjB,YAAY,CAAE,IAAI,CAClB,UAAU,CAAE,MAAM,CAClB,eAAe,CAAE,MAAM,AAC3B,CAAC,AACD,4BAAa,MAAM,AAAC,CAAC,AACjB,IAAI,CAAE,OAAO,AACjB,CAAC,AACD,4BAAa,MAAM,AAAC,CAAC,AACjB,KAAK,CAAE,OAAO,CACd,gBAAgB,CAAE,SAAS,AAC/B,CAAC\"}"
+	map: "{\"version\":3,\"file\":\"_layout.svelte\",\"sources\":[\"_layout.svelte\"],\"sourcesContent\":[\"\\n<script>\\n\\n//console.log(process.env.SAPPER_APP_HOSTIP);\\n\\n    import { stateStore } from '../stores/statebot.js';\\n    import { authStore } from '../stores/auth';\\n    import Nav from '../components/Nav.svelte';\\n    import Login from '../components/Login.svelte';\\n    import NavigationDrawer from 'smelte/src/components/NavigationDrawer';\\n    import AppBar from 'smelte/src/components/AppBar';\\n    import breakpoints from 'smelte/src/breakpoints';\\n    export let segment;\\n    const bp = breakpoints();\\n    import 'smelte/src/tailwind.css';\\n\\n    import dark from 'smelte/src/dark';\\n\\n    let darkMode = dark();\\n    let showzagl;\\n    \\n    import Button from 'smelte/src/components/Button';\\n    // export let segment;\\n\\n    function showtogle() {\\n        $stateStore.showmenu = !$stateStore.showmenu;\\n        //console.log ($stateStore.show);\\n        return $stateStore.showmenu;\\n    }\\n    //console.log(\\\"s_a_hip: \\\" + process.env.SAPPER_APP_HOSTIP);\\n    \\n \\n    //localStorage.setItem('darkmode', 'on');\\n    if ($bp === 'sm') showzagl = false;\\n\\n    function menucloseifnotsm() {\\n        if ($stateStore.showmenu && $bp === 'sm') {\\n            $stateStore.showmenu = false;\\n        }\\n    }\\n\\n     function gohome() {\\n            $stateStore.rout = 'botlist';\\n        }\\n</script>\\n\\n<style>\\n    .menu {\\n        display: flex;\\n        flex-direction: column;\\n        justify-content: space-between;\\n        height: 100vh;\\n        border-right: 1px solid #85898b;\\n    }\\n    .menulast {\\n        flex: none;\\n        text-align: center;\\n        margin-bottom: 2rem;\\n    }\\n    .chatpriglos {\\n       display: inline-flex;\\n        flex-grow: 2;\\n        text-align: center;\\n        border: 1px solid #85898b;\\n        border-radius: 5px;\\n        margin : 1rem;\\n    }\\n    .usermenu {\\n        line-height: inherit;\\n    }\\n    .rastyazhka {\\n        display: inline-flex;\\n        flex-grow: 2;\\n    }\\n    .backknob {\\n        margin-top: 1rem;\\n        margin-right: 1rem;\\n    }\\n\\n    .zagl {\\n        width: 16rem;\\n        height: 100vh;\\n    }\\n    .mainflex {\\n        display: flex;\\n        margin-left: auto;\\n        margin-right: auto;\\n        margin-top: 3.5rem;\\n        justify-content: center;\\n    }\\n    .fill-current:hover {\\n        fill: #f0b90b;\\n    }\\n    .text-current:hover {\\n        color: #f0b90b;\\n        background-color: #f0bb0b0c;\\n    }\\n</style>\\n\\n<AppBar class=\\\"bg-gray-200 dark:bg-dark-500 flex p-0 fixed w-full z-10 top-0\\\">\\n    <div class=\\\"text-white flex-none\\\">\\n        <a\\n            class=\\\"text-white no-underline hover:text-white hover:no-underline\\\"\\n            aria-current={segment === undefined ? 'page' : undefined}\\n            href=\\\".\\\"\\n            on:click={gohome}>\\n            <svg\\n                width=\\\"45\\\"\\n                height=\\\"45\\\"\\n                viewBox=\\\"0 0 45 45\\\"\\n                fill=\\\"none\\\"\\n                xmlns=\\\"http://www.w3.org/2000/svg\\\">\\n                <g clip-path=\\\"url(#clip0)\\\">\\n                    <path\\n                        fill-rule=\\\"evenodd\\\"\\n                        clip-rule=\\\"evenodd\\\"\\n                        d=\\\"M8.96631 8.65552L36.6553 8.65551L36.6553 36.3445L8.96631 36.3445L8.96631\\n                        8.65552ZM35.2663 18.3618L35.2663 21.6912H30.9552L30.9552 18.3618L35.2663\\n                        18.3618ZM35.2663 34.9937L35.2663 22.571L30.9552 22.571L30.9552\\n                        29.7173C30.7305 32.6744 32.6316 34.8393 35.2663 34.9937ZM29.9591\\n                        21.7293V18.4119L17.1564 18.4119L17.1564 21.729L21.5194 21.729L21.5194\\n                        34.9937H25.8293L25.8293 21.7293L29.9591 21.7293Z\\\"\\n                        fill=\\\"#F0B90B\\\" />\\n                </g>\\n                <defs>\\n                    <clipPath id=\\\"clip0\\\">\\n                        <rect width=\\\"45\\\" height=\\\"45\\\" fill=\\\"white\\\" />\\n                    </clipPath>\\n                </defs>\\n            </svg>\\n\\n        </a>\\n    </div>\\n    <div class=\\\"pr-2 flex-none\\\">\\n        <div on:click={showtogle}>\\n            <svg\\n                class=\\\"fill-current h-6 w-6\\\"\\n                viewBox=\\\"0 0 20 20\\\"\\n                xmlns=\\\"http://www.w3.org/2000/svg\\\">\\n                <title>Menu</title>\\n                <path d=\\\"M0 3h20v2H0V3zm0 6h20v2H0V9zm0 6h20v2H0v-2z\\\" />\\n            </svg>\\n        </div>\\n    </div>\\n    <div class=\\\"flex-grow text-center\\\">{$stateStore.selectbotname} </div>\\n\\n    <div class=\\\"usermenu flex-none\\\">\\n        <Login />\\n    </div>\\n\\n    <div class=\\\"flex-none\\\">\\n        <Button bind:value={$darkMode} class=\\\"mr-2 ml-2\\\">\\n            <svg\\n                class=\\\"fill-current w-6 h-6\\\"\\n                xmlns=\\\"http://www.w3.org/2000/svg\\\"\\n                viewBox=\\\"0 0 20 20\\\">\\n                <path\\n                    fill-rule=\\\"evenodd\\\"\\n                    d=\\\"M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018\\n                    0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414\\n                    1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1\\n                    0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2\\n                    0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414\\n                    1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0\\n                    011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z\\\"\\n                    clip-rule=\\\"evenodd\\\" />\\n            </svg>\\n        </Button>\\n    </div>\\n\\n</AppBar>\\n<NavigationDrawer class=\\\"bg-gray-200 dark:bg-black\\\" bind:show={$stateStore.showmenu} {segment}>\\n    <div class=\\\"menu\\\">\\n        <div class=\\\"flex justify-between\\\">\\n            <a\\n                class=\\\"text-white no-underline hover:text-white hover:no-underline\\\"\\n                aria-current={segment === undefined ? 'page' : undefined}\\n                href=\\\".\\\">\\n                <svg\\n                    width=\\\"95\\\"\\n                    height=\\\"95\\\"\\n                    viewBox=\\\"0 0 45 45\\\"\\n                    fill=\\\"none\\\"\\n                    xmlns=\\\"http://www.w3.org/2000/svg\\\">\\n                    <g clip-path=\\\"url(#clip0)\\\">\\n                        <path\\n                            fill-rule=\\\"evenodd\\\"\\n                            clip-rule=\\\"evenodd\\\"\\n                            d=\\\"M8.96631 8.65552L36.6553 8.65551L36.6553 36.3445L8.96631\\n                            36.3445L8.96631 8.65552ZM35.2663 18.3618L35.2663 21.6912H30.9552L30.9552\\n                            18.3618L35.2663 18.3618ZM35.2663 34.9937L35.2663 22.571L30.9552\\n                            22.571L30.9552 29.7173C30.7305 32.6744 32.6316 34.8393 35.2663\\n                            34.9937ZM29.9591 21.7293V18.4119L17.1564 18.4119L17.1564 21.729L21.5194\\n                            21.729L21.5194 34.9937H25.8293L25.8293 21.7293L29.9591 21.7293Z\\\"\\n                            fill=\\\"#F0B90B\\\" />\\n                    </g>\\n                    <defs>\\n                        <clipPath id=\\\"clip0\\\">\\n                            <rect width=\\\"45\\\" height=\\\"45\\\" fill=\\\"white\\\" />\\n                        </clipPath>\\n                    </defs>\\n                </svg>\\n\\n            </a>\\n            <div class=\\\"backknob\\\">\\n                <div on:click={showtogle}>\\n                    <svg\\n                        class=\\\"fill-current h-6 w-6\\\"\\n                        viewBox=\\\"0 0 20 20\\\"\\n                        xmlns=\\\"http://www.w3.org/2000/svg\\\">\\n                        <path\\n                            d=\\\"M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414\\n                            1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z\\\" />\\n                    </svg>\\n                </div>\\n            </div>\\n        </div>\\n\\n        <a\\n            class=\\\"text-current py-4 px-4 flex-none\\\"\\n            aria-current={segment === 'about' ? 'page' : undefined}\\n            href=\\\"/\\\"\\n            on:click={menucloseifnotsm}>\\n            Главная\\n        </a>\\n        <a\\n            class=\\\"text-current py-4 px-4 flex-none\\\"\\n            aria-current={segment === 'about' ? 'page' : undefined}\\n            href=\\\"about\\\"\\n            on:click={menucloseifnotsm}>\\n            О программе\\n        </a>\\n\\n        <a\\n            class=\\\"py-4 px-4 text-current flex-none\\\"\\n            rel=\\\"prefetch\\\"\\n            aria-current={segment === 'blog' ? 'page' : undefined}\\n            href=\\\"blog\\\"\\n            on:click={menucloseifnotsm}>\\n            Блог\\n        </a>\\n\\n        {#if $authStore.status === 'in'}\\n            <hr />\\n            <a\\n                class=\\\"py-4 px-4 text-current flex-none\\\"\\n                rel=\\\"prefetch\\\"\\n                aria-current={segment === 'blog' ? 'page' : undefined}\\n                href=\\\"/\\\"\\n                on:click={menucloseifnotsm}>\\n                GRID LONG Бот\\n            </a>\\n            <a\\n                class=\\\"py-4 px-4 text-current flex-none\\\"\\n                rel=\\\"prefetch\\\"\\n                aria-current={segment === 'blog' ? 'page' : undefined}\\n                href=\\\"settings\\\"\\n                on:click={menucloseifnotsm}>\\n                Настройки\\n            </a>\\n            <hr />\\n        {/if}\\n\\n        <div class=\\\"rastyazhka\\\">&nbsp;</div>\\n        <div class=\\\"chatpriglos py-4 px-4 text-current flex-none\\\">Вступай в наш чат!</div>\\n        <a\\n            class=\\\"menulast py-4 px-4 text-current flex-none\\\"\\n            rel=\\\"prefetch\\\"\\n            aria-current={segment === 'blog' ? 'page' : undefined}\\n            href=\\\"instruction\\\"\\n            on:click={menucloseifnotsm}>\\n            Инструкция\\n        </a>\\n\\n    </div>\\n</NavigationDrawer>\\n\\n<div class=\\\"mainflex\\\">\\n\\n    {#if $stateStore.showmenu && $bp != 'sm'}\\n        <div class=\\\"zagl\\\">&nbsp;</div>\\n\\n        <slot />\\n    {:else}\\n        <slot />\\n    {/if}\\n</div>\\n\"],\"names\":[],\"mappings\":\"AA+CI,oBAAM,CACF,OAAO,CAAE,IAAI,CACb,cAAc,CAAE,MAAM,CACtB,eAAe,CAAE,aAAa,CAC9B,MAAM,CAAE,KAAK,CACb,YAAY,CAAE,GAAG,CAAC,KAAK,CAAC,OAC5B,CACA,wBAAU,CACN,IAAI,CAAE,IAAI,CACV,UAAU,CAAE,MAAM,CAClB,aAAa,CAAE,IACnB,CACA,2BAAa,CACV,OAAO,CAAE,WAAW,CACnB,SAAS,CAAE,CAAC,CACZ,UAAU,CAAE,MAAM,CAClB,MAAM,CAAE,GAAG,CAAC,KAAK,CAAC,OAAO,CACzB,aAAa,CAAE,GAAG,CAClB,MAAM,CAAG,IACb,CACA,wBAAU,CACN,WAAW,CAAE,OACjB,CACA,0BAAY,CACR,OAAO,CAAE,WAAW,CACpB,SAAS,CAAE,CACf,CACA,wBAAU,CACN,UAAU,CAAE,IAAI,CAChB,YAAY,CAAE,IAClB,CAEA,oBAAM,CACF,KAAK,CAAE,KAAK,CACZ,MAAM,CAAE,KACZ,CACA,wBAAU,CACN,OAAO,CAAE,IAAI,CACb,WAAW,CAAE,IAAI,CACjB,YAAY,CAAE,IAAI,CAClB,UAAU,CAAE,MAAM,CAClB,eAAe,CAAE,MACrB,CACA,4BAAa,MAAO,CAChB,IAAI,CAAE,OACV,CACA,4BAAa,MAAO,CAChB,KAAK,CAAE,OAAO,CACd,gBAAgB,CAAE,SACtB\"}"
 };
 
-const Layout = create_ssr_component(($$result, $$props, $$bindings, $$slots) => {
-	let $stateStore = get_store_value(stateStore);
-	let $bp;
-	let $darkMode;
-	let $authStore = get_store_value(authStore);
+const Layout = create_ssr_component(($$result, $$props, $$bindings, slots) => {
+	let $stateStore, $$unsubscribe_stateStore;
+	let $bp, $$unsubscribe_bp;
+	let $darkMode, $$unsubscribe_darkMode;
+	let $authStore, $$unsubscribe_authStore;
+	$$unsubscribe_stateStore = subscribe(stateStore, value => $stateStore = value);
+	$$unsubscribe_authStore = subscribe(authStore, value => $authStore = value);
 	let { segment } = $$props;
 	const bp = breakpoint();
-	$bp = get_store_value(bp);
+	$$unsubscribe_bp = subscribe(bp, value => $bp = value);
 	let darkMode = dark();
-	$darkMode = get_store_value(darkMode);
+	$$unsubscribe_darkMode = subscribe(darkMode, value => $darkMode = value);
 
 	if ($$props.segment === void 0 && $$bindings.segment && segment !== void 0) $$bindings.segment(segment);
 	$$result.css.add(css$g);
@@ -4084,8 +4453,6 @@ const Layout = create_ssr_component(($$result, $$props, $$bindings, $$slots) => 
 
 	do {
 		$$settled = true;
-		$bp = get_store_value(bp);
-		$darkMode = get_store_value(darkMode);
 
 		$$rendered = `${validate_component(AppBar, "AppBar").$$render(
 			$$result,
@@ -4094,25 +4461,40 @@ const Layout = create_ssr_component(($$result, $$props, $$bindings, $$slots) => 
 			},
 			{},
 			{
-				default: () => `<div class="${"text-white flex-none"}"><a class="${"text-white no-underline hover:text-white hover:no-underline"}"${add_attribute("aria-current", segment === undefined ? "page" : undefined, 0)} href="${"."}"><svg width="${"45"}" height="${"45"}" viewBox="${"0 0 45 45"}" fill="${"none"}" xmlns="${"http://www.w3.org/2000/svg"}"><g clip-path="${"url(#clip0)"}"><path fill-rule="${"evenodd"}" clip-rule="${"evenodd"}" d="${"M8.96631 8.65552L36.6553 8.65551L36.6553 36.3445L8.96631 36.3445L8.96631\n                        8.65552ZM35.2663 18.3618L35.2663 21.6912H30.9552L30.9552 18.3618L35.2663\n                        18.3618ZM35.2663 34.9937L35.2663 22.571L30.9552 22.571L30.9552\n                        29.7173C30.7305 32.6744 32.6316 34.8393 35.2663 34.9937ZM29.9591\n                        21.7293V18.4119L17.1564 18.4119L17.1564 21.729L21.5194 21.729L21.5194\n                        34.9937H25.8293L25.8293 21.7293L29.9591 21.7293Z"}" fill="${"#F0B90B"}"></path></g><defs><clipPath id="${"clip0"}"><rect width="${"45"}" height="${"45"}" fill="${"white"}"></rect></clipPath></defs></svg></a></div>
-    <div class="${"pr-2 flex-none"}"><div><svg class="${"fill-current h-6 w-6 svelte-1fao8wd"}" viewBox="${"0 0 20 20"}" xmlns="${"http://www.w3.org/2000/svg"}"><title>Menu</title><path d="${"M0 3h20v2H0V3zm0 6h20v2H0V9zm0 6h20v2H0v-2z"}"></path></svg></div></div>
-    <div class="${"flex-grow text-center"}">${escape($stateStore.selectbotname)}</div>
+				default: () => {
+					return `<div class="text-white flex-none"><a class="text-white no-underline hover:text-white hover:no-underline"${add_attribute("aria-current", segment === undefined ? 'page' : undefined, 0)} href="."><svg width="45" height="45" viewBox="0 0 45 45" fill="none" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0)"><path fill-rule="evenodd" clip-rule="evenodd" d="M8.96631 8.65552L36.6553 8.65551L36.6553 36.3445L8.96631 36.3445L8.96631
+                        8.65552ZM35.2663 18.3618L35.2663 21.6912H30.9552L30.9552 18.3618L35.2663
+                        18.3618ZM35.2663 34.9937L35.2663 22.571L30.9552 22.571L30.9552
+                        29.7173C30.7305 32.6744 32.6316 34.8393 35.2663 34.9937ZM29.9591
+                        21.7293V18.4119L17.1564 18.4119L17.1564 21.729L21.5194 21.729L21.5194
+                        34.9937H25.8293L25.8293 21.7293L29.9591 21.7293Z" fill="#F0B90B"></path></g><defs><clipPath id="clip0"><rect width="45" height="45" fill="white"></rect></clipPath></defs></svg></a></div>
+    <div class="pr-2 flex-none"><div><svg class="fill-current h-6 w-6 svelte-1fao8wd" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><title>Menu</title><path d="M0 3h20v2H0V3zm0 6h20v2H0V9zm0 6h20v2H0v-2z"></path></svg></div></div>
+    <div class="flex-grow text-center">${escape($stateStore.selectbotname)}</div>
 
-    <div class="${"usermenu flex-none svelte-1fao8wd"}">${validate_component(Login, "Login").$$render($$result, {}, {}, {})}</div>
+    <div class="usermenu flex-none svelte-1fao8wd">${validate_component(Login, "Login").$$render($$result, {}, {}, {})}</div>
 
-    <div class="${"flex-none"}">${validate_component(Button, "Button").$$render(
-					$$result,
-					{ class: "mr-2 ml-2", value: $darkMode },
-					{
-						value: $$value => {
-							$darkMode = $$value;
-							$$settled = false;
+    <div class="flex-none">${validate_component(Button, "Button").$$render(
+						$$result,
+						{ class: "mr-2 ml-2", value: $darkMode },
+						{
+							value: $$value => {
+								$darkMode = $$value;
+								$$settled = false;
+							}
+						},
+						{
+							default: () => {
+								return `<svg class="fill-current w-6 h-6 svelte-1fao8wd" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018
+                    0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414
+                    1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1
+                    0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2
+                    0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414
+                    1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0
+                    011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"></path></svg>`;
+							}
 						}
-					},
-					{
-						default: () => `<svg class="${"fill-current w-6 h-6 svelte-1fao8wd"}" xmlns="${"http://www.w3.org/2000/svg"}" viewBox="${"0 0 20 20"}"><path fill-rule="${"evenodd"}" d="${"M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018\n                    0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414\n                    1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1\n                    0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2\n                    0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414\n                    1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0\n                    011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"}" clip-rule="${"evenodd"}"></path></svg>`
-					}
-				)}</div>`
+					)}</div>`;
+				}
 			}
 		)}
 ${validate_component(NavigationDrawer, "NavigationDrawer").$$render(
@@ -4129,46 +4511,58 @@ ${validate_component(NavigationDrawer, "NavigationDrawer").$$render(
 				}
 			},
 			{
-				default: () => `<div class="${"menu svelte-1fao8wd"}"><div class="${"flex justify-between"}"><a class="${"text-white no-underline hover:text-white hover:no-underline"}"${add_attribute("aria-current", segment === undefined ? "page" : undefined, 0)} href="${"."}"><svg width="${"95"}" height="${"95"}" viewBox="${"0 0 45 45"}" fill="${"none"}" xmlns="${"http://www.w3.org/2000/svg"}"><g clip-path="${"url(#clip0)"}"><path fill-rule="${"evenodd"}" clip-rule="${"evenodd"}" d="${"M8.96631 8.65552L36.6553 8.65551L36.6553 36.3445L8.96631\n                            36.3445L8.96631 8.65552ZM35.2663 18.3618L35.2663 21.6912H30.9552L30.9552\n                            18.3618L35.2663 18.3618ZM35.2663 34.9937L35.2663 22.571L30.9552\n                            22.571L30.9552 29.7173C30.7305 32.6744 32.6316 34.8393 35.2663\n                            34.9937ZM29.9591 21.7293V18.4119L17.1564 18.4119L17.1564 21.729L21.5194\n                            21.729L21.5194 34.9937H25.8293L25.8293 21.7293L29.9591 21.7293Z"}" fill="${"#F0B90B"}"></path></g><defs><clipPath id="${"clip0"}"><rect width="${"45"}" height="${"45"}" fill="${"white"}"></rect></clipPath></defs></svg></a>
-            <div class="${"backknob svelte-1fao8wd"}"><div><svg class="${"fill-current h-6 w-6 svelte-1fao8wd"}" viewBox="${"0 0 20 20"}" xmlns="${"http://www.w3.org/2000/svg"}"><path d="${"M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414\n                            1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"}"></path></svg></div></div></div>
+				default: () => {
+					return `<div class="menu svelte-1fao8wd"><div class="flex justify-between"><a class="text-white no-underline hover:text-white hover:no-underline"${add_attribute("aria-current", segment === undefined ? 'page' : undefined, 0)} href="."><svg width="95" height="95" viewBox="0 0 45 45" fill="none" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0)"><path fill-rule="evenodd" clip-rule="evenodd" d="M8.96631 8.65552L36.6553 8.65551L36.6553 36.3445L8.96631
+                            36.3445L8.96631 8.65552ZM35.2663 18.3618L35.2663 21.6912H30.9552L30.9552
+                            18.3618L35.2663 18.3618ZM35.2663 34.9937L35.2663 22.571L30.9552
+                            22.571L30.9552 29.7173C30.7305 32.6744 32.6316 34.8393 35.2663
+                            34.9937ZM29.9591 21.7293V18.4119L17.1564 18.4119L17.1564 21.729L21.5194
+                            21.729L21.5194 34.9937H25.8293L25.8293 21.7293L29.9591 21.7293Z" fill="#F0B90B"></path></g><defs><clipPath id="clip0"><rect width="45" height="45" fill="white"></rect></clipPath></defs></svg></a>
+            <div class="backknob svelte-1fao8wd"><div><svg class="fill-current h-6 w-6 svelte-1fao8wd" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414
+                            1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"></path></svg></div></div></div>
 
-        <a class="${"text-current py-4 px-4 flex-none svelte-1fao8wd"}"${add_attribute("aria-current", segment === "about" ? "page" : undefined, 0)} href="${"/"}">Главная
+        <a class="text-current py-4 px-4 flex-none svelte-1fao8wd"${add_attribute("aria-current", segment === 'about' ? 'page' : undefined, 0)} href="/">Главная
         </a>
-        <a class="${"text-current py-4 px-4 flex-none svelte-1fao8wd"}"${add_attribute("aria-current", segment === "about" ? "page" : undefined, 0)} href="${"about"}">О программе
-        </a>
-
-        <a class="${"py-4 px-4 text-current flex-none svelte-1fao8wd"}" rel="${"prefetch"}"${add_attribute("aria-current", segment === "blog" ? "page" : undefined, 0)} href="${"blog"}">Блог
+        <a class="text-current py-4 px-4 flex-none svelte-1fao8wd"${add_attribute("aria-current", segment === 'about' ? 'page' : undefined, 0)} href="about">О программе
         </a>
 
-        ${$authStore.status === "in"
-				? `<hr>
-            <a class="${"py-4 px-4 text-current flex-none svelte-1fao8wd"}" rel="${"prefetch"}"${add_attribute("aria-current", segment === "blog" ? "page" : undefined, 0)} href="${"/"}">GRID LONG Бот
+        <a class="py-4 px-4 text-current flex-none svelte-1fao8wd" rel="prefetch"${add_attribute("aria-current", segment === 'blog' ? 'page' : undefined, 0)} href="blog">Блог
+        </a>
+
+        ${$authStore.status === 'in'
+					? `<hr>
+            <a class="py-4 px-4 text-current flex-none svelte-1fao8wd" rel="prefetch"${add_attribute("aria-current", segment === 'blog' ? 'page' : undefined, 0)} href="/">GRID LONG Бот
             </a>
-            <a class="${"py-4 px-4 text-current flex-none svelte-1fao8wd"}" rel="${"prefetch"}"${add_attribute("aria-current", segment === "blog" ? "page" : undefined, 0)} href="${"settings"}">Настройки
+            <a class="py-4 px-4 text-current flex-none svelte-1fao8wd" rel="prefetch"${add_attribute("aria-current", segment === 'blog' ? 'page' : undefined, 0)} href="settings">Настройки
             </a>
             <hr>`
-				: ``}
+					: ``}
 
-        <div class="${"rastyazhka svelte-1fao8wd"}"> </div>
-        <div class="${"chatpriglos py-4 px-4 text-current flex-none svelte-1fao8wd"}">Вступай в наш чат!</div>
-        <a class="${"menulast py-4 px-4 text-current flex-none svelte-1fao8wd"}" rel="${"prefetch"}"${add_attribute("aria-current", segment === "blog" ? "page" : undefined, 0)} href="${"instruction"}">Инструкция
-        </a></div>`
+        <div class="rastyazhka svelte-1fao8wd"> </div>
+        <div class="chatpriglos py-4 px-4 text-current flex-none svelte-1fao8wd">Вступай в наш чат!</div>
+        <a class="menulast py-4 px-4 text-current flex-none svelte-1fao8wd" rel="prefetch"${add_attribute("aria-current", segment === 'blog' ? 'page' : undefined, 0)} href="instruction">Инструкция
+        </a></div>`;
+				}
 			}
 		)}
 
-<div class="${"mainflex svelte-1fao8wd"}">${$stateStore.showmenu && $bp != "sm"
-		? `<div class="${"zagl svelte-1fao8wd"}"> </div>
+<div class="mainflex svelte-1fao8wd">${$stateStore.showmenu && $bp != 'sm'
+		? `<div class="zagl svelte-1fao8wd"> </div>
 
-        ${$$slots.default ? $$slots.default({}) : ``}`
-		: `${$$slots.default ? $$slots.default({}) : ``}`}</div>`;
+        ${slots.default ? slots.default({}) : ``}`
+		: `${slots.default ? slots.default({}) : ``}`}</div>`;
 	} while (!$$settled);
 
+	$$unsubscribe_stateStore();
+	$$unsubscribe_bp();
+	$$unsubscribe_darkMode();
+	$$unsubscribe_authStore();
 	return $$rendered;
 });
 
-/* src/routes/_error.svelte generated by Svelte v3.24.0 */
+/* src/routes/_error.svelte generated by Svelte v3.59.2 */
 
-const Error$1 = create_ssr_component(($$result, $$props, $$bindings, $$slots) => {
+const Error$1 = create_ssr_component(($$result, $$props, $$bindings, slots) => {
 	let { status } = $$props;
 	let { error } = $$props;
 	if ($$props.status === void 0 && $$bindings.status && status !== void 0) $$bindings.status(status);
@@ -4280,9 +4674,9 @@ const build_dir = "__sapper__/build";
 
 const CONTEXT_KEY = {};
 
-/* src/node_modules/@sapper/internal/App.svelte generated by Svelte v3.24.0 */
+/* src/node_modules/@sapper/internal/App.svelte generated by Svelte v3.59.2 */
 
-const App = create_ssr_component(($$result, $$props, $$bindings, $$slots) => {
+const App = create_ssr_component(($$result, $$props, $$bindings, slots) => {
 	let { stores } = $$props;
 	let { error } = $$props;
 	let { status } = $$props;
@@ -4303,10 +4697,12 @@ const App = create_ssr_component(($$result, $$props, $$bindings, $$slots) => {
 	return `
 
 
-${validate_component(Layout, "Layout").$$render($$result, Object.assign({ segment: segments[0] }, level0.props), {}, {
-		default: () => `${error
-		? `${validate_component(Error$1, "Error").$$render($$result, { error, status }, {}, {})}`
-		: `${validate_component(level1.component || missing_component, "svelte:component").$$render($$result, Object.assign(level1.props), {}, {})}`}`
+${validate_component(Layout, "Layout").$$render($$result, Object.assign({}, { segment: segments[0] }, level0.props), {}, {
+		default: () => {
+			return `${error
+			? `${validate_component(Error$1, "Error").$$render($$result, { error, status }, {}, {})}`
+			: `${validate_component(level1.component || missing_component, "svelte:component").$$render($$result, Object.assign({}, level1.props), {}, {})}`}`;
+		}
 	})}`;
 });
 
@@ -4688,7 +5084,7 @@ var cookie = {
 var chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_$';
 var unsafeChars = /[<>\b\f\n\r\t\0\u2028\u2029]/g;
 var reserved = /^(?:do|if|in|for|int|let|new|try|var|byte|case|char|else|enum|goto|long|this|void|with|await|break|catch|class|const|final|float|short|super|throw|while|yield|delete|double|export|import|native|return|switch|throws|typeof|boolean|default|extends|finally|package|private|abstract|continue|debugger|function|volatile|interface|protected|transient|implements|instanceof|synchronized)$/;
-var escaped$1 = {
+var escaped = {
     '<': '\\u003C',
     '>': '\\u003E',
     '/': '\\u002F',
@@ -4869,7 +5265,7 @@ function getType(thing) {
     return Object.prototype.toString.call(thing).slice(8, -1);
 }
 function escapeUnsafeChar(c) {
-    return escaped$1[c] || c;
+    return escaped[c] || c;
 }
 function escapeUnsafeChars(str) {
     return str.replace(unsafeChars, escapeUnsafeChar);
@@ -4888,8 +5284,8 @@ function stringifyString(str) {
         if (char === '"') {
             result += '\\"';
         }
-        else if (char in escaped$1) {
-            result += escaped$1[char];
+        else if (char in escaped) {
+            result += escaped[char];
         }
         else if (code >= 0xd800 && code <= 0xdfff) {
             var next = str.charCodeAt(i + 1);
