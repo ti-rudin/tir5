@@ -144,24 +144,24 @@ services:
     networks:
       - tibotnet
   
-  front:
-    container_name: front
-    build:
-      context: ./front
-      dockerfile: ./Dockerfile.dev
-    env_file: .env
-    ports:
-      - "3000:3000"
-    volumes:
-      - './front/:/usr/src/app'
-    restart: always
-    depends_on:
-      - redis
-      - node-red-core
-      - node-red-worker2
-
-    networks:
-      - tibotnet
+  #front:
+  #  container_name: front
+  #  build:
+  #    context: ./front
+  #    dockerfile: ./Dockerfile.dev
+  #  env_file: .env
+  #  ports:
+  #    - "3000:3000"
+  #  volumes:
+  #    - './front/:/usr/src/app'
+  #  restart: always
+  #  depends_on:
+  #    - redis
+  #    - node-red-core
+  #    - node-red-worker2
+#
+  #  networks:
+  #    - tibotnet
     #labels:
     #  - "traefik.enable=true"
     #  - "traefik.http.routers.front.rule=Host(`tir4dev.ti-robots.ru`)"

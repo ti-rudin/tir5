@@ -23,7 +23,7 @@ node-red-data2/externalModules/
 node-red-data2/journals/
 front/node_modules/
 
-
+redis-data/dump.rdb
 
 ############################
 # OS X
@@ -144,3 +144,5 @@ front/__sapper__/dev/
 front/__sapper__/dev/client/*
 front/__sapper__/dev/*
 
+redis-data/dump.rdb
+redis-data/dump.rdb
