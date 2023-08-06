@@ -573,9 +573,7 @@
             "2f83bb2fab63d1bd"
         ],
         "x": 1114,
-        "y": 1119,
-        "w": 792,
-        "h": 122
+        "y": 1119
     },
     {
         "id": "666006aaa2e325fc",
@@ -968,7 +966,9 @@
             "5b7bb9d6beb5e5a8"
         ],
         "x": 674,
-        "y": 859
+        "y": 859,
+        "w": 792,
+        "h": 122
     },
     {
         "id": "fbac187aa8b93ccd",
@@ -3247,7 +3247,7 @@
         "type": "function",
         "z": "b89efe2b1fe909cb",
         "name": "getresurse ",
-        "func": "\nglobal.get('resurse-list', function (err, resurses) {\n    if (err) {\n        node.error(err, msg);\n    } else {\n        \n\n        if (resurses) {\n            let resurs = resurses.pop();\n\n            // Сохраняем измененное значение обратно:\n            global.set('resurse-list', resurses, function (err) {\n                if (err) {\n                    node.error(err, msg);\n                } else {\n                    msg.payload = resurses;\n                    node.send(msg);\n                }\n            });\n            msg.payload = resurs;\n\n        }\n\n    }\n});",
+        "func": "\nglobal.get('resurse-list', function (err, resurses) {\n    if (err) {\n        node.error(err, msg);\n    } else {\n        \n\n        if (resurses) {\n            let resurs = resurses.pop();\n\n            // Сохраняем измененное значение обратно:\n            global.set('resurse-list', resurses, function (err) {\n                if (err) {\n                    node.error(err, msg);\n                } else {\n                    msg.payload = resurses;\n                    node.send(msg);\n                }\n            });\n            msg.payload = resurs || \"\";\n\n        }\n\n    }\n});",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -3271,7 +3271,9 @@
         "propertyType": "msg",
         "rules": [
             {
-                "t": "nnull"
+                "t": "cont",
+                "v": "ex",
+                "vt": "str"
             },
             {
                 "t": "else"
@@ -3314,7 +3316,6 @@
         "y": 640,
         "wires": [
             [
-                "87127cf4dbe6e9a4",
                 "18a0fecaeeec3f17"
             ]
         ]
@@ -3347,7 +3348,8 @@
         "y": 560,
         "wires": [
             [
-                "5d363fb6aed28df1"
+                "5d363fb6aed28df1",
+                "8a4605b84e9b977b"
             ]
         ]
     },
@@ -3520,8 +3522,8 @@
         "targetType": "full",
         "statusVal": "",
         "statusType": "auto",
-        "x": 460,
-        "y": 400,
+        "x": 440,
+        "y": 440,
         "wires": []
     },
     {
@@ -3529,7 +3531,7 @@
         "type": "debug",
         "z": "b89efe2b1fe909cb",
         "name": "debug 41",
-        "active": false,
+        "active": true,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
@@ -3546,7 +3548,7 @@
         "type": "debug",
         "z": "b89efe2b1fe909cb",
         "name": "debug 48",
-        "active": false,
+        "active": true,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
@@ -3580,7 +3582,7 @@
         "type": "debug",
         "z": "b89efe2b1fe909cb",
         "name": "debug 50",
-        "active": false,
+        "active": true,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
@@ -3654,6 +3656,23 @@
                 "87127cf4dbe6e9a4"
             ]
         ]
+    },
+    {
+        "id": "8a4605b84e9b977b",
+        "type": "debug",
+        "z": "b89efe2b1fe909cb",
+        "name": "debug 52",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1480,
+        "y": 420,
+        "wires": []
     },
     {
         "id": "a7628168.861ce",
@@ -7095,7 +7114,7 @@
         "type": "debug",
         "z": "5df15275.2888ec",
         "name": "debug 47",
-        "active": false,
+        "active": true,
         "tosidebar": true,
         "console": false,
         "tostatus": false,

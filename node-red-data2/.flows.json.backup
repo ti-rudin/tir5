@@ -602,9 +602,7 @@
             "2f83bb2fab63d1bd"
         ],
         "x": 1114,
-        "y": 1119,
-        "w": 792,
-        "h": 122
+        "y": 1119
     },
     {
         "id": "666006aaa2e325fc",
@@ -626,9 +624,7 @@
             "7fad8acded27ae4f"
         ],
         "x": 1114,
-        "y": 1179,
-        "w": 792,
-        "h": 122
+        "y": 1179
     },
     {
         "id": "2044fa36820f41ee",
@@ -4733,22 +4729,6 @@
         ]
     },
     {
-        "id": "5dc151b369e35d87",
-        "type": "simple-queue",
-        "z": "5df15275.2888ec",
-        "name": "tesq",
-        "firstMessageBypass": true,
-        "bypassInterval": "0",
-        "x": 900,
-        "y": 1340,
-        "wires": [
-            [
-                "8ca24d0db8eebc32",
-                "f87ce112cc243605"
-            ]
-        ]
-    },
-    {
         "id": "658ed58dc310af10",
         "type": "redis-out",
         "z": "5df15275.2888ec",
@@ -6409,6 +6389,22 @@
         "wires": []
     },
     {
+        "id": "5dc151b369e35d87",
+        "type": "simple-queue",
+        "z": "5df15275.2888ec",
+        "name": "tesq",
+        "firstMessageBypass": true,
+        "bypassInterval": "0",
+        "x": 900,
+        "y": 1340,
+        "wires": [
+            [
+                "8ca24d0db8eebc32",
+                "f87ce112cc243605"
+            ]
+        ]
+    },
+    {
         "id": "612afd6e7357c83c",
         "type": "inject",
         "z": "b89efe2b1fe909cb",
@@ -6567,7 +6563,7 @@
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 190,
+        "x": 210,
         "y": 460,
         "wires": [
             [
@@ -6586,7 +6582,7 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 380,
+        "x": 400,
         "y": 460,
         "wires": [
             [
