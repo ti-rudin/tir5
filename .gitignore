@@ -143,5 +143,4 @@ _cacache/*
 front/__sapper__/dev/
 front/__sapper__/dev/client/*
 front/__sapper__/dev/*
-redis-data/dump.rdb
-redis-data/dump.rdb
+
