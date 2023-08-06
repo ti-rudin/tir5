@@ -511,8 +511,8 @@ function writable(value, start = noop) {
 const stateStore = writable({ rout: "botlist", 
                                     showmenu: false,
                                     selectbotname: "",
-                                    urlhost: "http://api.ti-robots.ru:1880/",
-                                    urlhostenv: "http://api.ti-robots.ru:1880/",
+                                    urlhost: "https://1880-tirudin-tir5-q4yjt6i3115.ws-eu102.gitpod.io/",
+                                    urlhostenv: "https://1880-tirudin-tir5-q4yjt6i3115.ws-eu102.gitpod.io/",
                                     darkmodestatus: true,
                                     timerId: "",
                                     timerIdlist: ""});

@@ -6632,7 +6632,7 @@
         "server": "f120eab2.0a60a8",
         "command": "subscribe",
         "name": "",
-        "topic": "resurse:ex1",
+        "topic": "resurse:ex2",
         "obj": true,
         "timeout": 0,
         "x": 170,
