@@ -59,19 +59,22 @@
   }
   onMount(async () => {
     const res = await fetch(api_bots, {
+      //mode: 'cors',
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
+        "Access-Control-Allow-Origin" :"*"
       },
       method: "get",
     })
       .then((res) => res.json())
       .then((json) => {
-        if ($authStore.user.uid != "d3fmoh2rVoVNgIcpLTFZBE0jHnI2"){
-          bots = json.filter(ismybot);
-        } else {
-          bots = json;
-        }
+        bots = json;
+        //if ($authStore.user.uid != "d3fmoh2rVoVNgIcpLTFZBE0jHnI2"){
+        //  bots = json.filter(ismybot);
+        //} else {
+        //  bots = json;
+        //}
         
         if (bots == null) {
           bots = [];
