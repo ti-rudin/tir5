@@ -987,9 +987,7 @@
             "5b7bb9d6beb5e5a8"
         ],
         "x": 34,
-        "y": 39,
-        "w": 792,
-        "h": 122
+        "y": 39
     },
     {
         "id": "6d2ff214f4cce1f5",
@@ -6563,7 +6561,7 @@
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 210,
+        "x": 170,
         "y": 460,
         "wires": [
             [
@@ -6582,7 +6580,7 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 400,
+        "x": 360,
         "y": 460,
         "wires": [
             [
@@ -20235,102 +20233,6 @@
         "statusType": "auto",
         "x": 2030,
         "y": 860,
-        "wires": []
-    },
-    {
-        "id": "f9f707f3e3ee1879",
-        "type": "function",
-        "z": "e089622.6a906a",
-        "name": "tgmsg",
-        "func": "let tgmsg = \"tgmsg\";\n\nlet guid = global.get('guid');\nmsg = {};\nmsg.payload = {tgmsg, guid};\nreturn msg;",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 1410,
-        "y": 180,
-        "wires": [
-            [
-                "42f43b8b350b4a89"
-            ]
-        ]
-    },
-    {
-        "id": "42f43b8b350b4a89",
-        "type": "redis-out",
-        "z": "e089622.6a906a",
-        "server": "f120eab2.0a60a8",
-        "command": "publish",
-        "name": "",
-        "topic": "tgpost",
-        "obj": true,
-        "x": 1550,
-        "y": 180,
-        "wires": []
-    },
-    {
-        "id": "6cab3fbf6cc9c8d0",
-        "type": "inject",
-        "z": "e089622.6a906a",
-        "name": "",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "",
-        "crontab": "",
-        "once": false,
-        "onceDelay": 0.1,
-        "topic": "",
-        "payload": "",
-        "payloadType": "date",
-        "x": 1260,
-        "y": 180,
-        "wires": [
-            [
-                "f9f707f3e3ee1879"
-            ]
-        ]
-    },
-    {
-        "id": "3912909e7d15aeea",
-        "type": "redis-in",
-        "z": "e089622.6a906a",
-        "server": "f120eab2.0a60a8",
-        "command": "subscribe",
-        "name": "",
-        "topic": "tgpost",
-        "obj": true,
-        "timeout": 0,
-        "x": 1370,
-        "y": 260,
-        "wires": [
-            [
-                "dbd21a1037c898cc"
-            ]
-        ]
-    },
-    {
-        "id": "dbd21a1037c898cc",
-        "type": "debug",
-        "z": "e089622.6a906a",
-        "name": "",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "true",
-        "targetType": "full",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 1510,
-        "y": 260,
         "wires": []
     },
     {
