@@ -59,7 +59,7 @@
   }
   onMount(async () => {
     const res = await fetch(api_bots, {
-      //mode: 'cors',
+      mode: 'no-cors',
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",

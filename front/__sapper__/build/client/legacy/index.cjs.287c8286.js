@@ -1,4 +1,4 @@
-import{_ as e}from"./client.e4e65a1d.js";import{i as r}from"./index.cjs.77709645.js";var t,a=(t=r)&&"object"===e(t)&&"default"in t?t.default:t;
+import{_ as e}from"./client.fa9b56b8.js";import{i as a}from"./index.cjs.fa9f8957.js";var r,t=(r=a)&&"object"===e(r)&&"default"in r?r.default:r;
 /**
  * @license
  * Copyright 2018 Google LLC
@@ -15,4 +15,4 @@ import{_ as e}from"./client.e4e65a1d.js";import{i as r}from"./index.cjs.77709645
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-a.registerVersion("firebase","7.16.1","app");var s=a,i=Object.freeze(Object.assign(Object.create(null),s,{default:s,__moduleExports:s}));export{i};
+t.registerVersion("firebase","7.16.1","app");var s=t,i=Object.freeze(Object.assign(Object.create(null),s,{default:s,__moduleExports:s}));export{i};
