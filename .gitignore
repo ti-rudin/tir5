@@ -146,3 +146,4 @@ front/__sapper__/dev/*
 
 redis-data/dump.rdb
 redis-data/dump.rdb
+letsencrypt/acme.json
