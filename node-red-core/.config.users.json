@@ -153,7 +153,7 @@
                 "b265e2af05f56632",
                 "e69d850366330cc7"
             ],
-            "filter": "filterAll"
+            "filter": "filterSelected"
         }
     }
 }

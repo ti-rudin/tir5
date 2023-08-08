@@ -77,7 +77,9 @@
             "9a835f6c.6a1ab"
         ],
         "x": 2554,
-        "y": 19
+        "y": 19,
+        "w": 632,
+        "h": 162
     },
     {
         "id": "e83aa13614517c81",
@@ -145,7 +147,9 @@
             "c4cf96930d013efb"
         ],
         "x": 1574,
-        "y": 1739
+        "y": 1739,
+        "w": 792,
+        "h": 122
     },
     {
         "id": "586e39dc007e0cae",
@@ -193,7 +197,9 @@
             "d3749cac89a0e2c9"
         ],
         "x": 2554,
-        "y": 1119
+        "y": 1119,
+        "w": 1352,
+        "h": 82
     },
     {
         "id": "7f9b2dd857a6dfb2",
@@ -216,7 +222,9 @@
             "792187aede59b6ac"
         ],
         "x": 2554,
-        "y": 1239
+        "y": 1239,
+        "w": 912,
+        "h": 82
     },
     {
         "id": "44cf135596e2716e",
@@ -276,7 +284,9 @@
             "bf190e9d.225ad"
         ],
         "x": 154,
-        "y": 1699
+        "y": 1699,
+        "w": 1232,
+        "h": 402
     },
     {
         "id": "014ce62956a26f95",
@@ -349,7 +359,9 @@
             "c4cfc0830f4e28bc"
         ],
         "x": 34,
-        "y": 779
+        "y": 779,
+        "w": 2092,
+        "h": 822
     },
     {
         "id": "d508da9d29e25c1b",
@@ -376,7 +388,9 @@
             "04c874ce359ca023"
         ],
         "x": 34,
-        "y": 639
+        "y": 639,
+        "w": 1612,
+        "h": 102
     },
     {
         "id": "17b2eb4baaa826d1",
@@ -760,7 +774,9 @@
             "869be0a90b76a3ef"
         ],
         "x": 2554,
-        "y": 219
+        "y": 219,
+        "w": 1032,
+        "h": 142
     },
     {
         "id": "048120318edbeca7",
@@ -838,7 +854,9 @@
             "54197cf454887ecb"
         ],
         "x": 28,
-        "y": 33
+        "y": 33,
+        "w": 2078,
+        "h": 588
     },
     {
         "id": "2c85add4d80ea7f8",
@@ -864,7 +882,9 @@
             "7b9be15bf9e8a08d"
         ],
         "x": 2554,
-        "y": 1399
+        "y": 1399,
+        "w": 772,
+        "h": 182
     },
     {
         "id": "a515f6f54037387e",
@@ -900,10 +920,14 @@
             "880c05f45c81c65f",
             "f4dd7d500c4c6287",
             "e5b3f65c64087091",
-            "1b0a7ba8e33f06b7"
+            "1b0a7ba8e33f06b7",
+            "a9bcb4718ede0bb9",
+            "8d114950d20ca1fb"
         ],
         "x": 2554,
-        "y": 599
+        "y": 599,
+        "w": 1052,
+        "h": 502
     },
     {
         "id": "f68e039ff73498a8",
@@ -944,7 +968,9 @@
             "9767b09975ad71d4"
         ],
         "x": 2494,
-        "y": 1599
+        "y": 1599,
+        "w": 832,
+        "h": 622
     },
     {
         "id": "3eb02193332f12bf",
@@ -966,9 +992,7 @@
             "5b7bb9d6beb5e5a8"
         ],
         "x": 674,
-        "y": 859,
-        "w": 792,
-        "h": 122
+        "y": 859
     },
     {
         "id": "fbac187aa8b93ccd",
@@ -1068,7 +1092,9 @@
             "96bdef7048780d35"
         ],
         "x": 54,
-        "y": 59
+        "y": 59,
+        "w": 792,
+        "h": 122
     },
     {
         "id": "f120eab2.0a60a8",
@@ -4063,7 +4089,7 @@
         "z": "5df15275.2888ec",
         "g": "814fe3ad47c48a59",
         "name": "getbotlist from redis",
-        "func": "let guid = env.get(\"GOOGLEUID\");\n\nconst gbl = global.get('getbotlist')(guid);\n\ngbl.then(gbl => {\n\n    msg.payload = gbl;\n\n    global.set('botlist',JSON.parse(gbl));\n    node.status({ fill: \"green\", shape: \"dot\" });\n    node.send(msg);\n\n}).catch(error => {\n\n\n    node.status({ fill: \"red\", shape: \"dot\" });\n\n    node.error(error);\n});",
+        "func": "let guid = env.get(\"GOOGLEUID\");\n\nconst gbl = global.get('getbotlist')(guid);\n\ngbl.then(gbl => {\n\n    msg.payload = gbl || [];\n\n    global.set('botlist',JSON.parse(gbl));\n    node.status({ fill: \"green\", shape: \"dot\" });\n    node.send(msg);\n\n}).catch(error => {\n\n\n    node.status({ fill: \"red\", shape: \"dot\" });\n\n    node.error(error);\n});",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -18718,7 +18744,7 @@
         "type": "debug",
         "z": "5f98db3a.7ab21c",
         "name": "",
-        "active": false,
+        "active": true,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
@@ -18813,6 +18839,54 @@
         "libs": [],
         "x": 3100,
         "y": 1440,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "a9bcb4718ede0bb9",
+        "type": "inject",
+        "z": "5f98db3a.7ab21c",
+        "g": "a515f6f54037387e",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 3430,
+        "y": 800,
+        "wires": [
+            [
+                "8d114950d20ca1fb"
+            ]
+        ]
+    },
+    {
+        "id": "8d114950d20ca1fb",
+        "type": "function",
+        "z": "5f98db3a.7ab21c",
+        "g": "a515f6f54037387e",
+        "name": "",
+        "func": "global.set('botlist', ['newbotlist']);\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 3470,
+        "y": 860,
         "wires": [
             []
         ]
