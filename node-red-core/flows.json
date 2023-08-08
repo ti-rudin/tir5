@@ -101,9 +101,7 @@
             "43e93874.b7141"
         ],
         "x": 1294,
-        "y": 2519,
-        "w": 592,
-        "h": 122
+        "y": 2519
     },
     {
         "id": "f8a5c66461864831",
@@ -125,9 +123,7 @@
             "a7628168.861ce"
         ],
         "x": 54,
-        "y": 59,
-        "w": 792,
-        "h": 122
+        "y": 59
     },
     {
         "id": "a6e4d859c0057b6f",
@@ -242,9 +238,7 @@
             "579577e08c6abb4c"
         ],
         "x": 2114,
-        "y": 19,
-        "w": 472,
-        "h": 122
+        "y": 19
     },
     {
         "id": "b5c4460e3abcebce",
@@ -450,9 +444,7 @@
             "b81dcd4ee6e797ca"
         ],
         "x": 54,
-        "y": 219,
-        "w": 3662,
-        "h": 222
+        "y": 219
     },
     {
         "id": "65ceb63d19a93d0f",
@@ -478,9 +470,7 @@
             "a1d4c1c74be64298"
         ],
         "x": 884,
-        "y": 59,
-        "w": 722,
-        "h": 122
+        "y": 59
     },
     {
         "id": "251a240e36b31c14",
@@ -505,9 +495,7 @@
             "6274a170dc04552c"
         ],
         "x": 2274,
-        "y": 1299,
-        "w": 632,
-        "h": 202
+        "y": 1299
     },
     {
         "id": "a098ebd7bc13168a",
@@ -529,9 +517,7 @@
             "58c7424d21936ed2"
         ],
         "x": 294,
-        "y": 3559,
-        "w": 792,
-        "h": 122
+        "y": 3559
     },
     {
         "id": "47ccdad2d228ed4b",
@@ -565,9 +551,7 @@
             "c80bf4b14fe4742e"
         ],
         "x": 114,
-        "y": 1299,
-        "w": 1682,
-        "h": 202
+        "y": 1299
     },
     {
         "id": "c723fa7827c597d2",
@@ -589,9 +573,7 @@
             "2f83bb2fab63d1bd"
         ],
         "x": 1114,
-        "y": 1119,
-        "w": 792,
-        "h": 122
+        "y": 1119
     },
     {
         "id": "666006aaa2e325fc",
@@ -755,9 +737,7 @@
             "21334d59e0d02c98"
         ],
         "x": 234,
-        "y": 1879,
-        "w": 2182,
-        "h": 562
+        "y": 1879
     },
     {
         "id": "f6ba3116da1e0f10",
@@ -986,7 +966,9 @@
             "5b7bb9d6beb5e5a8"
         ],
         "x": 674,
-        "y": 859
+        "y": 859,
+        "w": 792,
+        "h": 122
     },
     {
         "id": "fbac187aa8b93ccd",
@@ -1023,9 +1005,7 @@
             "2290591947878470"
         ],
         "x": 54,
-        "y": 479,
-        "w": 1352,
-        "h": 262
+        "y": 479
     },
     {
         "id": "7fdc8b902d4ab240",
@@ -1061,9 +1041,7 @@
             "35271e011194a589"
         ],
         "x": 114,
-        "y": 1059,
-        "w": 1872,
-        "h": 202
+        "y": 1059
     },
     {
         "id": "54197cf454887ecb",
@@ -3269,7 +3247,7 @@
         "type": "function",
         "z": "b89efe2b1fe909cb",
         "name": "getresurse ",
-        "func": "\nglobal.get('resurse-list', function (err, resurses) {\n    if (err) {\n        node.error(err, msg);\n    } else {\n        \n\n        if (resurses) {\n            let resurs = resurses.pop();\n\n            // Сохраняем измененное значение обратно:\n            global.set('resurse-list', resurses, function (err) {\n                if (err) {\n                    node.error(err, msg);\n                } else {\n                    msg.payload = resurses;\n                    node.send(msg);\n                }\n            });\n            msg.payload = resurs || \"\";\n\n        }\n\n    }\n});",
+        "func": "\nglobal.get('resurse-list', function (err, resurses) {\n    if (err) {\n        node.error(err, msg);\n    } else {\n        \n\n        if (resurses) {\n            let resurs = resurses.pop();\n            node.warn('выделили ресурс '+resurs);\n            // Сохраняем измененное значение обратно:\n            global.set('resurse-list', resurses, function (err) {\n                if (err) {\n                    node.error(err, msg);\n                } else {\n                    msg.payload = resurs;\n                    node.send(msg);\n                }\n            });\n            msg.payload = resurs || \"\";\n\n        }\n\n    }\n});",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -3280,7 +3258,8 @@
         "wires": [
             [
                 "075eef81d6e1252e",
-                "e175a4750ed0db09"
+                "e175a4750ed0db09",
+                "ade03519513fd76d"
             ]
         ]
     },
@@ -3293,9 +3272,7 @@
         "propertyType": "msg",
         "rules": [
             {
-                "t": "cont",
-                "v": "ex",
-                "vt": "str"
+                "t": "nnull"
             },
             {
                 "t": "else"
@@ -3308,12 +3285,13 @@
         "y": 600,
         "wires": [
             [
-                "0252f89edc84dd25",
                 "b57180d959a441bd",
-                "e1943e4f714b12e6"
+                "e1943e4f714b12e6",
+                "0252f89edc84dd25"
             ],
             [
-                "11e2a8e445749dd0"
+                "11e2a8e445749dd0",
+                "b265e2af05f56632"
             ]
         ]
     },
@@ -3338,7 +3316,8 @@
         "y": 640,
         "wires": [
             [
-                "18a0fecaeeec3f17"
+                "18a0fecaeeec3f17",
+                "87127cf4dbe6e9a4"
             ]
         ]
     },
@@ -3694,6 +3673,40 @@
         "statusType": "auto",
         "x": 1480,
         "y": 420,
+        "wires": []
+    },
+    {
+        "id": "ade03519513fd76d",
+        "type": "debug",
+        "z": "b89efe2b1fe909cb",
+        "name": "debug 53",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1140,
+        "y": 660,
+        "wires": []
+    },
+    {
+        "id": "b265e2af05f56632",
+        "type": "debug",
+        "z": "b89efe2b1fe909cb",
+        "name": "debug 54",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1320,
+        "y": 700,
         "wires": []
     },
     {
@@ -7099,7 +7112,7 @@
         "type": "function",
         "z": "5df15275.2888ec",
         "name": "load data",
-        "func": "msg.botname = msg.payload.bot.settings.botname;\nmsg.bot = msg.payload.bot;\nmsg.trackname = msg.payload.trackname;\nreturn msg;",
+        "func": "msg.botname = msg.payload.bot.settings.botname;\nmsg.bot = msg.payload.bot;\nmsg.trackname = msg.payload.trackname;\nnode.status({ fill: \"green\", shape: \"dot\" });\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
