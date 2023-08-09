@@ -76,8 +76,8 @@ bot.on('message', (msg) => {
 
     client.get(userid + "-leads", function (err, reply) {
 
-      leads = JSON.parse(reply);
-      let count = leads.length;
+      leads = JSON.parse(reply) || [];
+      let count = leads.length || 0;
       var sum = 0;
 
       for (var i = 0; i < leads.length; i++) {

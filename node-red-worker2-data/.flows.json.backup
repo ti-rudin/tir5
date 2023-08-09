@@ -42,10 +42,12 @@
             "5b7bb9d6beb5e5a8"
         ],
         "x": 34,
-        "y": 39
+        "y": 39,
+        "w": 792,
+        "h": 122
     },
     {
-        "id": "44cf135596e2716e",
+        "id": "ed30ef18f5184445",
         "type": "group",
         "z": "8929ff49bf2bbea4",
         "style": {
@@ -58,6 +60,34 @@
             "color": "#a4a4a4"
         },
         "nodes": [
+            "1b96aac6bf557001",
+            "3cf21f0195b3bccf",
+            "9aa618e516cc5a90",
+            "642ebd6d0bd5aa4a",
+            "b8dd96d5d9b54edd"
+        ],
+        "x": 1134,
+        "y": 679,
+        "w": 752,
+        "h": 122
+    },
+    {
+        "id": "5154e25d5a925517",
+        "type": "group",
+        "z": "8929ff49bf2bbea4",
+        "style": {
+            "stroke": "#2e333a",
+            "stroke-opacity": "1",
+            "fill": "#383c45",
+            "fill-opacity": "0.5",
+            "label": true,
+            "label-position": "nw",
+            "color": "#a4a4a4"
+        },
+        "nodes": [
+            "1b4f7ff11cabc4ba",
+            "f9ff2da4868bdda0",
+            "0147ae97caf68acf",
             "841dbfe6777b1e36",
             "2c2113e3d7c3305b",
             "d3e0688d41cc172c",
@@ -65,8 +95,8 @@
         ],
         "x": 994,
         "y": 19,
-        "w": 472,
-        "h": 122
+        "w": 612,
+        "h": 162
     },
     {
         "id": "f120eab2.0a60a8",
@@ -2126,8 +2156,8 @@
         "targetType": "full",
         "statusVal": "",
         "statusType": "auto",
-        "x": 1350,
-        "y": 200,
+        "x": 1510,
+        "y": 260,
         "wires": []
     },
     {
@@ -2142,8 +2172,8 @@
         "paramsType": "json",
         "payloadType": "json",
         "block": false,
-        "x": 1150,
-        "y": 200,
+        "x": 1310,
+        "y": 260,
         "wires": [
             [
                 "116d7ae981c3616c"
@@ -2167,8 +2197,8 @@
         "topic": "",
         "payload": "1",
         "payloadType": "str",
-        "x": 920,
-        "y": 220,
+        "x": 1090,
+        "y": 260,
         "wires": [
             [
                 "deb77a9b0d57ff6d"
@@ -2188,8 +2218,8 @@
         "targetType": "full",
         "statusVal": "",
         "statusType": "auto",
-        "x": 1390,
-        "y": 320,
+        "x": 1430,
+        "y": 380,
         "wires": []
     },
     {
@@ -2204,8 +2234,8 @@
         "paramsType": "json",
         "payloadType": "json",
         "block": false,
-        "x": 1070,
-        "y": 320,
+        "x": 1230,
+        "y": 380,
         "wires": [
             [
                 "873d7415be270745"
@@ -2229,8 +2259,8 @@
         "topic": "",
         "payload": "1",
         "payloadType": "str",
-        "x": 870,
-        "y": 320,
+        "x": 1030,
+        "y": 380,
         "wires": [
             [
                 "93854d7e7b6baae6"
@@ -2241,18 +2271,18 @@
         "id": "1b96aac6bf557001",
         "type": "redis-in",
         "z": "8929ff49bf2bbea4",
+        "g": "ed30ef18f5184445",
         "server": "f120eab2.0a60a8",
         "command": "subscribe",
         "name": "",
         "topic": "workers:heartbeat:ex2",
         "obj": true,
         "timeout": 0,
-        "x": 210,
-        "y": 300,
+        "x": 1260,
+        "y": 720,
         "wires": [
             [
-                "9aa618e516cc5a90",
-                "260392ec470dfdb0"
+                "9aa618e516cc5a90"
             ]
         ]
     },
@@ -2260,6 +2290,7 @@
         "id": "3cf21f0195b3bccf",
         "type": "debug",
         "z": "8929ff49bf2bbea4",
+        "g": "ed30ef18f5184445",
         "name": "",
         "active": true,
         "tosidebar": true,
@@ -2269,8 +2300,8 @@
         "targetType": "full",
         "statusVal": "",
         "statusType": "auto",
-        "x": 450,
-        "y": 360,
+        "x": 1650,
+        "y": 760,
         "wires": []
     },
     {
@@ -2282,8 +2313,8 @@
         "name": "",
         "topic": "workertest:ex2",
         "obj": true,
-        "x": 1030,
-        "y": 540,
+        "x": 1190,
+        "y": 600,
         "wires": []
     },
     {
@@ -2303,8 +2334,8 @@
         "topic": "",
         "payload": "1",
         "payloadType": "str",
-        "x": 850,
-        "y": 540,
+        "x": 1010,
+        "y": 600,
         "wires": [
             [
                 "f4a3e3043cf0d948"
@@ -2315,6 +2346,7 @@
         "id": "1b4f7ff11cabc4ba",
         "type": "inject",
         "z": "8929ff49bf2bbea4",
+        "g": "5154e25d5a925517",
         "name": "start onLoad",
         "props": [
             {
@@ -2325,14 +2357,14 @@
                 "vt": "str"
             }
         ],
-        "repeat": "6",
+        "repeat": "3",
         "crontab": "",
-        "once": false,
-        "onceDelay": "2",
+        "once": true,
+        "onceDelay": "0.1",
         "topic": "",
         "payloadType": "date",
-        "x": 200,
-        "y": 200,
+        "x": 1120,
+        "y": 140,
         "wires": [
             [
                 "f9ff2da4868bdda0"
@@ -2343,6 +2375,7 @@
         "id": "f9ff2da4868bdda0",
         "type": "function",
         "z": "8929ff49bf2bbea4",
+        "g": "5154e25d5a925517",
         "name": "heartbeat",
         "func": "\nlet worker_name = global.get(\"worker_name\");\n\nmsg.topic = \"workers:heartbeat:\" + worker_name;\nmsg.payload = {\n    worker_name: worker_name,\n    healthbeat : \"ok\",\n    }\n    \n\n\nreturn msg;",
         "outputs": 1,
@@ -2350,8 +2383,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 380,
-        "y": 200,
+        "x": 1300,
+        "y": 140,
         "wires": [
             [
                 "0147ae97caf68acf"
@@ -2362,19 +2395,21 @@
         "id": "0147ae97caf68acf",
         "type": "redis-out",
         "z": "8929ff49bf2bbea4",
+        "g": "5154e25d5a925517",
         "server": "f120eab2.0a60a8",
         "command": "publish",
         "name": "workers:heartbeat",
         "topic": "",
         "obj": true,
-        "x": 570,
-        "y": 200,
+        "x": 1490,
+        "y": 140,
         "wires": []
     },
     {
         "id": "9aa618e516cc5a90",
         "type": "trigger",
         "z": "8929ff49bf2bbea4",
+        "g": "ed30ef18f5184445",
         "name": "",
         "op1": "",
         "op2": "5 sec timeout",
@@ -2388,8 +2423,8 @@
         "bytopic": "all",
         "topic": "topic",
         "outputs": 1,
-        "x": 430,
-        "y": 300,
+        "x": 1480,
+        "y": 720,
         "wires": [
             [
                 "3cf21f0195b3bccf",
@@ -2398,27 +2433,10 @@
         ]
     },
     {
-        "id": "260392ec470dfdb0",
-        "type": "debug",
-        "z": "8929ff49bf2bbea4",
-        "name": "",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "true",
-        "targetType": "full",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 410,
-        "y": 260,
-        "wires": []
-    },
-    {
         "id": "841dbfe6777b1e36",
         "type": "inject",
         "z": "8929ff49bf2bbea4",
-        "g": "44cf135596e2716e",
+        "g": "5154e25d5a925517",
         "name": "0.015",
         "props": [
             {
@@ -2443,7 +2461,7 @@
         "id": "2c2113e3d7c3305b",
         "type": "function",
         "z": "8929ff49bf2bbea4",
-        "g": "44cf135596e2716e",
+        "g": "5154e25d5a925517",
         "name": "global.set(\"commision\", 0.075)",
         "func": "global.set(\"commision\", 0.075);\nreturn msg;",
         "outputs": 1,
@@ -2461,7 +2479,7 @@
         "id": "d3e0688d41cc172c",
         "type": "function",
         "z": "8929ff49bf2bbea4",
-        "g": "44cf135596e2716e",
+        "g": "5154e25d5a925517",
         "name": "get env",
         "func": "let guid = env.get(\"GOOGLEUID\");\nglobal.set(\"guid\", guid);\n\n//let botlistname = guid + \"-botlist\";\n//global.set(botlistname, []);\n\nlet key = env.get(\"BINANCEKEY\");\nlet secret = env.get(\"BINANCESECRET\");\nglobal.set(\"key\", key);\nglobal.set(\"secret\", secret);\n\nreturn msg;\n",
         "outputs": 1,
@@ -2479,7 +2497,7 @@
         "id": "579577e08c6abb4c",
         "type": "inject",
         "z": "8929ff49bf2bbea4",
-        "g": "44cf135596e2716e",
+        "g": "5154e25d5a925517",
         "name": "onLoad",
         "props": [
             {
@@ -2504,19 +2522,21 @@
         "id": "642ebd6d0bd5aa4a",
         "type": "redis-out",
         "z": "8929ff49bf2bbea4",
+        "g": "ed30ef18f5184445",
         "server": "f120eab2.0a60a8",
         "command": "publish",
         "name": "",
         "topic": "tgpost",
         "obj": true,
-        "x": 410,
-        "y": 460,
+        "x": 1810,
+        "y": 720,
         "wires": []
     },
     {
         "id": "b8dd96d5d9b54edd",
         "type": "function",
         "z": "8929ff49bf2bbea4",
+        "g": "ed30ef18f5184445",
         "name": "timeout 5 ",
         "func": "let tgmsg = \"timeout 5 sec worker_ex2\";\n\nlet guid = global.get('guid');\nmsg = {};\nmsg.payload = {tgmsg, guid};\nreturn msg;",
         "outputs": 1,
@@ -2524,12 +2544,134 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 280,
-        "y": 460,
+        "x": 1660,
+        "y": 720,
         "wires": [
             [
                 "642ebd6d0bd5aa4a"
             ]
         ]
+    },
+    {
+        "id": "9e773dea90a38cb2",
+        "type": "inject",
+        "z": "8929ff49bf2bbea4",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 230,
+        "y": 520,
+        "wires": [
+            [
+                "0631c28017c83d72"
+            ]
+        ]
+    },
+    {
+        "id": "824e5a5287a8f610",
+        "type": "inject",
+        "z": "8929ff49bf2bbea4",
+        "name": "start onLoad",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "2",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 250,
+        "y": 440,
+        "wires": [
+            [
+                "cf04166efdb26aaf"
+            ]
+        ]
+    },
+    {
+        "id": "cf04166efdb26aaf",
+        "type": "function",
+        "z": "8929ff49bf2bbea4",
+        "name": "worker_name = \"ex2\"",
+        "func": "\nlet worker_name = \"ex2\"; \nglobal.set('worker_name', worker_name);\nmsg.topic = \"workers:regist\";\nmsg.payload = {\n    worker_name: worker_name,\n    status : \"free\",\n    }\n    \n\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 480,
+        "y": 440,
+        "wires": [
+            [
+                "1ceff122995b2f20"
+            ]
+        ]
+    },
+    {
+        "id": "1ceff122995b2f20",
+        "type": "redis-out",
+        "z": "8929ff49bf2bbea4",
+        "server": "f120eab2.0a60a8",
+        "command": "rpush",
+        "name": "",
+        "topic": "workers:regist",
+        "obj": true,
+        "x": 700,
+        "y": 440,
+        "wires": []
+    },
+    {
+        "id": "0631c28017c83d72",
+        "type": "function",
+        "z": "8929ff49bf2bbea4",
+        "name": "test task",
+        "func": "\nmsg.topic = \"tasks:regist\";\nmsg.payload = {\n    task_id: msg.payload,\n    task_type: \"task_type\",\n    data: { bot: \"botdata\" },\n}\n\n\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 400,
+        "y": 520,
+        "wires": [
+            [
+                "865edcbef4afac99"
+            ]
+        ]
+    },
+    {
+        "id": "865edcbef4afac99",
+        "type": "redis-out",
+        "z": "8929ff49bf2bbea4",
+        "server": "f120eab2.0a60a8",
+        "command": "rpush",
+        "name": "",
+        "topic": "tasks:regist",
+        "obj": true,
+        "x": 570,
+        "y": 520,
+        "wires": []
     }
 ]

@@ -40,7 +40,7 @@ services:
       dockerfile: ./nodered-core.Dockerfile
     env_file: .env
     ports:
-      - "1880:1880"
+      - "1882:1882"
     networks:
       - tibotnet
     depends_on:
@@ -86,7 +86,7 @@ services:
       dockerfile: ./nodered-worker2.Dockerfile
     env_file: .env
     ports:
-      - "1882:1882"
+      - "1880:1880"
     networks:
       - tibotnet
     depends_on:
