@@ -35,7 +35,7 @@
             "642ebd6d0bd5aa4a",
             "b8dd96d5d9b54edd"
         ],
-        "x": 1134,
+        "x": 1514,
         "y": 679,
         "w": 752,
         "h": 122
@@ -503,130 +503,6 @@
         "wires": []
     },
     {
-        "id": "116d7ae981c3616c",
-        "type": "debug",
-        "z": "8929ff49bf2bbea4",
-        "name": "",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "true",
-        "targetType": "full",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 1510,
-        "y": 260,
-        "wires": []
-    },
-    {
-        "id": "deb77a9b0d57ff6d",
-        "type": "redis-command",
-        "z": "8929ff49bf2bbea4",
-        "server": "da97327dd29e690a",
-        "command": "BLPOP",
-        "name": "",
-        "topic": "workers:regist",
-        "params": "[]",
-        "paramsType": "json",
-        "payloadType": "json",
-        "block": false,
-        "x": 1310,
-        "y": 260,
-        "wires": [
-            [
-                "116d7ae981c3616c"
-            ]
-        ]
-    },
-    {
-        "id": "21095a48a3219173",
-        "type": "inject",
-        "z": "8929ff49bf2bbea4",
-        "name": "",
-        "props": [
-            {
-                "p": "payload"
-            }
-        ],
-        "repeat": "",
-        "crontab": "",
-        "once": false,
-        "onceDelay": 0.1,
-        "topic": "",
-        "payload": "1",
-        "payloadType": "str",
-        "x": 1090,
-        "y": 260,
-        "wires": [
-            [
-                "deb77a9b0d57ff6d"
-            ]
-        ]
-    },
-    {
-        "id": "873d7415be270745",
-        "type": "debug",
-        "z": "8929ff49bf2bbea4",
-        "name": "",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "true",
-        "targetType": "full",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 1430,
-        "y": 380,
-        "wires": []
-    },
-    {
-        "id": "93854d7e7b6baae6",
-        "type": "redis-command",
-        "z": "8929ff49bf2bbea4",
-        "server": "da97327dd29e690a",
-        "command": "BRPOP",
-        "name": "",
-        "topic": "workers",
-        "params": "[]",
-        "paramsType": "json",
-        "payloadType": "json",
-        "block": false,
-        "x": 1230,
-        "y": 380,
-        "wires": [
-            [
-                "873d7415be270745"
-            ]
-        ]
-    },
-    {
-        "id": "617a80d8aeda7485",
-        "type": "inject",
-        "z": "8929ff49bf2bbea4",
-        "name": "",
-        "props": [
-            {
-                "p": "payload"
-            }
-        ],
-        "repeat": "",
-        "crontab": "",
-        "once": false,
-        "onceDelay": 0.1,
-        "topic": "",
-        "payload": "1",
-        "payloadType": "str",
-        "x": 1030,
-        "y": 380,
-        "wires": [
-            [
-                "93854d7e7b6baae6"
-            ]
-        ]
-    },
-    {
         "id": "1b96aac6bf557001",
         "type": "redis-in",
         "z": "8929ff49bf2bbea4",
@@ -637,7 +513,7 @@
         "topic": "workers:heartbeat:ex2",
         "obj": true,
         "timeout": 0,
-        "x": 1260,
+        "x": 1640,
         "y": 720,
         "wires": [
             [
@@ -659,47 +535,9 @@
         "targetType": "full",
         "statusVal": "",
         "statusType": "auto",
-        "x": 1650,
+        "x": 2030,
         "y": 760,
         "wires": []
-    },
-    {
-        "id": "f4a3e3043cf0d948",
-        "type": "redis-out",
-        "z": "8929ff49bf2bbea4",
-        "server": "da97327dd29e690a",
-        "command": "publish",
-        "name": "",
-        "topic": "workertest:ex2",
-        "obj": true,
-        "x": 1190,
-        "y": 600,
-        "wires": []
-    },
-    {
-        "id": "9dfa2a39a8d8081e",
-        "type": "inject",
-        "z": "8929ff49bf2bbea4",
-        "name": "",
-        "props": [
-            {
-                "p": "payload"
-            }
-        ],
-        "repeat": "",
-        "crontab": "",
-        "once": false,
-        "onceDelay": 0.1,
-        "topic": "",
-        "payload": "1",
-        "payloadType": "str",
-        "x": 1010,
-        "y": 600,
-        "wires": [
-            [
-                "f4a3e3043cf0d948"
-            ]
-        ]
     },
     {
         "id": "1b4f7ff11cabc4ba",
@@ -782,7 +620,7 @@
         "bytopic": "all",
         "topic": "topic",
         "outputs": 1,
-        "x": 1480,
+        "x": 1860,
         "y": 720,
         "wires": [
             [
@@ -887,7 +725,7 @@
         "name": "",
         "topic": "tgpost",
         "obj": true,
-        "x": 1810,
+        "x": 2190,
         "y": 720,
         "wires": []
     },
@@ -903,7 +741,7 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 1660,
+        "x": 2040,
         "y": 720,
         "wires": [
             [
@@ -932,8 +770,8 @@
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 230,
-        "y": 520,
+        "x": 580,
+        "y": 720,
         "wires": [
             [
                 "0631c28017c83d72"
@@ -951,8 +789,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 400,
-        "y": 520,
+        "x": 750,
+        "y": 720,
         "wires": [
             [
                 "865edcbef4afac99"
@@ -968,8 +806,8 @@
         "name": "",
         "topic": "tasks:regist",
         "obj": true,
-        "x": 630,
-        "y": 500,
+        "x": 930,
+        "y": 720,
         "wires": []
     },
     {
@@ -1001,8 +839,8 @@
         "paramsType": "json",
         "payloadType": "json",
         "block": false,
-        "x": 710,
-        "y": 980,
+        "x": 590,
+        "y": 1040,
         "wires": [
             [
                 "13d9c6dd9322ab0a",
@@ -1027,8 +865,8 @@
         "topic": "",
         "payload": "1",
         "payloadType": "str",
-        "x": 490,
-        "y": 980,
+        "x": 390,
+        "y": 1040,
         "wires": [
             [
                 "a825f866e5c35ac5"
@@ -1053,12 +891,11 @@
         ],
         "checkall": "true",
         "outputs": 1,
-        "x": 970,
-        "y": 980,
+        "x": 790,
+        "y": 1040,
         "wires": [
             [
-                "b901e9848345ebe1",
-                "14ac5a3104644258"
+                "b901e9848345ebe1"
             ]
         ]
     },
@@ -1067,7 +904,7 @@
         "type": "function",
         "z": "8929ff49bf2bbea4",
         "name": "tasks:pending",
-        "func": "\nmsg.topic = \"tasks:pending\";\nmsg.payload = JSON.parse(msg.payload[1]);\n\n\nreturn msg;",
+        "func": "\nmsg.topic = \"tasks:pending\";\nmsg.payload = {\n    worker: JSON.parse(msg.payload[1]),\n    task : msg.task\n    }\n\n\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -1162,7 +999,8 @@
         "y": 1180,
         "wires": [
             [
-                "343e579ba86cf9c6"
+                "343e579ba86cf9c6",
+                "715b561a5a13f078"
             ]
         ]
     },
@@ -1196,8 +1034,8 @@
         "targetType": "full",
         "statusVal": "",
         "statusType": "auto",
-        "x": 1490,
-        "y": 1220,
+        "x": 1930,
+        "y": 1120,
         "wires": []
     },
     {
@@ -1228,45 +1066,28 @@
         "name": "",
         "topic": "redis",
         "location": "flow",
-        "x": 710,
-        "y": 780,
+        "x": 910,
+        "y": 40,
         "wires": []
     },
     {
         "id": "b901e9848345ebe1",
         "type": "function",
         "z": "8929ff49bf2bbea4",
-        "name": "",
+        "name": "prepare",
         "func": "\nmsg = {\n    payload:\"1\",\n    topic:\"workers:regist\",\n    task : JSON.parse(msg.payload[1])\n}\n\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 980,
+        "x": 940,
         "y": 1040,
         "wires": [
             [
                 "1cbba27a490ae438",
                 "48cc21f45544ae2d"
             ]
-        ]
-    },
-    {
-        "id": "14ac5a3104644258",
-        "type": "function",
-        "z": "8929ff49bf2bbea4",
-        "name": "",
-        "func": "\n\n\n\nreturn msg;",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 1120,
-        "y": 980,
-        "wires": [
-            []
         ]
     },
     {
@@ -1282,8 +1103,8 @@
         "targetType": "full",
         "statusVal": "",
         "statusType": "auto",
-        "x": 910,
-        "y": 900,
+        "x": 630,
+        "y": 1080,
         "wires": []
     },
     {
@@ -1299,7 +1120,7 @@
         "targetType": "full",
         "statusVal": "",
         "statusType": "auto",
-        "x": 1130,
+        "x": 930,
         "y": 1080,
         "wires": []
     },
@@ -1321,11 +1142,12 @@
         "checkall": "true",
         "repair": false,
         "outputs": 2,
-        "x": 1420,
-        "y": 1060,
+        "x": 1410,
+        "y": 1040,
         "wires": [
             [
-                "d39012762f276d7d"
+                "d39012762f276d7d",
+                "c38fba0236bd62e9"
             ],
             [
                 "f185a3bd1b6b71ce"
@@ -1345,8 +1167,8 @@
         "targetType": "full",
         "statusVal": "",
         "statusType": "auto",
-        "x": 1570,
-        "y": 1040,
+        "x": 1410,
+        "y": 880,
         "wires": []
     },
     {
@@ -1360,8 +1182,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 1440,
-        "y": 1120,
+        "x": 1580,
+        "y": 1100,
         "wires": [
             [
                 "24b07dd92fae064f"
@@ -1385,13 +1207,68 @@
         "drop": false,
         "allowrate": false,
         "outputs": 1,
-        "x": 1520,
-        "y": 1160,
+        "x": 1750,
+        "y": 1100,
         "wires": [
             [
                 "1b801febea7ac8a5",
                 "1cbba27a490ae438"
             ]
         ]
+    },
+    {
+        "id": "715b561a5a13f078",
+        "type": "delay",
+        "z": "8929ff49bf2bbea4",
+        "name": "",
+        "pauseType": "random",
+        "timeout": "5",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "0",
+        "randomLast": "2",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 1120,
+        "y": 1240,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "ebf1dec71c71a249",
+        "type": "function",
+        "z": "8929ff49bf2bbea4",
+        "name": "",
+        "func": "msg.topic = \"workers:regist\";\nmsg.payload = {\n    worker_name: global.get('worker_name'),\n    status: \"free\",\n}\n\n\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1820,
+        "y": 1200,
+        "wires": [
+            [
+                "638476a4175c9978"
+            ]
+        ]
+    },
+    {
+        "id": "638476a4175c9978",
+        "type": "redis-out",
+        "z": "8929ff49bf2bbea4",
+        "server": "da97327dd29e690a",
+        "command": "rpush",
+        "name": "",
+        "topic": "workers:regist",
+        "obj": true,
+        "x": 2000,
+        "y": 1200,
+        "wires": []
     }
 ]
