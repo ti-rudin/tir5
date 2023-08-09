@@ -56,22 +56,22 @@ services:
       - "traefik.http.routers.node-red-core.tls.certresolver=myresolver"
       - "traefik.http.services.node-red-core.loadBalancer.server.port=1880"
 
-  node-red2:
-    container_name: node-red2
-    build:
-      context: .
-      dockerfile: ./nodered2.Dockerfile
-    env_file: .env
-    ports:
-      - "1881:1881"
-    networks:
-      - tibotnet
-    depends_on:
-      - redis
-    volumes:
-      - ./node-red-data2:/data 
-      - ./nr-logs:/usr/src/node-red/logs
-    restart: always
+  #node-red2:
+  #  container_name: node-red2
+  #  build:
+  #    context: .
+  #    dockerfile: ./nodered2.Dockerfile
+  #  env_file: .env
+  #  ports:
+  #    - "1881:1881"
+  #  networks:
+  #    - tibotnet
+  #  depends_on:
+  #    - redis
+  #  volumes:
+  #    - ./node-red-data2:/data 
+  #    - ./nr-logs:/usr/src/node-red/logs
+  #  restart: always
     #labels:
     #  - "traefik.enable=true"
     #  - "traefik.http.routers.node-red2.rule=Host(`worker1.ti-robots.ru`)"
