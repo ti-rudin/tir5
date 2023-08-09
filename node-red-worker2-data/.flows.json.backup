@@ -3,7 +3,7 @@
         "id": "b89efe2b1fe909cb",
         "type": "tab",
         "label": "devMAIN",
-        "disabled": false,
+        "disabled": true,
         "info": "",
         "env": []
     },
@@ -42,9 +42,7 @@
             "5b7bb9d6beb5e5a8"
         ],
         "x": 34,
-        "y": 39,
-        "w": 792,
-        "h": 122
+        "y": 39
     },
     {
         "id": "ed30ef18f5184445",
@@ -2017,18 +2015,6 @@
         "wires": []
     },
     {
-        "id": "a13d2797.8a7ff",
-        "type": "redis-instance",
-        "z": "e089622.6a906a",
-        "server": "f120eab2.0a60a8",
-        "name": "",
-        "topic": "redis",
-        "location": "flow",
-        "x": 1450,
-        "y": 2340,
-        "wires": []
-    },
-    {
         "id": "2a93e7ce.341078",
         "type": "inject",
         "z": "e089622.6a906a",
@@ -2582,67 +2568,6 @@
         ]
     },
     {
-        "id": "824e5a5287a8f610",
-        "type": "inject",
-        "z": "8929ff49bf2bbea4",
-        "name": "start onLoad",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "",
-        "crontab": "",
-        "once": true,
-        "onceDelay": "2",
-        "topic": "",
-        "payload": "",
-        "payloadType": "date",
-        "x": 250,
-        "y": 440,
-        "wires": [
-            [
-                "cf04166efdb26aaf"
-            ]
-        ]
-    },
-    {
-        "id": "cf04166efdb26aaf",
-        "type": "function",
-        "z": "8929ff49bf2bbea4",
-        "name": "worker_name = \"ex2\"",
-        "func": "\nlet worker_name = \"ex2\"; \nglobal.set('worker_name', worker_name);\nmsg.topic = \"workers:regist\";\nmsg.payload = {\n    worker_name: worker_name,\n    status : \"free\",\n    }\n    \n\n\nreturn msg;",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 480,
-        "y": 440,
-        "wires": [
-            [
-                "1ceff122995b2f20"
-            ]
-        ]
-    },
-    {
-        "id": "1ceff122995b2f20",
-        "type": "redis-out",
-        "z": "8929ff49bf2bbea4",
-        "server": "f120eab2.0a60a8",
-        "command": "rpush",
-        "name": "",
-        "topic": "workers:regist",
-        "obj": true,
-        "x": 700,
-        "y": 440,
-        "wires": []
-    },
-    {
         "id": "0631c28017c83d72",
         "type": "function",
         "z": "8929ff49bf2bbea4",
@@ -2670,8 +2595,267 @@
         "name": "",
         "topic": "tasks:regist",
         "obj": true,
-        "x": 570,
-        "y": 520,
+        "x": 630,
+        "y": 500,
+        "wires": []
+    },
+    {
+        "id": "fc2bbde2da1ab11a",
+        "type": "debug",
+        "z": "8929ff49bf2bbea4",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1810,
+        "y": 1040,
+        "wires": []
+    },
+    {
+        "id": "a825f866e5c35ac5",
+        "type": "redis-command",
+        "z": "8929ff49bf2bbea4",
+        "server": "f120eab2.0a60a8",
+        "command": "BLPOP",
+        "name": "",
+        "topic": "tasks:regist",
+        "params": "[]",
+        "paramsType": "json",
+        "payloadType": "json",
+        "block": false,
+        "x": 710,
+        "y": 980,
+        "wires": [
+            [
+                "13d9c6dd9322ab0a"
+            ]
+        ]
+    },
+    {
+        "id": "9f43d0842645c644",
+        "type": "inject",
+        "z": "8929ff49bf2bbea4",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "0.2",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "0.1",
+        "topic": "",
+        "payload": "1",
+        "payloadType": "str",
+        "x": 490,
+        "y": 980,
+        "wires": [
+            [
+                "a825f866e5c35ac5"
+            ]
+        ]
+    },
+    {
+        "id": "13d9c6dd9322ab0a",
+        "type": "filter",
+        "z": "8929ff49bf2bbea4",
+        "name": "",
+        "property": "payload",
+        "propertyType": "msg",
+        "asArray": false,
+        "itemProperty": "payload",
+        "itemPropertyType": "item",
+        "rules": [
+            {
+                "t": "nnull",
+                "output": 1
+            }
+        ],
+        "checkall": "true",
+        "outputs": 1,
+        "x": 970,
+        "y": 980,
+        "wires": [
+            [
+                "c38fba0236bd62e9",
+                "1cbba27a490ae438"
+            ]
+        ]
+    },
+    {
+        "id": "c38fba0236bd62e9",
+        "type": "function",
+        "z": "8929ff49bf2bbea4",
+        "name": "tasks:pending",
+        "func": "\nmsg.topic = \"tasks:pending\";\nmsg.payload = JSON.parse(msg.payload[1]);\n\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1700,
+        "y": 980,
+        "wires": [
+            [
+                "fc2bbde2da1ab11a",
+                "19dd9620ed068d0b"
+            ]
+        ]
+    },
+    {
+        "id": "19dd9620ed068d0b",
+        "type": "redis-out",
+        "z": "8929ff49bf2bbea4",
+        "server": "f120eab2.0a60a8",
+        "command": "rpush",
+        "name": "",
+        "topic": "tasks:pending",
+        "obj": true,
+        "x": 1900,
+        "y": 980,
+        "wires": []
+    },
+    {
+        "id": "68f8b902113b3b5a",
+        "type": "redis-command",
+        "z": "8929ff49bf2bbea4",
+        "server": "f120eab2.0a60a8",
+        "command": "BLPOP",
+        "name": "",
+        "topic": "tasks:pending",
+        "params": "[]",
+        "paramsType": "json",
+        "payloadType": "json",
+        "block": true,
+        "x": 740,
+        "y": 1180,
+        "wires": [
+            [
+                "a8b42f028bbaf3f6"
+            ]
+        ]
+    },
+    {
+        "id": "6e4086f981d63d72",
+        "type": "inject",
+        "z": "8929ff49bf2bbea4",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "0.1",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "2",
+        "topic": "",
+        "payload": "1",
+        "payloadType": "str",
+        "x": 520,
+        "y": 1180,
+        "wires": [
+            [
+                "68f8b902113b3b5a"
+            ]
+        ]
+    },
+    {
+        "id": "a8b42f028bbaf3f6",
+        "type": "filter",
+        "z": "8929ff49bf2bbea4",
+        "name": "",
+        "property": "payload",
+        "propertyType": "msg",
+        "asArray": false,
+        "itemProperty": "payload",
+        "itemPropertyType": "item",
+        "rules": [
+            {
+                "t": "nnull",
+                "output": 1
+            }
+        ],
+        "checkall": "true",
+        "outputs": 1,
+        "x": 940,
+        "y": 1180,
+        "wires": [
+            [
+                "343e579ba86cf9c6"
+            ]
+        ]
+    },
+    {
+        "id": "343e579ba86cf9c6",
+        "type": "debug",
+        "z": "8929ff49bf2bbea4",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1110,
+        "y": 1180,
+        "wires": []
+    },
+    {
+        "id": "1b801febea7ac8a5",
+        "type": "debug",
+        "z": "8929ff49bf2bbea4",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1430,
+        "y": 1040,
+        "wires": []
+    },
+    {
+        "id": "1cbba27a490ae438",
+        "type": "redis-command",
+        "z": "8929ff49bf2bbea4",
+        "server": "f120eab2.0a60a8",
+        "command": "BLPOP",
+        "name": "",
+        "topic": "workers:regist",
+        "params": "[]",
+        "paramsType": "json",
+        "payloadType": "json",
+        "block": false,
+        "x": 1230,
+        "y": 1040,
+        "wires": [
+            [
+                "1b801febea7ac8a5"
+            ]
+        ]
+    },
+    {
+        "id": "273eae948ec64822",
+        "type": "redis-instance",
+        "z": "8929ff49bf2bbea4",
+        "server": "f120eab2.0a60a8",
+        "name": "",
+        "topic": "redis",
+        "location": "flow",
+        "x": 870,
+        "y": 820,
         "wires": []
     }
 ]
