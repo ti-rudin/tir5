@@ -777,8 +777,8 @@
         "onceDelay": 0.1,
         "topic": "",
         "payloadType": "date",
-        "x": 580,
-        "y": 720,
+        "x": 480,
+        "y": 800,
         "wires": [
             [
                 "0631c28017c83d72"
@@ -796,60 +796,12 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 750,
-        "y": 720,
+        "x": 650,
+        "y": 800,
         "wires": [
             [
                 "4dcedbb595ea2b70"
             ]
-        ]
-    },
-    {
-        "id": "865edcbef4afac99",
-        "type": "redis-out",
-        "z": "8929ff49bf2bbea4",
-        "server": "da97327dd29e690a",
-        "command": "rpush",
-        "name": "",
-        "topic": "tasks:regist",
-        "obj": true,
-        "x": 1030,
-        "y": 700,
-        "wires": []
-    },
-    {
-        "id": "fc2bbde2da1ab11a",
-        "type": "debug",
-        "z": "8929ff49bf2bbea4",
-        "name": "",
-        "active": false,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "true",
-        "targetType": "full",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 1810,
-        "y": 1040,
-        "wires": []
-    },
-    {
-        "id": "a825f866e5c35ac5",
-        "type": "redis-command",
-        "z": "8929ff49bf2bbea4",
-        "server": "da97327dd29e690a",
-        "command": "BLPOP",
-        "name": "",
-        "topic": "tasks:regist",
-        "params": "[]",
-        "paramsType": "json",
-        "payloadType": "json",
-        "block": false,
-        "x": 450,
-        "y": 1100,
-        "wires": [
-            []
         ]
     },
     {
@@ -869,8 +821,8 @@
         "topic": "",
         "payload": "1",
         "payloadType": "str",
-        "x": 310,
-        "y": 940,
+        "x": 490,
+        "y": 980,
         "wires": [
             [
                 "c27ee31892adbef0"
@@ -914,34 +866,20 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 1700,
-        "y": 980,
+        "x": 1600,
+        "y": 1000,
         "wires": [
             [
-                "fc2bbde2da1ab11a",
                 "b57180d959a441bd"
             ]
         ]
-    },
-    {
-        "id": "19dd9620ed068d0b",
-        "type": "redis-out",
-        "z": "8929ff49bf2bbea4",
-        "server": "da97327dd29e690a",
-        "command": "rpush",
-        "name": "",
-        "topic": "tasks:pending",
-        "obj": true,
-        "x": 1980,
-        "y": 960,
-        "wires": []
     },
     {
         "id": "1b801febea7ac8a5",
         "type": "debug",
         "z": "8929ff49bf2bbea4",
         "name": "",
-        "active": true,
+        "active": false,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
@@ -1026,8 +964,7 @@
         "y": 1040,
         "wires": [
             [
-                "c38fba0236bd62e9",
-                "0918ce5c53cf6954"
+                "c38fba0236bd62e9"
             ],
             [
                 "f185a3bd1b6b71ce"
@@ -1080,38 +1017,6 @@
         ]
     },
     {
-        "id": "ebf1dec71c71a249",
-        "type": "function",
-        "z": "8929ff49bf2bbea4",
-        "name": "",
-        "func": "msg.topic = \"workers:regist\";\nmsg.payload = {\n    worker_name: global.get('worker_name'),\n    status: \"free\",\n}\n\n\n\nreturn msg;",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 1820,
-        "y": 1200,
-        "wires": [
-            [
-                "638476a4175c9978"
-            ]
-        ]
-    },
-    {
-        "id": "638476a4175c9978",
-        "type": "redis-out",
-        "z": "8929ff49bf2bbea4",
-        "server": "da97327dd29e690a",
-        "command": "rpush",
-        "name": "",
-        "topic": "workers:regist",
-        "obj": true,
-        "x": 2000,
-        "y": 1200,
-        "wires": []
-    },
-    {
         "id": "b57180d959a441bd",
         "type": "function",
         "z": "8929ff49bf2bbea4",
@@ -1122,12 +1027,11 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 1700,
-        "y": 920,
+        "x": 1800,
+        "y": 1000,
         "wires": [
             [
                 "5d363fb6aed28df1",
-                "9e606c0e0c5d6d1b",
                 "41ffa656bfcf53c8"
             ]
         ]
@@ -1141,8 +1045,8 @@
         "name": "",
         "topic": "",
         "obj": true,
-        "x": 1880,
-        "y": 920,
+        "x": 1980,
+        "y": 1000,
         "wires": []
     },
     {
@@ -1155,8 +1059,8 @@
         "topic": "resurse:ex2",
         "obj": true,
         "timeout": 0,
-        "x": 620,
-        "y": 1400,
+        "x": 750,
+        "y": 1360,
         "wires": [
             [
                 "e47c1828f339606d",
@@ -1177,7 +1081,7 @@
         "targetType": "full",
         "statusVal": "",
         "statusType": "auto",
-        "x": 790,
+        "x": 750,
         "y": 1400,
         "wires": []
     },
@@ -1192,8 +1096,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 1040,
-        "y": 1420,
+        "x": 1100,
+        "y": 1400,
         "wires": [
             [
                 "a37d953d4c3eb0a5"
@@ -1209,8 +1113,8 @@
         "name": "",
         "topic": "workers:regist",
         "obj": true,
-        "x": 1280,
-        "y": 1420,
+        "x": 1300,
+        "y": 1400,
         "wires": []
     },
     {
@@ -1230,49 +1134,14 @@
         "drop": false,
         "allowrate": false,
         "outputs": 1,
-        "x": 930,
+        "x": 920,
         "y": 1360,
         "wires": [
             [
                 "30269c0017720ad9",
-                "cb676b24d8e36a71",
                 "3c92409f284b0c9a"
             ]
         ]
-    },
-    {
-        "id": "9e606c0e0c5d6d1b",
-        "type": "debug",
-        "z": "8929ff49bf2bbea4",
-        "name": "",
-        "active": false,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "true",
-        "targetType": "full",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 1710,
-        "y": 840,
-        "wires": []
-    },
-    {
-        "id": "0918ce5c53cf6954",
-        "type": "debug",
-        "z": "8929ff49bf2bbea4",
-        "name": "",
-        "active": false,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "true",
-        "targetType": "full",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 1450,
-        "y": 940,
-        "wires": []
     },
     {
         "id": "3c92409f284b0c9a",
@@ -1285,46 +1154,16 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 1380,
+        "x": 1140,
         "y": 1320,
         "wires": [
             [
-                "1717af76fef8107c"
+                "cb676b24d8e36a71"
             ]
         ]
     },
     {
-        "id": "f5821f4c93bc0a53",
-        "type": "redis-out",
-        "z": "8929ff49bf2bbea4",
-        "server": "da97327dd29e690a",
-        "command": "rpush",
-        "name": "",
-        "topic": "tasks:pending",
-        "obj": true,
-        "x": 1840,
-        "y": 1360,
-        "wires": []
-    },
-    {
         "id": "cb676b24d8e36a71",
-        "type": "debug",
-        "z": "8929ff49bf2bbea4",
-        "name": "",
-        "active": false,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "true",
-        "targetType": "full",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 1150,
-        "y": 1260,
-        "wires": []
-    },
-    {
-        "id": "1717af76fef8107c",
         "type": "debug",
         "z": "8929ff49bf2bbea4",
         "name": "",
@@ -1336,7 +1175,7 @@
         "targetType": "full",
         "statusVal": "",
         "statusType": "auto",
-        "x": 1630,
+        "x": 1350,
         "y": 1320,
         "wires": []
     },
@@ -1351,31 +1190,13 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 540,
-        "y": 940,
+        "x": 640,
+        "y": 980,
         "wires": [
             [
-                "8b3251c2974c96ea",
                 "13d9c6dd9322ab0a"
             ]
         ]
-    },
-    {
-        "id": "8b3251c2974c96ea",
-        "type": "debug",
-        "z": "8929ff49bf2bbea4",
-        "name": "",
-        "active": false,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "true",
-        "targetType": "full",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 810,
-        "y": 940,
-        "wires": []
     },
     {
         "id": "4dcedbb595ea2b70",
@@ -1414,11 +1235,10 @@
         "z": "8929ff49bf2bbea4",
         "name": "",
         "queue": "30996d79e1bf9955",
-        "x": 460,
+        "x": 640,
         "y": 1040,
         "wires": [
             [
-                "8b3251c2974c96ea",
                 "13d9c6dd9322ab0a"
             ]
         ]
@@ -1429,8 +1249,8 @@
         "z": "8929ff49bf2bbea4",
         "name": "",
         "queue": "30996d79e1bf9955",
-        "x": 1940,
-        "y": 860,
+        "x": 1990,
+        "y": 960,
         "wires": []
     },
     {
@@ -1454,8 +1274,8 @@
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 1440,
-        "y": 860,
+        "x": 1800,
+        "y": 960,
         "wires": [
             [
                 "41ffa656bfcf53c8"
