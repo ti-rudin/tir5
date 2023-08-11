@@ -456,34 +456,6 @@
         "h": 222
     },
     {
-        "id": "65ceb63d19a93d0f",
-        "type": "group",
-        "z": "5df15275.2888ec",
-        "style": {
-            "stroke": "#2e333a",
-            "stroke-opacity": "1",
-            "fill": "#383c45",
-            "fill-opacity": "0.5",
-            "label": true,
-            "label-position": "nw",
-            "color": "#a4a4a4"
-        },
-        "nodes": [
-            "efa132132a7fa5d7",
-            "8e747d7d4ec5b050",
-            "f5fcc7414475be12",
-            "1719022f8617153c",
-            "c4ba62796dfec943",
-            "64dc395af95431e1",
-            "28fda303e5196ddd",
-            "a1d4c1c74be64298"
-        ],
-        "x": 884,
-        "y": 59,
-        "w": 722,
-        "h": 122
-    },
-    {
         "id": "251a240e36b31c14",
         "type": "group",
         "z": "5df15275.2888ec",
@@ -500,14 +472,13 @@
             "71d59fd5323329d0",
             "a98eccc2c1f43b19",
             "1acc76a1e7049e58",
-            "8a2855df7069c19f",
             "c63e2cc4400d40fe",
             "355607853c06794c",
             "6274a170dc04552c"
         ],
         "x": 2274,
         "y": 1299,
-        "w": 632,
+        "w": 522,
         "h": 202
     },
     {
@@ -590,9 +561,7 @@
             "2f83bb2fab63d1bd"
         ],
         "x": 1114,
-        "y": 1119,
-        "w": 792,
-        "h": 122
+        "y": 1119
     },
     {
         "id": "666006aaa2e325fc",
@@ -1071,6 +1040,31 @@
         "h": 202
     },
     {
+        "id": "ed30ef18f5184445",
+        "type": "group",
+        "z": "b89efe2b1fe909cb",
+        "style": {
+            "stroke": "#2e333a",
+            "stroke-opacity": "1",
+            "fill": "#383c45",
+            "fill-opacity": "0.5",
+            "label": true,
+            "label-position": "nw",
+            "color": "#a4a4a4"
+        },
+        "nodes": [
+            "1b96aac6bf557001",
+            "3cf21f0195b3bccf",
+            "9aa618e516cc5a90",
+            "79afe590ff4b1234",
+            "4f9680c811d5eef5"
+        ],
+        "x": 494,
+        "y": 19,
+        "w": 752,
+        "h": 122
+    },
+    {
         "id": "54197cf454887ecb",
         "type": "group",
         "z": "5f98db3a.7ab21c",
@@ -1096,31 +1090,6 @@
         ],
         "x": 54,
         "y": 59
-    },
-    {
-        "id": "ed30ef18f5184445",
-        "type": "group",
-        "z": "b89efe2b1fe909cb",
-        "style": {
-            "stroke": "#2e333a",
-            "stroke-opacity": "1",
-            "fill": "#383c45",
-            "fill-opacity": "0.5",
-            "label": true,
-            "label-position": "nw",
-            "color": "#a4a4a4"
-        },
-        "nodes": [
-            "1b96aac6bf557001",
-            "3cf21f0195b3bccf",
-            "9aa618e516cc5a90",
-            "79afe590ff4b1234",
-            "4f9680c811d5eef5"
-        ],
-        "x": 494,
-        "y": 19,
-        "w": 752,
-        "h": 122
     },
     {
         "id": "f120eab2.0a60a8",
@@ -1261,7 +1230,7 @@
         "type": "memory-queue",
         "name": "qu-main",
         "size": "5",
-        "discard": true
+        "discard": false
     },
     {
         "id": "b0cef4ea50b252b0",
@@ -3088,7 +3057,7 @@
         "wires": [
             [
                 "015cb77a3fb3ae39",
-                "4dcedbb595ea2b70"
+                "44cf5a4e2560f1bc"
             ]
         ]
     },
@@ -3174,31 +3143,6 @@
         ]
     },
     {
-        "id": "9f43d0842645c644",
-        "type": "inject",
-        "z": "b89efe2b1fe909cb",
-        "name": "",
-        "props": [
-            {
-                "p": "payload"
-            }
-        ],
-        "repeat": "",
-        "crontab": "",
-        "once": false,
-        "onceDelay": "0.1",
-        "topic": "",
-        "payload": "1",
-        "payloadType": "str",
-        "x": 250,
-        "y": 760,
-        "wires": [
-            [
-                "c27ee31892adbef0"
-            ]
-        ]
-    },
-    {
         "id": "13d9c6dd9322ab0a",
         "type": "filter",
         "z": "b89efe2b1fe909cb",
@@ -3239,7 +3183,8 @@
         "y": 780,
         "wires": [
             [
-                "6a97c9512db67e63"
+                "6a97c9512db67e63",
+                "5a050b0bae48d97a"
             ]
         ]
     },
@@ -3248,7 +3193,7 @@
         "type": "debug",
         "z": "b89efe2b1fe909cb",
         "name": "",
-        "active": false,
+        "active": true,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
@@ -3256,8 +3201,8 @@
         "targetType": "full",
         "statusVal": "",
         "statusType": "auto",
-        "x": 1670,
-        "y": 900,
+        "x": 1650,
+        "y": 880,
         "wires": []
     },
     {
@@ -3378,7 +3323,7 @@
         "type": "function",
         "z": "b89efe2b1fe909cb",
         "name": "send payload ",
-        "func": "msg ={\n    topic: \"resurse:\" + msg.payload.worker.worker_name,\n    payload: msg.payload.task\n}\n\n\nreturn msg;",
+        "func": "msg = {\n    topic: \"resurse:\" + msg.payload.worker.worker_name,\n    payload: {\n        ...msg.payload,\n        pending_time: new Date().getTime() - msg.payload.task.task_id\n    }\n}\n\n\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -3390,7 +3335,8 @@
             [
                 "82de0d4682b24b00",
                 "41ffa656bfcf53c8",
-                "a98f7950b044f058"
+                "a98f7950b044f058",
+                "f23e80894361f1a2"
             ]
         ]
     },
@@ -3408,31 +3354,12 @@
         "wires": []
     },
     {
-        "id": "c27ee31892adbef0",
-        "type": "function",
-        "z": "b89efe2b1fe909cb",
-        "name": "get task",
-        "func": "\nlet tasks = global.get('regist-tasks-list') || [];\n\nmsg.payload = tasks.pop();\n\nglobal.set('regist-tasks-list', tasks);\nreturn msg;\n\n\n\n",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 400,
-        "y": 760,
-        "wires": [
-            [
-                "13d9c6dd9322ab0a"
-            ]
-        ]
-    },
-    {
         "id": "4dcedbb595ea2b70",
         "type": "memqueue in",
         "z": "b89efe2b1fe909cb",
         "name": "",
         "queue": "30996d79e1bf9955",
-        "x": 580,
+        "x": 780,
         "y": 520,
         "wires": [
             [
@@ -3445,7 +3372,7 @@
         "type": "debug",
         "z": "b89efe2b1fe909cb",
         "name": "",
-        "active": true,
+        "active": false,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
@@ -3453,7 +3380,7 @@
         "targetType": "full",
         "statusVal": "",
         "statusType": "auto",
-        "x": 720,
+        "x": 990,
         "y": 520,
         "wires": []
     },
@@ -3624,7 +3551,7 @@
         "wires": [
             [
                 "381df5931b8287f5",
-                "95c37f9471ec3fe0"
+                "80f83d0c96dd5441"
             ]
         ]
     },
@@ -3633,7 +3560,7 @@
         "type": "function",
         "z": "b89efe2b1fe909cb",
         "name": "remove from pending list",
-        "func": "let task_id = msg.payload.task_id;\nlet tasks = global.get('pending-tasks-list') || [];\n\nlet result = tasks.filter((item) => item.id != task_id);\n\nglobal.set('pending-tasks-list', result);\nreturn msg;",
+        "func": "let task_id = msg.payload.task_id;\nlet tasks = global.get('pending-tasks-list') || [];\n\nlet result = tasks.filter((item) => item.id != task_id);\n\nglobal.set('pending-tasks-list', result);\nmsg.payload = JSON.parse(msg.payload);\n\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -3642,7 +3569,11 @@
         "x": 1550,
         "y": 520,
         "wires": [
-            []
+            [
+                "95c37f9471ec3fe0",
+                "df3f75eac96cd66f",
+                "9fd12982babb2980"
+            ]
         ]
     },
     {
@@ -3658,8 +3589,8 @@
         "targetType": "full",
         "statusVal": "",
         "statusType": "auto",
-        "x": 1330,
-        "y": 560,
+        "x": 1750,
+        "y": 520,
         "wires": []
     },
     {
@@ -3667,7 +3598,7 @@
         "type": "debug",
         "z": "b89efe2b1fe909cb",
         "name": "",
-        "active": true,
+        "active": false,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
@@ -3675,12 +3606,235 @@
         "targetType": "full",
         "statusVal": "",
         "statusType": "auto",
-        "x": 610,
-        "y": 920,
+        "x": 390,
+        "y": 880,
         "wires": []
     },
     {
         "id": "a98f7950b044f058",
+        "type": "debug",
+        "z": "b89efe2b1fe909cb",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1750,
+        "y": 820,
+        "wires": []
+    },
+    {
+        "id": "5a050b0bae48d97a",
+        "type": "debug",
+        "z": "b89efe2b1fe909cb",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1370,
+        "y": 640,
+        "wires": []
+    },
+    {
+        "id": "21bfe211882167d4",
+        "type": "ui_chart",
+        "z": "b89efe2b1fe909cb",
+        "name": "",
+        "group": "f244fee6.d2627",
+        "order": 0,
+        "width": "4",
+        "height": "7",
+        "label": "pending",
+        "chartType": "line",
+        "legend": "false",
+        "xformat": "ss",
+        "interpolate": "bezier",
+        "nodata": "",
+        "dot": true,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": "10",
+        "removeOlderPoints": "40",
+        "removeOlderUnit": "1",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9a244f",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "x": 1880,
+        "y": 580,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "df3f75eac96cd66f",
+        "type": "function",
+        "z": "b89efe2b1fe909cb",
+        "name": "tester___",
+        "func": "\nnode.status({fill: \"green\", shape: \"ring\", text: msg.payload});   \nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1600,
+        "y": 420,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "0b00e2b94b61e587",
+        "type": "comment",
+        "z": "b89efe2b1fe909cb",
+        "name": "main track",
+        "info": "",
+        "x": 1600,
+        "y": 380,
+        "wires": []
+    },
+    {
+        "id": "44cf5a4e2560f1bc",
+        "type": "function",
+        "z": "b89efe2b1fe909cb",
+        "name": "",
+        "func": "msg = {\n    topic: msg.topic,\n    payload: {\n        ...msg.payload,\n        task_id: new Date().getTime()\n    }\n}\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 590,
+        "y": 520,
+        "wires": [
+            [
+                "4dcedbb595ea2b70"
+            ]
+        ]
+    },
+    {
+        "id": "f23e80894361f1a2",
+        "type": "debug",
+        "z": "b89efe2b1fe909cb",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1650,
+        "y": 660,
+        "wires": []
+    },
+    {
+        "id": "80f83d0c96dd5441",
+        "type": "debug",
+        "z": "b89efe2b1fe909cb",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1350,
+        "y": 420,
+        "wires": []
+    },
+    {
+        "id": "22b3251da2514ba1",
+        "type": "ui_chart",
+        "z": "b89efe2b1fe909cb",
+        "name": "",
+        "group": "f244fee6.d2627",
+        "order": 0,
+        "width": "4",
+        "height": "7",
+        "label": "ex",
+        "chartType": "line",
+        "legend": "false",
+        "xformat": "ss",
+        "interpolate": "bezier",
+        "nodata": "",
+        "dot": true,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": "10",
+        "removeOlderPoints": "40",
+        "removeOlderUnit": "1",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9a244f",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "x": 1870,
+        "y": 620,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "9fd12982babb2980",
+        "type": "function",
+        "z": "b89efe2b1fe909cb",
+        "name": "",
+        "func": "let msg_p = {\n    payload: msg.payload.pending_time\n};\nlet msg_e = {\n    payload: msg.payload.ex_time\n};\nreturn [msg_p, msg_e];",
+        "outputs": 2,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1660,
+        "y": 600,
+        "wires": [
+            [
+                "21bfe211882167d4",
+                "2ddcd80066bd542a"
+            ],
+            [
+                "3d2535f876f4bc2d"
+            ]
+        ]
+    },
+    {
+        "id": "2ddcd80066bd542a",
         "type": "debug",
         "z": "b89efe2b1fe909cb",
         "name": "",
@@ -3692,9 +3846,55 @@
         "targetType": "full",
         "statusVal": "",
         "statusType": "auto",
-        "x": 1670,
-        "y": 660,
+        "x": 1830,
+        "y": 680,
         "wires": []
+    },
+    {
+        "id": "3d2535f876f4bc2d",
+        "type": "debug",
+        "z": "b89efe2b1fe909cb",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1970,
+        "y": 680,
+        "wires": []
+    },
+    {
+        "id": "cc84144cf5d45931",
+        "type": "inject",
+        "z": "b89efe2b1fe909cb",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 1490,
+        "y": 600,
+        "wires": [
+            [
+                "9fd12982babb2980"
+            ]
+        ]
     },
     {
         "id": "a7628168.861ce",
@@ -5083,7 +5283,6 @@
         "id": "efa132132a7fa5d7",
         "type": "link in",
         "z": "5df15275.2888ec",
-        "g": "65ceb63d19a93d0f",
         "name": "",
         "links": [
             "f937bdc295f372a8",
@@ -5102,7 +5301,6 @@
         "id": "8e747d7d4ec5b050",
         "type": "function",
         "z": "5df15275.2888ec",
-        "g": "65ceb63d19a93d0f",
         "name": "tester___",
         "func": "let trackname = msg.trackname;\n//flow.set(trackname);\nnode.status({fill: \"green\", shape: \"ring\", text: msg.payload});   \nreturn msg;",
         "outputs": 1,
@@ -5120,7 +5318,6 @@
         "id": "f5fcc7414475be12",
         "type": "comment",
         "z": "5df15275.2888ec",
-        "g": "65ceb63d19a93d0f",
         "name": "main track",
         "info": "",
         "x": 1220,
@@ -5131,7 +5328,6 @@
         "id": "1719022f8617153c",
         "type": "link in",
         "z": "5df15275.2888ec",
-        "g": "65ceb63d19a93d0f",
         "name": "meter ttp",
         "links": [
             "365e54e1b5c77315",
@@ -5151,7 +5347,6 @@
         "id": "c4ba62796dfec943",
         "type": "function",
         "z": "5df15275.2888ec",
-        "g": "65ceb63d19a93d0f",
         "name": "tester___",
         "func": "\nnode.status({ fill: \"green\", shape: \"ring\", text: msg.payload });\nreturn msg;",
         "outputs": 1,
@@ -5169,7 +5364,6 @@
         "id": "64dc395af95431e1",
         "type": "comment",
         "z": "5df15275.2888ec",
-        "g": "65ceb63d19a93d0f",
         "name": "ttp track",
         "info": "",
         "x": 1520,
@@ -5305,7 +5499,6 @@
         "id": "28fda303e5196ddd",
         "type": "link in",
         "z": "5df15275.2888ec",
-        "g": "65ceb63d19a93d0f",
         "name": "",
         "links": [
             "12cdc134f2944261"
@@ -5322,7 +5515,6 @@
         "id": "a1d4c1c74be64298",
         "type": "function",
         "z": "5df15275.2888ec",
-        "g": "65ceb63d19a93d0f",
         "name": "bot ready",
         "func": "node.status({ fill: \"green\", shape: \"dot\" });\n\nreturn msg;",
         "outputs": 1,
@@ -5417,53 +5609,8 @@
         "y": 1400,
         "wires": [
             [
-                "8a2855df7069c19f",
                 "a98eccc2c1f43b19"
             ]
-        ]
-    },
-    {
-        "id": "8a2855df7069c19f",
-        "type": "ui_chart",
-        "z": "5df15275.2888ec",
-        "g": "251a240e36b31c14",
-        "name": "",
-        "group": "f244fee6.d2627",
-        "order": 0,
-        "width": "4",
-        "height": "7",
-        "label": "main track",
-        "chartType": "line",
-        "legend": "false",
-        "xformat": "ss",
-        "interpolate": "bezier",
-        "nodata": "",
-        "dot": true,
-        "ymin": "",
-        "ymax": "",
-        "removeOlder": "10",
-        "removeOlderPoints": "40",
-        "removeOlderUnit": "1",
-        "cutout": 0,
-        "useOneColor": false,
-        "useUTC": false,
-        "colors": [
-            "#1f77b4",
-            "#aec7e8",
-            "#ff7f0e",
-            "#2ca02c",
-            "#98df8a",
-            "#d62728",
-            "#ff9896",
-            "#9a244f",
-            "#c5b0d5"
-        ],
-        "outputs": 1,
-        "useDifferentColor": false,
-        "x": 2810,
-        "y": 1380,
-        "wires": [
-            []
         ]
     },
     {
@@ -7047,7 +7194,7 @@
         "z": "5df15275.2888ec",
         "g": "4b5621a5daf6eb8e",
         "name": "data prepare",
-        "func": "msg= {\ntopic : \"taskque\",\n    payload: {\n        \"bot\": msg.bot,\n        \"worktype\": \"floor-check\",\n        \"workdata\": \"workdataobj\",\n        \"trackname\": msg.trackname\n    }\n}\n\nreturn msg;",
+        "func": "msg= {\ntopic : \"taskque\",\n    payload: {\n        \"bot\": msg.bot,\n        \"worktype\": \"floor-check\",\n        \"workdata\": \"workdataobj\",\n    }\n}\n\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -7125,7 +7272,7 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 2420,
+        "x": 2360,
         "y": 1800,
         "wires": [
             []
@@ -7147,6 +7294,97 @@
         "x": 1220,
         "y": 1900,
         "wires": []
+    },
+    {
+        "id": "94dfc8faf2a767a8",
+        "type": "inject",
+        "z": "5df15275.2888ec",
+        "name": "",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 1040,
+        "y": 900,
+        "wires": [
+            [
+                "d8c39126985f7a19"
+            ]
+        ]
+    },
+    {
+        "id": "d8c39126985f7a19",
+        "type": "function",
+        "z": "5df15275.2888ec",
+        "name": "",
+        "func": "msg.payload = flow.keys();\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1170,
+        "y": 900,
+        "wires": [
+            [
+                "c18af2a94ccc385a"
+            ]
+        ]
+    },
+    {
+        "id": "f97ebd037dfe90fd",
+        "type": "debug",
+        "z": "5df15275.2888ec",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "x": 1550,
+        "y": 900,
+        "wires": []
+    },
+    {
+        "id": "c18af2a94ccc385a",
+        "type": "split",
+        "z": "5df15275.2888ec",
+        "name": "",
+        "splt": "\\n",
+        "spltType": "str",
+        "arraySplt": 1,
+        "arraySpltType": "len",
+        "stream": false,
+        "addname": "",
+        "x": 1290,
+        "y": 900,
+        "wires": [
+            [
+                "da0d752d39c3d73c"
+            ]
+        ]
+    },
+    {
+        "id": "da0d752d39c3d73c",
+        "type": "function",
+        "z": "5df15275.2888ec",
+        "name": "",
+        "func": "var key = msg.payload;\nvar val = flow.get(key);\nflow.delete(key);\n\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1410,
+        "y": 900,
+        "wires": [
+            [
+                "f97ebd037dfe90fd"
+            ]
+        ]
     },
     {
         "id": "b38fc6a51aebc0c0",

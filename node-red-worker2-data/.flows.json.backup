@@ -63,9 +63,7 @@
             "4144add5c78f1ce1"
         ],
         "x": 1254,
-        "y": 999,
-        "w": 752,
-        "h": 122
+        "y": 999
     },
     {
         "id": "acbee441.8c1e1",
@@ -1148,8 +1146,8 @@
         "name": "",
         "topic": "redis",
         "location": "flow",
-        "x": 890,
-        "y": 40,
+        "x": 810,
+        "y": 80,
         "wires": []
     },
     {
@@ -1225,19 +1223,19 @@
         "type": "delay",
         "z": "8929ff49bf2bbea4",
         "name": "",
-        "pauseType": "random",
+        "pauseType": "delay",
         "timeout": "1",
         "timeoutUnits": "milliseconds",
         "rate": "10",
         "nbRateUnits": "1",
         "rateUnits": "second",
-        "randomFirst": "2",
-        "randomLast": "4",
+        "randomFirst": "0",
+        "randomLast": "3",
         "randomUnits": "seconds",
         "drop": false,
         "allowrate": false,
         "outputs": 1,
-        "x": 380,
+        "x": 390,
         "y": 400,
         "wires": [
             [
@@ -1250,14 +1248,14 @@
         "id": "3c92409f284b0c9a",
         "type": "function",
         "z": "8929ff49bf2bbea4",
-        "name": "remove from tasks:pending",
-        "func": "let task_id = msg.payload.task_id;\nmsg.topic = \"tasks:finished\";\nmsg.payload = JSON.stringify({\n\n    task_id: msg.payload.task_id,\n    ex_time: new Date().getTime() - msg.payload.task_id\n});\n\n\nreturn msg;\n\n",
+        "name": "task finished",
+        "func": "let task_id = msg.payload.task.task_id;\nmsg.topic = \"tasks:finished\";\nmsg.payload = JSON.stringify({\n...msg.payload,\n\n    \n    ex_time: new Date().getTime() - task_id\n});\n\n\nreturn msg;\n\n",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 600,
+        "x": 550,
         "y": 360,
         "wires": [
             [
@@ -1288,7 +1286,7 @@
         "type": "redis-out",
         "z": "8929ff49bf2bbea4",
         "server": "f120eab2.0a60a8",
-        "command": "rpush",
+        "command": "publish",
         "name": "",
         "topic": "",
         "obj": true,
