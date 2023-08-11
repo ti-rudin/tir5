@@ -33,9 +33,9 @@
             "sidebar": {
                 "order": [
                     "context",
+                    "debug",
                     "info",
                     "help",
-                    "debug",
                     "config",
                     "flow-debugger",
                     "smxstate",
@@ -47,6 +47,9 @@
         "menu-menu-item-sidebar": true,
         "menu-deploymenu-item-flow": false,
         "menu-deploymenu-item-full": true,
-        "menu-deploymenu-item-node": false
+        "menu-deploymenu-item-node": false,
+        "debug": {
+            "filter": "filterSelected"
+        }
     }
 }

@@ -776,7 +776,6 @@
         "once": false,
         "onceDelay": 0.1,
         "topic": "",
-        "payload": "",
         "payloadType": "date",
         "x": 580,
         "y": 720,
@@ -791,7 +790,7 @@
         "type": "function",
         "z": "8929ff49bf2bbea4",
         "name": "test task",
-        "func": "\nmsg.topic = \"tasks:regist\";\nmsg.payload = {\n    task_id: msg.payload,\n    task_type: \"task_type\",\n    data: { bot: \"botdata\" },\n}\n\n\n\nreturn msg;",
+        "func": "\nmsg.topic = \"tasks:regist\";\nmsg.payload = {\n    task_id: msg.payload,\n    task_type: \"task_type\",\n    data: { bot: \"botdata\" },\n}\n\n\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -801,7 +800,7 @@
         "y": 720,
         "wires": [
             [
-                "865edcbef4afac99"
+                "4dcedbb595ea2b70"
             ]
         ]
     },
@@ -814,8 +813,8 @@
         "name": "",
         "topic": "tasks:regist",
         "obj": true,
-        "x": 930,
-        "y": 720,
+        "x": 1030,
+        "y": 700,
         "wires": []
     },
     {
@@ -823,7 +822,7 @@
         "type": "debug",
         "z": "8929ff49bf2bbea4",
         "name": "",
-        "active": true,
+        "active": false,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
@@ -847,12 +846,10 @@
         "paramsType": "json",
         "payloadType": "json",
         "block": false,
-        "x": 590,
-        "y": 1040,
+        "x": 450,
+        "y": 1100,
         "wires": [
-            [
-                "13d9c6dd9322ab0a"
-            ]
+            []
         ]
     },
     {
@@ -872,11 +869,11 @@
         "topic": "",
         "payload": "1",
         "payloadType": "str",
-        "x": 390,
-        "y": 1040,
+        "x": 250,
+        "y": 940,
         "wires": [
             [
-                "a825f866e5c35ac5"
+                "c27ee31892adbef0"
             ]
         ]
     },
@@ -911,7 +908,7 @@
         "type": "function",
         "z": "8929ff49bf2bbea4",
         "name": "tasks:pending",
-        "func": "\nmsg.topic = \"tasks:pending\";\nmsg.payload = {\n    worker: JSON.parse(msg.payload[1]),\n    task: msg.task\n}\n\nlet tasks = global.get('pending-tasks-list') || {};\n\nlet task_id = msg.payload.task.task_id;\nnode.warn(task_id);\ntasks.push({ id: task_id, task: msg.payload});\n\nnode.warn(tasks);\n// Сохраняем измененное значение обратно:\nglobal.set('pending-tasks-list', tasks);\nreturn msg;\n\n",
+        "func": "\nmsg.topic = \"tasks:pending\";\nmsg.payload = {\n    worker: JSON.parse(msg.payload[1]),\n    task: msg.task\n}\n\nlet tasks = global.get('pending-tasks-list') || {};\n\nlet task_id = msg.payload.task.task_id;\n\ntasks.push({ id: task_id, task: msg.payload});\n\nglobal.set('pending-tasks-list', tasks);\nreturn msg;\n\n",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -937,96 +934,6 @@
         "obj": true,
         "x": 1980,
         "y": 960,
-        "wires": []
-    },
-    {
-        "id": "68f8b902113b3b5a",
-        "type": "redis-command",
-        "z": "8929ff49bf2bbea4",
-        "server": "da97327dd29e690a",
-        "command": "BLPOP",
-        "name": "",
-        "topic": "tasks:pending",
-        "params": "[]",
-        "paramsType": "json",
-        "payloadType": "json",
-        "block": true,
-        "x": 720,
-        "y": 1180,
-        "wires": [
-            [
-                "a8b42f028bbaf3f6"
-            ]
-        ]
-    },
-    {
-        "id": "6e4086f981d63d72",
-        "type": "inject",
-        "z": "8929ff49bf2bbea4",
-        "name": "",
-        "props": [
-            {
-                "p": "payload"
-            }
-        ],
-        "repeat": "",
-        "crontab": "",
-        "once": false,
-        "onceDelay": "2",
-        "topic": "",
-        "payload": "1",
-        "payloadType": "str",
-        "x": 520,
-        "y": 1180,
-        "wires": [
-            [
-                "68f8b902113b3b5a"
-            ]
-        ]
-    },
-    {
-        "id": "a8b42f028bbaf3f6",
-        "type": "filter",
-        "z": "8929ff49bf2bbea4",
-        "name": "",
-        "property": "payload",
-        "propertyType": "msg",
-        "asArray": false,
-        "itemProperty": "payload",
-        "itemPropertyType": "item",
-        "rules": [
-            {
-                "t": "nnull",
-                "output": 1
-            }
-        ],
-        "checkall": "true",
-        "outputs": 1,
-        "x": 940,
-        "y": 1180,
-        "wires": [
-            [
-                "715b561a5a13f078",
-                "12cbbfe3ae032dc7",
-                "8c17677fb483621b"
-            ]
-        ]
-    },
-    {
-        "id": "343e579ba86cf9c6",
-        "type": "debug",
-        "z": "8929ff49bf2bbea4",
-        "name": "",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "true",
-        "targetType": "full",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 1330,
-        "y": 1180,
         "wires": []
     },
     {
@@ -1083,7 +990,7 @@
         "type": "function",
         "z": "8929ff49bf2bbea4",
         "name": "prepare",
-        "func": "\nmsg = {\n    payload:\"1\",\n    topic:\"workers:regist\",\n    task : JSON.parse(msg.payload[1])\n}\n\nreturn msg;",
+        "func": "\nmsg = {\n    payload:\"1\",\n    topic:\"workers:regist\",\n    task : msg.payload\n}\n\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -1173,29 +1080,6 @@
         ]
     },
     {
-        "id": "715b561a5a13f078",
-        "type": "delay",
-        "z": "8929ff49bf2bbea4",
-        "name": "",
-        "pauseType": "random",
-        "timeout": "5",
-        "timeoutUnits": "seconds",
-        "rate": "1",
-        "nbRateUnits": "1",
-        "rateUnits": "second",
-        "randomFirst": "0",
-        "randomLast": "2",
-        "randomUnits": "seconds",
-        "drop": false,
-        "allowrate": false,
-        "outputs": 1,
-        "x": 1120,
-        "y": 1240,
-        "wires": [
-            []
-        ]
-    },
-    {
         "id": "ebf1dec71c71a249",
         "type": "function",
         "z": "8929ff49bf2bbea4",
@@ -1243,7 +1127,8 @@
         "wires": [
             [
                 "5d363fb6aed28df1",
-                "9e606c0e0c5d6d1b"
+                "9e606c0e0c5d6d1b",
+                "41ffa656bfcf53c8"
             ]
         ]
     },
@@ -1258,42 +1143,6 @@
         "obj": true,
         "x": 1880,
         "y": 920,
-        "wires": []
-    },
-    {
-        "id": "12cbbfe3ae032dc7",
-        "type": "function",
-        "z": "8929ff49bf2bbea4",
-        "name": "",
-        "func": "\nglobal.get('pending-tasks-list', function (err, tasks) {\n    if (err) {\n        node.error(err, msg);\n    } else {\n\n\n        tasks.push(JSON.parse(msg.payload[1]));\n        // Сохраняем измененное значение обратно:\n        global.set('pending-tasks-list', tasks, function (err) {\n            if (err) {\n                node.error(err, msg);\n            } else {\n                msg.payload = tasks;\n            \n            }\n        });\n        msg.payload = tasks || \"\";\n\n    }\n});\nreturn msg;",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 1120,
-        "y": 1180,
-        "wires": [
-            [
-                "343e579ba86cf9c6"
-            ]
-        ]
-    },
-    {
-        "id": "8c17677fb483621b",
-        "type": "debug",
-        "z": "8929ff49bf2bbea4",
-        "name": "",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "true",
-        "targetType": "full",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 1110,
-        "y": 1140,
         "wires": []
     },
     {
@@ -1320,7 +1169,7 @@
         "type": "debug",
         "z": "8929ff49bf2bbea4",
         "name": "",
-        "active": true,
+        "active": false,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
@@ -1370,13 +1219,13 @@
         "z": "8929ff49bf2bbea4",
         "name": "",
         "pauseType": "random",
-        "timeout": "5",
-        "timeoutUnits": "seconds",
-        "rate": "1",
+        "timeout": "1",
+        "timeoutUnits": "milliseconds",
+        "rate": "10",
         "nbRateUnits": "1",
         "rateUnits": "second",
-        "randomFirst": "0",
-        "randomLast": "2",
+        "randomFirst": "2",
+        "randomLast": "4",
         "randomUnits": "seconds",
         "drop": false,
         "allowrate": false,
@@ -1385,7 +1234,9 @@
         "y": 1360,
         "wires": [
             [
-                "30269c0017720ad9"
+                "30269c0017720ad9",
+                "cb676b24d8e36a71",
+                "3c92409f284b0c9a"
             ]
         ]
     },
@@ -1394,7 +1245,7 @@
         "type": "debug",
         "z": "8929ff49bf2bbea4",
         "name": "",
-        "active": true,
+        "active": false,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
@@ -1411,7 +1262,7 @@
         "type": "debug",
         "z": "8929ff49bf2bbea4",
         "name": "",
-        "active": true,
+        "active": false,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
@@ -1422,5 +1273,193 @@
         "x": 1450,
         "y": 940,
         "wires": []
+    },
+    {
+        "id": "3c92409f284b0c9a",
+        "type": "function",
+        "z": "8929ff49bf2bbea4",
+        "name": "remove from tasks:pending",
+        "func": "let task_id = msg.payload.task_id;\nmsg.topic = \"tasks:finished\";\nmsg.payload = {\n\n    task: msg.payload.task_id,\n    ex_time: new Date().getTime() - msg.payload.task_id\n}\n\nlet tasks = global.get('pending-tasks-list') || [];\n\nlet result = tasks.filter((item) => item.id != task_id);\n\nglobal.set('pending-tasks-list', result);\nreturn msg;\n\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1380,
+        "y": 1320,
+        "wires": [
+            [
+                "1717af76fef8107c"
+            ]
+        ]
+    },
+    {
+        "id": "f5821f4c93bc0a53",
+        "type": "redis-out",
+        "z": "8929ff49bf2bbea4",
+        "server": "da97327dd29e690a",
+        "command": "rpush",
+        "name": "",
+        "topic": "tasks:pending",
+        "obj": true,
+        "x": 1840,
+        "y": 1360,
+        "wires": []
+    },
+    {
+        "id": "cb676b24d8e36a71",
+        "type": "debug",
+        "z": "8929ff49bf2bbea4",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1150,
+        "y": 1260,
+        "wires": []
+    },
+    {
+        "id": "1717af76fef8107c",
+        "type": "debug",
+        "z": "8929ff49bf2bbea4",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1630,
+        "y": 1320,
+        "wires": []
+    },
+    {
+        "id": "c27ee31892adbef0",
+        "type": "function",
+        "z": "8929ff49bf2bbea4",
+        "name": "get task",
+        "func": "\nlet tasks = global.get('regist-tasks-list') || [];\n\nmsg.payload = tasks.pop();\n\nglobal.set('regist-tasks-list', tasks);\nreturn msg;\n\n\n\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 540,
+        "y": 940,
+        "wires": [
+            [
+                "8b3251c2974c96ea",
+                "13d9c6dd9322ab0a"
+            ]
+        ]
+    },
+    {
+        "id": "8b3251c2974c96ea",
+        "type": "debug",
+        "z": "8929ff49bf2bbea4",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 810,
+        "y": 940,
+        "wires": []
+    },
+    {
+        "id": "4dcedbb595ea2b70",
+        "type": "memqueue in",
+        "z": "8929ff49bf2bbea4",
+        "name": "",
+        "queue": "30996d79e1bf9955",
+        "x": 810,
+        "y": 800,
+        "wires": [
+            [
+                "8943d5331edaf4b7"
+            ]
+        ]
+    },
+    {
+        "id": "8943d5331edaf4b7",
+        "type": "debug",
+        "z": "8929ff49bf2bbea4",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 950,
+        "y": 800,
+        "wires": []
+    },
+    {
+        "id": "c63365946f971419",
+        "type": "memqueue out",
+        "z": "8929ff49bf2bbea4",
+        "name": "",
+        "queue": "30996d79e1bf9955",
+        "x": 460,
+        "y": 1040,
+        "wires": [
+            [
+                "8b3251c2974c96ea",
+                "13d9c6dd9322ab0a"
+            ]
+        ]
+    },
+    {
+        "id": "41ffa656bfcf53c8",
+        "type": "memqueue ack",
+        "z": "8929ff49bf2bbea4",
+        "name": "",
+        "queue": "30996d79e1bf9955",
+        "x": 1940,
+        "y": 860,
+        "wires": []
+    },
+    {
+        "id": "f8b2b974c217032a",
+        "type": "inject",
+        "z": "8929ff49bf2bbea4",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 1440,
+        "y": 860,
+        "wires": [
+            [
+                "41ffa656bfcf53c8"
+            ]
+        ]
     }
 ]
