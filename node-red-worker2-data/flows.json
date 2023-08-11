@@ -16,6 +16,335 @@
         "env": []
     },
     {
+        "id": "f643da0b7b09b33e",
+        "type": "tab",
+        "label": "FLOOR CHECk",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "353e417759fd5750",
+        "type": "tab",
+        "label": "Flow 2",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "f859eaf0ee4217b7",
+        "type": "group",
+        "z": "e089622.6a906a",
+        "style": {
+            "stroke": "#2e333a",
+            "stroke-opacity": "1",
+            "fill": "#383c45",
+            "fill-opacity": "0.5",
+            "label": true,
+            "label-position": "nw",
+            "color": "#a4a4a4"
+        },
+        "nodes": [
+            "6b0467e31ad7364e",
+            "84ecbd23cf691a05",
+            "4bd64baad3bdbdd3",
+            "d416225eefe2eab2",
+            "4144add5c78f1ce1"
+        ],
+        "x": 1254,
+        "y": 999
+    },
+    {
+        "id": "c723fa7827c597d2",
+        "type": "group",
+        "z": "f643da0b7b09b33e",
+        "name": "",
+        "style": {
+            "label": true,
+            "fill": "#3f5787",
+            "fill-opacity": "0.37"
+        },
+        "nodes": [
+            "02bfaff19623e58c",
+            "108d162050f2bedb",
+            "692c5e5bb70e41c4",
+            "9a1bc6c73bf93cea",
+            "5f58ba037a88ad40",
+            "b1e85c33253a7bc1",
+            "2f83bb2fab63d1bd"
+        ],
+        "x": 1094,
+        "y": 1139,
+        "w": 792,
+        "h": 122
+    },
+    {
+        "id": "014ce62956a26f95",
+        "type": "group",
+        "z": "353e417759fd5750",
+        "style": {
+            "stroke": "#2e333a",
+            "stroke-opacity": "1",
+            "fill": "#383c45",
+            "fill-opacity": "0.5",
+            "label": true,
+            "label-position": "nw",
+            "color": "#a4a4a4"
+        },
+        "nodes": [
+            "387fcf8a.76cff",
+            "c985b525.212f78",
+            "2bed7653.30adaa",
+            "ade3bf55.b02e3",
+            "9606b8d3.0957",
+            "2cfa357e.60327a",
+            "cc5b16dd.4820c8",
+            "46152e90.390ef8",
+            "df242fa3.762dc",
+            "f8fb32fa.8c38e",
+            "7fc0c8c6.6d262",
+            "594b48ef.1a0e68",
+            "8eca3137.03e0a8",
+            "8af21b87.015cb",
+            "90c4f7da.42c3b8",
+            "ac3992bd.d4dd5",
+            "72c134ed.8f07cc",
+            "937d8df0.8d461",
+            "d9e1bbad.d8dc4",
+            "7d460277.6d43cc",
+            "83dab1d2.d3929",
+            "c2ee13d8.13fab8",
+            "4fd27ca5.37d60c",
+            "8044def5.ed945",
+            "f52a6bcf.7d3728",
+            "fa849ff6.802878",
+            "f38ba797.bdd398",
+            "f6791e2.e72656",
+            "4b18cb02.0baa0c",
+            "2827f6dd.5c7162",
+            "5f7186a8.0ea498",
+            "e5d314a7.f6825",
+            "be53914b.bf62b",
+            "5a624a9b.734534",
+            "563d14b6.3a5db4",
+            "c0b46394.7bd6e",
+            "241d62c4.835d6e",
+            "6f817e7d.c291c",
+            "85f53fe7.0846f8",
+            "9ebc7b79.d11ad8",
+            "2253204.d02816",
+            "874d8336.9507e",
+            "56c6a73caae35c2f",
+            "f5c3922ede7ca10e",
+            "11245d07d29c58d7",
+            "f873485fa819703f",
+            "904948d9b141e76a",
+            "c51f492683bd478b",
+            "e99da6578187f6b1",
+            "0c245c89ee18c959",
+            "d82e020b5a4a47a5",
+            "c8becf6bb0419135",
+            "0ba1f4d05ad6d76a",
+            "6250c3310b6d177b",
+            "c4cfc0830f4e28bc"
+        ],
+        "x": 34,
+        "y": 99
+    },
+    {
+        "id": "79e296b2.11a2d8",
+        "type": "group",
+        "z": "353e417759fd5750",
+        "style": {
+            "stroke": "#999999",
+            "stroke-opacity": "1",
+            "fill": "none",
+            "fill-opacity": "1",
+            "label": true,
+            "label-position": "nw",
+            "color": "#a4a4a4"
+        },
+        "nodes": [
+            "1adeb6d2.0028b1",
+            "174c55c9.364c72",
+            "af87984e.38efa8",
+            "af6bd09e.c7c798",
+            "9a835f6c.6a1ab"
+        ],
+        "x": 134,
+        "y": 999
+    },
+    {
+        "id": "b5c4460e3abcebce",
+        "type": "group",
+        "z": "353e417759fd5750",
+        "style": {
+            "stroke": "#2e333a",
+            "stroke-opacity": "1",
+            "fill": "#383c45",
+            "fill-opacity": "0.5",
+            "label": true,
+            "label-position": "nw",
+            "color": "#a4a4a4"
+        },
+        "nodes": [
+            "130f3240.00961e",
+            "f4452587.561d48",
+            "6b7c6b19.00a204",
+            "b1193833.175118",
+            "efe6ca9d.d20898",
+            "2ccabce5.3df754",
+            "307f6fe7.76709",
+            "f83aa4a.5b36658",
+            "b5f725fd.240e98",
+            "f6fb5868.e9bd18",
+            "ec0d7b62.22bf98",
+            "607a1476.9d2f3c",
+            "d8222377.a5f0c",
+            "f9b6f483.e38838",
+            "301639c.27435c6",
+            "d73dab1c.a64828",
+            "8c2b136a.c18c",
+            "bb1ad3fd.e2d78",
+            "9a627e02.c4ed6",
+            "bf190e9d.225ad"
+        ],
+        "x": 134,
+        "y": 1339
+    },
+    {
+        "id": "048120318edbeca7",
+        "type": "group",
+        "z": "353e417759fd5750",
+        "style": {
+            "stroke": "#2e333a",
+            "stroke-opacity": "1",
+            "fill": "#383c45",
+            "fill-opacity": "0.5",
+            "label": true,
+            "label-position": "nw",
+            "color": "#a4a4a4"
+        },
+        "nodes": [
+            "91002369b1074d75",
+            "54bc231adc5891e5",
+            "38c8c689cb5c0e28",
+            "85a473180350d074",
+            "caa36ec009038d1a",
+            "cc432a8e0784b0f9",
+            "2e7a67404d21442a",
+            "3cbc407f58d45bb0",
+            "5b61de68b494bd33",
+            "a2ef331bd08c5903",
+            "ebd3770efa8b27af",
+            "33d2dd1688f92679",
+            "b58eea72b93f13de",
+            "681d5081aa7276f4",
+            "2d034a3b4969d69c",
+            "f8e441b5bf25d02b",
+            "e9fba05140f9c559",
+            "68780f4ed6394507",
+            "49e45671dc6dde59",
+            "806473f046ac801f",
+            "562ff39eb84e69fd",
+            "b1df2d40528537c1",
+            "fae5e5360b112e39",
+            "f8b6987bf7dab58f",
+            "0b70f554344ed103",
+            "43ed2206ae8dbe66",
+            "1a76aa7a7ff5c2e2",
+            "546128bed7ba8244",
+            "2f4c3485729e3440",
+            "bd67d9792381b2eb",
+            "f9f577d0da59868f",
+            "2e77778de767d2d9",
+            "a667c0dd847aa312",
+            "0f30e83273a11e5c",
+            "4f05bd668da083ff",
+            "9b5160469297046a",
+            "d7b39504af93e7f7",
+            "5e752f84c84031eb",
+            "6d62a92d5a53f020",
+            "2b18414b4a3f8aaa",
+            "0675cf14e1c40b79",
+            "52bb7aacce10da86",
+            "a598cf9306306929",
+            "477b9f3956393f39",
+            "e1d84a73e7e74924",
+            "2969e077aef97f77",
+            "ad0d7275ea85d9e2",
+            "c4eb37e84cd37624",
+            "09fab8f34f7dea3e",
+            "c291578025a7dac7",
+            "76ef8aef545938d7",
+            "8421b42ef331902b",
+            "2e12580400f01cb0",
+            "88be5d43e25bbab5",
+            "796a325983588e67",
+            "a1d26aa75b137aa5",
+            "c16073e365380562",
+            "72a4bee8563f2952",
+            "f2f3669acc5a1967",
+            "54197cf454887ecb"
+        ],
+        "x": 68,
+        "y": 1813
+    },
+    {
+        "id": "d508da9d29e25c1b",
+        "type": "group",
+        "z": "353e417759fd5750",
+        "style": {
+            "stroke": "#2e333a",
+            "stroke-opacity": "1",
+            "fill": "#383c45",
+            "fill-opacity": "0.5",
+            "label": true,
+            "label-position": "nw",
+            "color": "#a4a4a4"
+        },
+        "nodes": [
+            "eb0ebfc5.9889a",
+            "6868e3af.6c4b4c",
+            "6526e141.43af9",
+            "eab25c49.10d9c8",
+            "afaf3a2c.646c88",
+            "9018737c.12e188",
+            "81a608ac.0eeab8",
+            "d615849.c726078",
+            "04c874ce359ca023"
+        ],
+        "x": 64,
+        "y": 2659
+    },
+    {
+        "id": "54197cf454887ecb",
+        "type": "group",
+        "z": "353e417759fd5750",
+        "g": "048120318edbeca7",
+        "style": {
+            "stroke": "#2e333a",
+            "stroke-opacity": "1",
+            "fill": "#383c45",
+            "fill-opacity": "0.5",
+            "label": true,
+            "label-position": "nw",
+            "color": "#a4a4a4"
+        },
+        "nodes": [
+            "8d14f5fc3845adff",
+            "6a1466a03b9d3d55",
+            "a0695b5f57215c9a",
+            "5c90fc22745f5191",
+            "9cca35f02ce4d817",
+            "bfb1e76b54a7b1fb",
+            "ddc7f34243674b87",
+            "96bdef7048780d35"
+        ],
+        "x": 94,
+        "y": 1839
+    },
+    {
         "id": "5154e25d5a925517",
         "type": "group",
         "z": "8929ff49bf2bbea4",
@@ -41,29 +370,6 @@
         "y": 19,
         "w": 612,
         "h": 162
-    },
-    {
-        "id": "f859eaf0ee4217b7",
-        "type": "group",
-        "z": "e089622.6a906a",
-        "style": {
-            "stroke": "#2e333a",
-            "stroke-opacity": "1",
-            "fill": "#383c45",
-            "fill-opacity": "0.5",
-            "label": true,
-            "label-position": "nw",
-            "color": "#a4a4a4"
-        },
-        "nodes": [
-            "6b0467e31ad7364e",
-            "84ecbd23cf691a05",
-            "4bd64baad3bdbdd3",
-            "d416225eefe2eab2",
-            "4144add5c78f1ce1"
-        ],
-        "x": 1254,
-        "y": 999
     },
     {
         "id": "acbee441.8c1e1",
@@ -990,6 +1296,695 @@
         "wires": []
     },
     {
+        "id": "273eae948ec64822",
+        "type": "redis-instance",
+        "z": "8929ff49bf2bbea4",
+        "server": "da97327dd29e690a",
+        "name": "",
+        "topic": "redis",
+        "location": "flow",
+        "x": 810,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "105d5d575a582aa5",
+        "type": "redis-in",
+        "z": "8929ff49bf2bbea4",
+        "d": true,
+        "server": "f120eab2.0a60a8",
+        "command": "subscribe",
+        "name": "",
+        "topic": "resurse:ex2",
+        "obj": true,
+        "timeout": 0,
+        "x": 210,
+        "y": 400,
+        "wires": [
+            [
+                "e47c1828f339606d",
+                "3c8817fd6c5a1613"
+            ]
+        ]
+    },
+    {
+        "id": "e47c1828f339606d",
+        "type": "debug",
+        "z": "8929ff49bf2bbea4",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 210,
+        "y": 440,
+        "wires": []
+    },
+    {
+        "id": "30269c0017720ad9",
+        "type": "function",
+        "z": "8929ff49bf2bbea4",
+        "name": "set worker free",
+        "func": "\nlet worker_name = global.get('worker_name');\n\nmsg.topic = \"workers:regist\";\nmsg.payload = {\n    worker_name: worker_name,\n    status : \"free\",\n    }\n    \n\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 580,
+        "y": 440,
+        "wires": [
+            [
+                "a37d953d4c3eb0a5"
+            ]
+        ]
+    },
+    {
+        "id": "a37d953d4c3eb0a5",
+        "type": "redis-out",
+        "z": "8929ff49bf2bbea4",
+        "server": "da97327dd29e690a",
+        "command": "rpush",
+        "name": "",
+        "topic": "workers:regist",
+        "obj": true,
+        "x": 760,
+        "y": 440,
+        "wires": []
+    },
+    {
+        "id": "3c8817fd6c5a1613",
+        "type": "delay",
+        "z": "8929ff49bf2bbea4",
+        "name": "",
+        "pauseType": "random",
+        "timeout": "1",
+        "timeoutUnits": "milliseconds",
+        "rate": "10",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "0",
+        "randomLast": "1900",
+        "randomUnits": "milliseconds",
+        "drop": false,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 380,
+        "y": 400,
+        "wires": [
+            [
+                "30269c0017720ad9",
+                "3c92409f284b0c9a"
+            ]
+        ]
+    },
+    {
+        "id": "3c92409f284b0c9a",
+        "type": "function",
+        "z": "8929ff49bf2bbea4",
+        "name": "task finished",
+        "func": "let task_id = msg.payload.task.task_id;\nmsg.topic = \"tasks:finished\";\nmsg.payload = JSON.stringify({\n...msg.payload,\n\n    \n    ex_time: new Date().getTime() - task_id\n});\n\n\nreturn msg;\n\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 590,
+        "y": 340,
+        "wires": [
+            [
+                "cb676b24d8e36a71",
+                "5cfd2e9e3709b223"
+            ]
+        ]
+    },
+    {
+        "id": "cb676b24d8e36a71",
+        "type": "debug",
+        "z": "8929ff49bf2bbea4",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 810,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "5cfd2e9e3709b223",
+        "type": "redis-out",
+        "z": "8929ff49bf2bbea4",
+        "server": "f120eab2.0a60a8",
+        "command": "publish",
+        "name": "",
+        "topic": "",
+        "obj": true,
+        "x": 810,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "5f4515f84461838f",
+        "type": "redis-in",
+        "z": "8929ff49bf2bbea4",
+        "server": "f120eab2.0a60a8",
+        "command": "subscribe",
+        "name": "",
+        "topic": "resurse:ex2",
+        "obj": true,
+        "timeout": 0,
+        "x": 270,
+        "y": 800,
+        "wires": [
+            [
+                "f8727ffca66ea75d",
+                "4cad8a91d8c67247"
+            ]
+        ]
+    },
+    {
+        "id": "f8727ffca66ea75d",
+        "type": "debug",
+        "z": "8929ff49bf2bbea4",
+        "name": "debug 36",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 280,
+        "y": 860,
+        "wires": []
+    },
+    {
+        "id": "4cad8a91d8c67247",
+        "type": "switch",
+        "z": "8929ff49bf2bbea4",
+        "name": "",
+        "property": "payload.task.worktype",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "ma-calc",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "floor-check",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "floor-service",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "panic",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "ttp",
+                "vt": "str"
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 6,
+        "x": 530,
+        "y": 860,
+        "wires": [
+            [
+                "249e06dd23a909e4"
+            ],
+            [
+                "ea1deeac81becf59"
+            ],
+            [],
+            [],
+            [],
+            [
+                "3e7fed7b4c9ead23"
+            ]
+        ]
+    },
+    {
+        "id": "3e7fed7b4c9ead23",
+        "type": "debug",
+        "z": "8929ff49bf2bbea4",
+        "name": "command type error",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 500,
+        "y": 980,
+        "wires": []
+    },
+    {
+        "id": "e29c0f3cf3dd0ebe",
+        "type": "comment",
+        "z": "8929ff49bf2bbea4",
+        "name": "расчет МА",
+        "info": "",
+        "x": 560,
+        "y": 760,
+        "wires": []
+    },
+    {
+        "id": "249e06dd23a909e4",
+        "type": "function",
+        "z": "8929ff49bf2bbea4",
+        "name": "load data",
+        "func": "msg.bot = msg.payload.task.bot;\nmsg.task_id = msg.payload.task.task_id;\nnode.status({ fill: \"green\", shape: \"dot\" });\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 720,
+        "y": 760,
+        "wires": [
+            [
+                "9c5c9326b995a656"
+            ]
+        ]
+    },
+    {
+        "id": "9c5c9326b995a656",
+        "type": "function",
+        "z": "8929ff49bf2bbea4",
+        "name": "get candlestick",
+        "func": "function parseApiError(error) {\n  if (error.body) {\n    try {\n      var resp = JSON.parse(error.body);\n      return resp.msg;\n    } catch (error) {/* pass thru */ }\n  }\n  return \"Unknown error. Status code: \" + error.statsCode;\n}\n\nlet LBinance = global.get('gBinance');\nlet key = global.get('key');\nlet secret = global.get('secret');\n\nlet binance = new LBinance().options({\n  APIKEY: key,\n  APISECRET: secret,\n  \"reconnect\": false\n});\n\nlet moneta = msg.bot.settings.moneta;\nlet deep = Number(msg.bot.settings.ma2);\n\nbinance.useServerTime(function () {\n  binance.candlesticks(moneta, \"1m\", (error, ticks, symbol) => {\n\n    if (error) {\n      var errorMsg = parseApiError(error) + \", moneta:\" + moneta;\n      node.error(errorMsg, msg);\n\n      msg.err = error;\n      node.status({ fill: \"red\", shape: \"dot\", text: errorMsg });\n\n      node.send(msg);\n\n    }\n\n    msg.payload = ticks;\n    node.status({ fill: \"green\", shape: \"dot\" });\n    node.send(msg);\n\n  }, { limit: deep });\n\n});\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "gBinance",
+                "module": "node-binance-api"
+            }
+        ],
+        "x": 900,
+        "y": 760,
+        "wires": [
+            [
+                "676af55402f85391"
+            ]
+        ],
+        "inputLabels": [
+            "orderid, moneta"
+        ],
+        "outputLabels": [
+            "status"
+        ],
+        "icon": "font-awesome/fa-compress"
+    },
+    {
+        "id": "d39b03215a7cf48e",
+        "type": "function",
+        "z": "8929ff49bf2bbea4",
+        "name": "расчет MA",
+        "func": "\n\nlet candles = msg.payload;\n\n\nlet heiken = candles.map(function(tick){\n  //  node.warn(tick);\n    \n    \n    return (Number(tick[1]) + Number(tick[2]) + Number(tick[3]) + Number(tick[4]))/4;\n});\n\n\n//node.warn(heiken);\nmsg.heiken = heiken;\n\n\nlet heiken_small = heiken.slice(-msg.bot.settings.ma1);\n\n//node.warn(heiken_small);\nlet sum_all = heiken.reduce(function(sum, current) {\n  return sum + current\n});\n\nlet sum_small = heiken_small.reduce(function(sum, current) {\n  return sum + current\n});\n\nmsg.bot.status.sr_ma_big = sum_all / msg.bot.settings.ma2;\nmsg.bot.status.sr_ma_small = sum_small / msg.bot.settings.ma1;\n\n\nnode.status({ fill: \"green\", shape: \"dot\" });\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1290,
+        "y": 700,
+        "wires": [
+            [
+                "f94c9bfdbc42620a",
+                "f6ba4facf8559c29",
+                "69aab39c6ce66257"
+            ]
+        ]
+    },
+    {
+        "id": "676af55402f85391",
+        "type": "switch",
+        "z": "8929ff49bf2bbea4",
+        "name": "try second if null",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "nempty"
+            },
+            {
+                "t": "empty"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 1100,
+        "y": 720,
+        "wires": [
+            [
+                "d39b03215a7cf48e"
+            ],
+            [
+                "9c5c9326b995a656"
+            ]
+        ]
+    },
+    {
+        "id": "20b1fdb2fa2c4e35",
+        "type": "link out",
+        "z": "8929ff49bf2bbea4",
+        "name": "link out 2",
+        "mode": "link",
+        "links": [
+            "179defa09285937f"
+        ],
+        "x": 765,
+        "y": 840,
+        "wires": []
+    },
+    {
+        "id": "1d766dd58476c9ba",
+        "type": "comment",
+        "z": "8929ff49bf2bbea4",
+        "name": "floor-check",
+        "info": "",
+        "x": 880,
+        "y": 900,
+        "wires": []
+    },
+    {
+        "id": "f731605f015253a0",
+        "type": "link in",
+        "z": "8929ff49bf2bbea4",
+        "name": "link in 2",
+        "links": [
+            "a2375dc0e61e0bfc"
+        ],
+        "x": 995,
+        "y": 840,
+        "wires": [
+            [
+                "373fa63e85e9af60",
+                "88dc54f5a072cbea",
+                "c1f6443e3dc83211"
+            ]
+        ]
+    },
+    {
+        "id": "ea1deeac81becf59",
+        "type": "function",
+        "z": "8929ff49bf2bbea4",
+        "name": "load data",
+        "func": "msg.bot = msg.payload.task.bot;\nmsg.task_id = msg.payload.task.task_id;\nnode.status({ fill: \"green\", shape: \"dot\" });\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 660,
+        "y": 840,
+        "wires": [
+            [
+                "20b1fdb2fa2c4e35",
+                "9e79f456bb11c67e"
+            ]
+        ]
+    },
+    {
+        "id": "f6ba4facf8559c29",
+        "type": "function",
+        "z": "8929ff49bf2bbea4",
+        "name": "set worker free",
+        "func": "\nlet worker_name = global.get('worker_name');\n\nmsg = {\n\n    topic: \"workers:regist\",\n    payload: {\n        worker_name: worker_name,\n        status: \"free\",\n    }\n\n}\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1540,
+        "y": 720,
+        "wires": [
+            [
+                "e9df736f719648df",
+                "50bf143d7577667e"
+            ]
+        ]
+    },
+    {
+        "id": "e9df736f719648df",
+        "type": "redis-out",
+        "z": "8929ff49bf2bbea4",
+        "server": "da97327dd29e690a",
+        "command": "rpush",
+        "name": "",
+        "topic": "workers:regist",
+        "obj": true,
+        "x": 1740,
+        "y": 720,
+        "wires": []
+    },
+    {
+        "id": "f94c9bfdbc42620a",
+        "type": "function",
+        "z": "8929ff49bf2bbea4",
+        "name": "task finished",
+        "func": "let task_id = msg.task_id;\nmsg.topic = \"tasks:finished:ma\";\nmsg.payload = JSON.stringify({\n\n    bot: msg.bot,\n    task_id: task_id,\n    ex_time: new Date().getTime() - task_id\n});\n\n\nreturn msg;\n\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1530,
+        "y": 680,
+        "wires": [
+            [
+                "d3153cf94f0826c6",
+                "09a9d5ef9b219202"
+            ]
+        ]
+    },
+    {
+        "id": "d3153cf94f0826c6",
+        "type": "debug",
+        "z": "8929ff49bf2bbea4",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1850,
+        "y": 680,
+        "wires": []
+    },
+    {
+        "id": "09a9d5ef9b219202",
+        "type": "redis-out",
+        "z": "8929ff49bf2bbea4",
+        "server": "f120eab2.0a60a8",
+        "command": "publish",
+        "name": "",
+        "topic": "",
+        "obj": true,
+        "x": 1700,
+        "y": 680,
+        "wires": []
+    },
+    {
+        "id": "88dc54f5a072cbea",
+        "type": "function",
+        "z": "8929ff49bf2bbea4",
+        "name": "set worker free",
+        "func": "\nlet worker_name = global.get('worker_name');\n\nmsg = {\n\ntopic : \"workers:regist\",\npayload : {\n    worker_name: worker_name,\n    status : \"free\",\n    }\n    \n}\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1180,
+        "y": 860,
+        "wires": [
+            [
+                "35580397f04aa99a",
+                "cad46959e35b92c0"
+            ]
+        ]
+    },
+    {
+        "id": "35580397f04aa99a",
+        "type": "redis-out",
+        "z": "8929ff49bf2bbea4",
+        "server": "da97327dd29e690a",
+        "command": "rpush",
+        "name": "",
+        "topic": "workers:regist",
+        "obj": true,
+        "x": 1380,
+        "y": 860,
+        "wires": []
+    },
+    {
+        "id": "373fa63e85e9af60",
+        "type": "function",
+        "z": "8929ff49bf2bbea4",
+        "name": "task finished",
+        "func": "let task_id = msg.payload.task.task_id;\nmsg.topic = \"tasks:finished:floorcheck\";\nmsg.payload = JSON.stringify({\n\n    bot: msg.bot,\n    task_id: task_id,\n    ex_time: new Date().getTime() - task_id\n});\n\n\nreturn msg;\n\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1170,
+        "y": 820,
+        "wires": [
+            [
+                "a7926142005d3395",
+                "62406d12b6486dfc"
+            ]
+        ]
+    },
+    {
+        "id": "a7926142005d3395",
+        "type": "debug",
+        "z": "8929ff49bf2bbea4",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1490,
+        "y": 820,
+        "wires": []
+    },
+    {
+        "id": "62406d12b6486dfc",
+        "type": "redis-out",
+        "z": "8929ff49bf2bbea4",
+        "server": "f120eab2.0a60a8",
+        "command": "publish",
+        "name": "",
+        "topic": "",
+        "obj": true,
+        "x": 1340,
+        "y": 820,
+        "wires": []
+    },
+    {
+        "id": "69aab39c6ce66257",
+        "type": "debug",
+        "z": "8929ff49bf2bbea4",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1290,
+        "y": 660,
+        "wires": []
+    },
+    {
+        "id": "50bf143d7577667e",
+        "type": "debug",
+        "z": "8929ff49bf2bbea4",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1910,
+        "y": 720,
+        "wires": []
+    },
+    {
+        "id": "9e79f456bb11c67e",
+        "type": "debug",
+        "z": "8929ff49bf2bbea4",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 750,
+        "y": 960,
+        "wires": []
+    },
+    {
+        "id": "c1f6443e3dc83211",
+        "type": "debug",
+        "z": "8929ff49bf2bbea4",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1070,
+        "y": 780,
+        "wires": []
+    },
+    {
+        "id": "cad46959e35b92c0",
+        "type": "debug",
+        "z": "8929ff49bf2bbea4",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1550,
+        "y": 860,
+        "wires": []
+    },
+    {
         "id": "1b4f7ff11cabc4ba",
         "type": "inject",
         "z": "8929ff49bf2bbea4",
@@ -1139,40 +2134,1163 @@
         ]
     },
     {
-        "id": "273eae948ec64822",
-        "type": "redis-instance",
-        "z": "8929ff49bf2bbea4",
-        "server": "da97327dd29e690a",
+        "id": "c1de80b9cafdd278",
+        "type": "link in",
+        "z": "f643da0b7b09b33e",
         "name": "",
-        "topic": "redis",
-        "location": "flow",
-        "x": 810,
-        "y": 80,
-        "wires": []
-    },
-    {
-        "id": "105d5d575a582aa5",
-        "type": "redis-in",
-        "z": "8929ff49bf2bbea4",
-        "server": "f120eab2.0a60a8",
-        "command": "subscribe",
-        "name": "",
-        "topic": "resurse:ex2",
-        "obj": true,
-        "timeout": 0,
-        "x": 210,
-        "y": 400,
+        "links": [
+            "f073e9dbe313502b",
+            "2aaf81456a47ee40",
+            "4970e284f21b629f",
+            "3b2d899666aacef2",
+            "15864b4634126e66",
+            "8f0c5b57b5119af8",
+            "2d5ad73752c276d9",
+            "4cddd51017c75769",
+            "d208742dc4eeb9ef",
+            "2c9442a2b966c69a",
+            "bd8595f08c41505b",
+            "db5671252a8f49ee",
+            "13be00812f46687f",
+            "b7d66df51452c263",
+            "10f5ad379a6e24f0",
+            "aa5c8214700f80d1",
+            "90a8b3f2dbc8401b",
+            "ccdecaaa4dad9420",
+            "0faae939f8adb6b8",
+            "a7bb2946f8f0ea4d",
+            "56d57c1b4e2f677a",
+            "143a749463398893",
+            "3a80ac675cc5b41a",
+            "f8477aadd0dec13b",
+            "a35cd6db05d8aaec",
+            "dd998b700bdae2f0",
+            "b35ad3fd7395deda",
+            "c2bd72e5639f646b",
+            "10c24a2e7aabc7a2",
+            "84065a7178289056",
+            "34ae5b9f4b1fedc4",
+            "7e04d87f3c65e53f",
+            "8d10b8e8b4a2df34",
+            "f2d991f44297d869",
+            "41a9873ca478fbd4",
+            "c54248bd9b2a7809",
+            "3479749d95070158",
+            "18cc618e220d306b",
+            "48730dc914400d86"
+        ],
+        "x": 115,
+        "y": 60,
         "wires": [
             [
-                "e47c1828f339606d",
-                "3c8817fd6c5a1613"
+                "a2375dc0e61e0bfc"
             ]
         ]
     },
     {
-        "id": "e47c1828f339606d",
+        "id": "179defa09285937f",
+        "type": "link in",
+        "z": "f643da0b7b09b33e",
+        "name": "",
+        "links": [
+            "895dddf9d5cdfdae",
+            "9540463a0607bccd",
+            "5b558081f66acb32",
+            "20b1fdb2fa2c4e35",
+            "130aec3be6fc0203",
+            "c25a2717613d69d4",
+            "ad95e10e33ae8d6d"
+        ],
+        "x": 135,
+        "y": 500,
+        "wires": [
+            [
+                "8790159c0111f669",
+                "9e90068f641b1386",
+                "1a16326994b68adc"
+            ]
+        ]
+    },
+    {
+        "id": "726689ed5c0a7303",
+        "type": "comment",
+        "z": "f643da0b7b09b33e",
+        "name": "1 - Покупаем",
+        "info": "",
+        "x": 530,
+        "y": 400,
+        "wires": []
+    },
+    {
+        "id": "aef42f1841b33e5b",
+        "type": "comment",
+        "z": "f643da0b7b09b33e",
+        "name": "2 - Купили. Держим",
+        "info": "",
+        "x": 560,
+        "y": 680,
+        "wires": []
+    },
+    {
+        "id": "19eccd7b4e15cba7",
+        "type": "comment",
+        "z": "f643da0b7b09b33e",
+        "name": "3 - Продаём",
+        "info": "",
+        "x": 530,
+        "y": 940,
+        "wires": []
+    },
+    {
+        "id": "8790159c0111f669",
+        "type": "switch",
+        "z": "f643da0b7b09b33e",
+        "name": "статус этажа",
+        "property": "bot.currentfloor[7]",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "0",
+                "vt": "num"
+            },
+            {
+                "t": "eq",
+                "v": "1",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "2",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "3",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "4",
+                "vt": "str"
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 6,
+        "x": 280,
+        "y": 500,
+        "wires": [
+            [
+                "4d88c0e87e6c8b36"
+            ],
+            [
+                "c247093c113fff21"
+            ],
+            [
+                "efba0babdaabbdb4"
+            ],
+            [
+                "db5671252a8f49ee"
+            ],
+            [],
+            [
+                "db5671252a8f49ee"
+            ]
+        ]
+    },
+    {
+        "id": "4d88c0e87e6c8b36",
+        "type": "switch",
+        "z": "f643da0b7b09b33e",
+        "name": "проверка запрета на закуп",
+        "property": "bot.zapret_na_zakup",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "false"
+            },
+            {
+                "t": "true"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 580,
+        "y": 280,
+        "wires": [
+            [
+                "b5da4416e6d8f280"
+            ],
+            [
+                "3b2d899666aacef2"
+            ]
+        ]
+    },
+    {
+        "id": "11f0b67d23b208cb",
+        "type": "comment",
+        "z": "f643da0b7b09b33e",
+        "name": "запрещено закупать",
+        "info": "",
+        "x": 880,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "04a7b30ad52a4789",
+        "type": "comment",
+        "z": "f643da0b7b09b33e",
+        "name": "0 - Свободно",
+        "info": "",
+        "x": 530,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "1301be39818eabba",
+        "type": "comment",
+        "z": "f643da0b7b09b33e",
+        "name": "PARTIALLY_FILLED",
+        "info": "",
+        "x": 1650,
+        "y": 800,
+        "wires": []
+    },
+    {
+        "id": "3b2d899666aacef2",
+        "type": "link out",
+        "z": "f643da0b7b09b33e",
+        "name": "",
+        "links": [
+            "c1de80b9cafdd278"
+        ],
+        "x": 1015,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "c247093c113fff21",
+        "type": "switch",
+        "z": "f643da0b7b09b33e",
+        "name": "проверка запрета на закуп",
+        "property": "bot.zapret_na_zakup",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "false"
+            },
+            {
+                "t": "true"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 580,
+        "y": 440,
+        "wires": [
+            [
+                "b4145de635699943"
+            ],
+            [
+                "6cdbd44cf8421fa0"
+            ]
+        ]
+    },
+    {
+        "id": "2f9b458633a6f9aa",
+        "type": "comment",
+        "z": "f643da0b7b09b33e",
+        "name": "NEW",
+        "info": "",
+        "x": 1570,
+        "y": 580,
+        "wires": []
+    },
+    {
+        "id": "8d3fe3d273fe15fd",
+        "type": "switch",
+        "z": "f643da0b7b09b33e",
+        "name": "статус ордера",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "NEW",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "PARTIALLY_FILLED",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "CANCELED",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "FILLED",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "REJECTED",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "EXPIRED",
+                "vt": "str"
+            },
+            {
+                "t": "null"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 7,
+        "x": 1320,
+        "y": 700,
+        "wires": [
+            [
+                "103f92e316371166"
+            ],
+            [
+                "b35ad3fd7395deda",
+                "d7492a66d6fdb9e7"
+            ],
+            [
+                "fca5d924d34e5947"
+            ],
+            [
+                "e1965619ce8c768d"
+            ],
+            [
+                "c2bd72e5639f646b"
+            ],
+            [
+                "c2bd72e5639f646b"
+            ],
+            [
+                "c2bd72e5639f646b"
+            ]
+        ]
+    },
+    {
+        "id": "6cdbd44cf8421fa0",
+        "type": "function",
+        "z": "f643da0b7b09b33e",
+        "name": "prepare get order status",
+        "func": "let orderid = msg.bot.currentfloor[8];\nmsg.moneta = msg.bot.settings.moneta;\nmsg.orderid = orderid;\n\nnode.status({ fill: \"green\", shape: \"ring\", text: orderid });\nreturn msg;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 890,
+        "y": 600,
+        "wires": [
+            [
+                "01f55c268871d97d"
+            ]
+        ],
+        "inputLabels": [
+            "orderid"
+        ],
+        "outputLabels": [
+            "status"
+        ],
+        "icon": "node-red-contrib-binance/binance.png"
+    },
+    {
+        "id": "62c002a7378a7bbe",
+        "type": "comment",
+        "z": "f643da0b7b09b33e",
+        "name": "FILLED",
+        "info": "",
+        "x": 1570,
+        "y": 740,
+        "wires": []
+    },
+    {
+        "id": "9b514bd436e3d4ed",
+        "type": "comment",
+        "z": "f643da0b7b09b33e",
+        "name": "CANCELED",
+        "info": "",
+        "x": 1590,
+        "y": 660,
+        "wires": []
+    },
+    {
+        "id": "cf3d5d02c2733e7b",
+        "type": "function",
+        "z": "f643da0b7b09b33e",
+        "name": "change floors",
+        "func": "//node.warn(\"cancel order \" + msg.bot.currentfloor[14]);\n//let tempfin = Number(Number(msg.bot.finance.baseinorders) - Number(msg.bot.currentfloor[14]) * Number(msg.bot.currentfloor[10]));\n//let tempfin2 = Number(Number(msg.bot.finance.basenal) + Number(msg.bot.currentfloor[14]) * Number(msg.bot.currentfloor[10]));\n//\n//msg.bot.finance.baseinorders = tempfin.toFixed(msg.bot.settings.digitprice);\n//msg.bot.finance.basenal = tempfin2.toFixed(msg.bot.settings.digitprice);\n//\n//if (msg.bot.finance.baseinorders == -0) { msg.bot.finance.baseinorders = 0; }\n//if (msg.bot.finance.basenal == -0) { msg.bot.finance.basenal = 0; }\n\nlet botname = msg.bot.settings.botname;\n\nlet data = \"Ордер на покупку отменен, ID - \" + msg.bot.currentfloor[8];\nconst tilog = global.get('tilog')(botname, data);\ntilog;\n\nlet currentfloor = msg.bot.currentfloor;\ncurrentfloor[7] = 0;\ncurrentfloor[8] = 0;\ncurrentfloor[10] = 0;\ncurrentfloor[14] = 0;\n\nmsg.bot.floors[currentfloor[0] - 1] = currentfloor;\n\nnode.status({ fill: \"green\", shape: \"ring\"});\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1760,
+        "y": 380,
+        "wires": [
+            [
+                "1983ee28c14da90f"
+            ]
+        ]
+    },
+    {
+        "id": "631b9d675397bcac",
+        "type": "comment",
+        "z": "f643da0b7b09b33e",
+        "name": "NEW",
+        "info": "",
+        "x": 1590,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "80a561dd15f6d54a",
+        "type": "switch",
+        "z": "f643da0b7b09b33e",
+        "name": "статус ордера",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "NEW",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "PARTIALLY_FILLED",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "CANCELED",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "FILLED",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "REJECTED",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "EXPIRED",
+                "vt": "str"
+            },
+            {
+                "t": "null"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 7,
+        "x": 1320,
+        "y": 420,
+        "wires": [
+            [
+                "8f0c5b57b5119af8"
+            ],
+            [
+                "8f0c5b57b5119af8"
+            ],
+            [
+                "cf3d5d02c2733e7b"
+            ],
+            [
+                "7c6e44661c565069"
+            ],
+            [],
+            [],
+            [
+                "8f0c5b57b5119af8"
+            ]
+        ]
+    },
+    {
+        "id": "b4145de635699943",
+        "type": "function",
+        "z": "f643da0b7b09b33e",
+        "name": "prepare get order status",
+        "func": "let orderid = msg.bot.currentfloor[8];\n\nmsg.moneta = msg.bot.settings.moneta;\nmsg.orderid = orderid;\n\nnode.status({ fill: \"green\", shape: \"ring\", text: orderid });\nreturn msg;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 890,
+        "y": 420,
+        "wires": [
+            [
+                "8a6d47cfe7e6b0b8"
+            ]
+        ],
+        "inputLabels": [
+            "orderid"
+        ],
+        "outputLabels": [
+            "status"
+        ],
+        "icon": "node-red-contrib-binance/binance.png"
+    },
+    {
+        "id": "2b172e9d328c2d36",
+        "type": "comment",
+        "z": "f643da0b7b09b33e",
+        "name": "FILLED",
+        "info": "",
+        "x": 1570,
+        "y": 460,
+        "wires": []
+    },
+    {
+        "id": "65ec62648934ebc3",
+        "type": "comment",
+        "z": "f643da0b7b09b33e",
+        "name": "CANCELED",
+        "info": "",
+        "x": 1590,
+        "y": 380,
+        "wires": []
+    },
+    {
+        "id": "7c6e44661c565069",
+        "type": "function",
+        "z": "f643da0b7b09b33e",
+        "name": "change floors",
+        "func": "node.warn(\"filled order \" + msg.bot.currentfloor[14]);\nlet node_time = new Date().getTime();\n\nlet currentfloor = msg.bot.currentfloor;\ncurrentfloor[7] = 2;\ncurrentfloor[9] = node_time;\nmsg.bot.floors[currentfloor[0] - 1] = currentfloor;\n\nlet data = \"Ордер на покупку исполнен, ID - \" + msg.bot.currentfloor[8];\nconst tilog = global.get('tilog')(msg.bot.settings.botname, data);\ntilog;\n\nnode.status({ fill: \"green\", shape: \"ring\"});\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1720,
+        "y": 460,
+        "wires": [
+            [
+                "446039aefc6efaf0"
+            ]
+        ]
+    },
+    {
+        "id": "8f0c5b57b5119af8",
+        "type": "link out",
+        "z": "f643da0b7b09b33e",
+        "name": "",
+        "links": [
+            "c1de80b9cafdd278"
+        ],
+        "x": 1515,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "b35ad3fd7395deda",
+        "type": "link out",
+        "z": "f643da0b7b09b33e",
+        "name": "",
+        "links": [
+            "c1de80b9cafdd278"
+        ],
+        "x": 1535,
+        "y": 800,
+        "wires": []
+    },
+    {
+        "id": "bad3556cd3b1cbdd",
+        "type": "comment",
+        "z": "f643da0b7b09b33e",
+        "name": "PARTIALLY_FILLED",
+        "info": "",
+        "x": 1630,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "c0a5d2ee9b66f698",
+        "type": "comment",
+        "z": "f643da0b7b09b33e",
+        "name": "null",
+        "info": "",
+        "x": 1710,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "efba0babdaabbdb4",
+        "type": "function",
+        "z": "f643da0b7b09b33e",
+        "name": "check price for sale start",
+        "func": "if (msg.bot.status.currentprice >= msg.bot.currentfloor[5]){\n    \n    msg.bot.currentfloor[7] = 3;\n\n    return [null,msg];\n} else {\n\n    return [msg,null];\n}",
+        "outputs": 2,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 570,
+        "y": 800,
+        "wires": [
+            [
+                "bd8595f08c41505b"
+            ],
+            [
+                "7999575a552e1f50"
+            ]
+        ]
+    },
+    {
+        "id": "bd8595f08c41505b",
+        "type": "link out",
+        "z": "f643da0b7b09b33e",
+        "name": "",
+        "links": [
+            "c1de80b9cafdd278"
+        ],
+        "x": 755,
+        "y": 760,
+        "wires": []
+    },
+    {
+        "id": "db5671252a8f49ee",
+        "type": "link out",
+        "z": "f643da0b7b09b33e",
+        "name": "",
+        "links": [
+            "c1de80b9cafdd278"
+        ],
+        "x": 475,
+        "y": 980,
+        "wires": []
+    },
+    {
+        "id": "c2bd72e5639f646b",
+        "type": "link out",
+        "z": "f643da0b7b09b33e",
+        "name": "",
+        "links": [
+            "c1de80b9cafdd278"
+        ],
+        "x": 1535,
+        "y": 860,
+        "wires": []
+    },
+    {
+        "id": "7999575a552e1f50",
+        "type": "function",
+        "z": "f643da0b7b09b33e",
+        "name": "change floors",
+        "func": "node.warn(\"start ttp on floor \"+msg.bot.currentfloor[0]);     \n\n//let tempfin = Number(Number(msg.bot.finance.quotainorders) + Number(msg.bot.currentfloor[14]));\n//\n//let tempfin2 = Number(Number(msg.bot.finance.quotanal) - Number(msg.bot.currentfloor[14]));\n//\n//msg.bot.finance.quotainorders = tempfin.toFixed(msg.bot.settings.digitprice);\n//msg.bot.finance.quotanal = tempfin2.toFixed(msg.bot.settings.digitq);\n//\n//if (msg.bot.finance.baseinorders == -0) {msg.bot.finance.baseinorders = 0;}\n//if (msg.bot.finance.basenal == -0) {msg.bot.finance.basenal = 0;}\n\nlet currentfloor = msg.bot.currentfloor;\ncurrentfloor[7] = 3;\n\nmsg.bot.floors[currentfloor[0]-1] = currentfloor;\n\nnode.status({fill: \"green\", shape: \"ring\"});\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 820,
+        "y": 820,
+        "wires": [
+            [
+                "6047d32d13caab4d"
+            ]
+        ]
+    },
+    {
+        "id": "8a6d47cfe7e6b0b8",
+        "type": "function",
+        "z": "f643da0b7b09b33e",
+        "name": "get_order_status",
+        "func": "let moneta = msg.bot.settings.moneta;\nlet orderid = Number(msg.orderid);\n\nconst get_order_status = global.get('get_order_status')(moneta, orderid);\n\nget_order_status.then(result => {\n\n    msg.payload = result;\n    node.status({ fill: \"green\", shape: \"dot\" });\n    node.send(msg);\n\n}).catch(error => {\n\n    node.status({ fill: \"red\", shape: \"dot\" });\n    node.error(error);\n});",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1130,
+        "y": 420,
+        "wires": [
+            [
+                "80a561dd15f6d54a"
+            ]
+        ]
+    },
+    {
+        "id": "71427f80fb3ce3c7",
+        "type": "comment",
+        "z": "f643da0b7b09b33e",
+        "name": "null",
+        "info": "",
+        "x": 1610,
+        "y": 860,
+        "wires": []
+    },
+    {
+        "id": "78dc2bd8eb16e546",
+        "type": "comment",
+        "z": "f643da0b7b09b33e",
+        "name": "запрещено закупать",
+        "info": "",
+        "x": 680,
+        "y": 540,
+        "wires": []
+    },
+    {
+        "id": "01f55c268871d97d",
+        "type": "function",
+        "z": "f643da0b7b09b33e",
+        "name": "get_order_status",
+        "func": "let moneta = msg.bot.settings.moneta;\nlet orderid = Number(msg.orderid);\n\nconst get_order_status = global.get('get_order_status')(moneta, orderid);\n\nget_order_status.then(result => {\n\n    msg.payload = result;\n\n    node.status({ fill: \"green\", shape: \"dot\" });\n    node.send(msg);\n\n}).catch(error => {\n\n    node.status({ fill: \"red\", shape: \"dot\" });\n    node.error(error);\n});",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1130,
+        "y": 600,
+        "wires": [
+            [
+                "8d3fe3d273fe15fd",
+                "ad35fc1a6d370428"
+            ]
+        ]
+    },
+    {
+        "id": "fca5d924d34e5947",
+        "type": "function",
+        "z": "f643da0b7b09b33e",
+        "name": "change floors",
+        "func": "//node.warn(\"cancel order \" + msg.bot.currentfloor[14]);\n//let tempfin = Number(Number(msg.bot.finance.baseinorders) - Number(msg.bot.currentfloor[14]) * Number(msg.bot.currentfloor[10]));\n//let tempfin2 = Number(Number(msg.bot.finance.basenal) + Number(msg.bot.currentfloor[14]) * Number(msg.bot.currentfloor[10]));\n//\n//msg.bot.finance.baseinorders = tempfin.toFixed(msg.bot.settings.digitprice);\n//msg.bot.finance.basenal = tempfin2.toFixed(msg.bot.settings.digitprice);\n//\n//if (msg.bot.finance.baseinorders == -0) { msg.bot.finance.baseinorders = 0; }\n//if (msg.bot.finance.basenal == -0) { msg.bot.finance.basenal = 0; }\n\nlet botname = msg.bot.settings.botname;\n\nlet data = \"Ордер на покупку отменен, ID - \" + msg.bot.currentfloor[8];\nconst tilog = global.get('tilog')(botname, data);\ntilog;\n\nlet currentfloor = msg.bot.currentfloor;\ncurrentfloor[7] = 0;\ncurrentfloor[8] = 0;\ncurrentfloor[10] = 0;\ncurrentfloor[14] = 0;\n\nmsg.bot.floors[currentfloor[0] - 1] = currentfloor;\n\nnode.status({ fill: \"green\", shape: \"ring\"});\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1760,
+        "y": 660,
+        "wires": [
+            [
+                "c3e5d17dde715ead"
+            ]
+        ]
+    },
+    {
+        "id": "e1965619ce8c768d",
+        "type": "function",
+        "z": "f643da0b7b09b33e",
+        "name": "change floors",
+        "func": "node.warn(\"filled order \" + msg.bot.currentfloor[14]);\nlet node_time = new Date().getTime();\n\nlet currentfloor = msg.bot.currentfloor;\ncurrentfloor[7] = 2;\ncurrentfloor[9] = node_time;\nmsg.bot.floors[currentfloor[0] - 1] = currentfloor;\n\nlet data = \"Ордер на покупку исполнен, ID - \" + msg.bot.currentfloor[8];\nconst tilog = global.get('tilog')(msg.bot.settings.botname, data);\ntilog;\n\nnode.status({ fill: \"green\", shape: \"ring\"});\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1760,
+        "y": 740,
+        "wires": [
+            [
+                "d8536023cc099910"
+            ]
+        ]
+    },
+    {
+        "id": "b5da4416e6d8f280",
+        "type": "function",
+        "z": "f643da0b7b09b33e",
+        "name": "проверка баланса",
+        "func": "let quantity = Number((Number(msg.bot.finance.depo) * Number(msg.bot.settings.ordersize) / 100 / msg.bot.status.currentprice).toFixed(msg.bot.settings.digitq));\nlet price = Number((msg.bot.currentfloor[3]).toFixed(msg.bot.settings.digitprice));\n\nlet ordersum = price * quantity;\n//node.warn(ordersum);\nnode.status({ fill: \"green\", shape: \"dot\" });\nif (ordersum <= msg.bot.finance.basenal) {\n    return [msg, null];\n} else {\n    return [null, msg];\n}\n\n",
+        "outputs": 2,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 810,
+        "y": 180,
+        "wires": [
+            [
+                "8a163bfb42beec87"
+            ],
+            [
+                "b7d66df51452c263"
+            ]
+        ]
+    },
+    {
+        "id": "b7d66df51452c263",
+        "type": "link out",
+        "z": "f643da0b7b09b33e",
+        "name": "",
+        "links": [
+            "c1de80b9cafdd278"
+        ],
+        "x": 975,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "a7bb2946f8f0ea4d",
+        "type": "link out",
+        "z": "f643da0b7b09b33e",
+        "name": "",
+        "links": [
+            "c1de80b9cafdd278"
+        ],
+        "x": 2235,
+        "y": 380,
+        "wires": []
+    },
+    {
+        "id": "143a749463398893",
+        "type": "link out",
+        "z": "f643da0b7b09b33e",
+        "name": "",
+        "links": [
+            "c1de80b9cafdd278"
+        ],
+        "x": 2235,
+        "y": 460,
+        "wires": []
+    },
+    {
+        "id": "3a80ac675cc5b41a",
+        "type": "link out",
+        "z": "f643da0b7b09b33e",
+        "name": "",
+        "links": [
+            "c1de80b9cafdd278"
+        ],
+        "x": 2335,
+        "y": 740,
+        "wires": []
+    },
+    {
+        "id": "f8477aadd0dec13b",
+        "type": "link out",
+        "z": "f643da0b7b09b33e",
+        "name": "",
+        "links": [
+            "c1de80b9cafdd278"
+        ],
+        "x": 2235,
+        "y": 660,
+        "wires": []
+    },
+    {
+        "id": "dd998b700bdae2f0",
+        "type": "link out",
+        "z": "f643da0b7b09b33e",
+        "name": "",
+        "links": [
+            "c1de80b9cafdd278"
+        ],
+        "x": 1295,
+        "y": 820,
+        "wires": []
+    },
+    {
+        "id": "a2375dc0e61e0bfc",
+        "type": "link out",
+        "z": "f643da0b7b09b33e",
+        "name": "out",
+        "links": [
+            "33f2b93ae8d315c4",
+            "35158053d0f5b216",
+            "f731605f015253a0",
+            "fb66ec95abd45bde",
+            "4ff6eac0164aefc3",
+            "ce64a7a618823564"
+        ],
+        "x": 295,
+        "y": 60,
+        "wires": []
+    },
+    {
+        "id": "8a163bfb42beec87",
+        "type": "function",
+        "z": "f643da0b7b09b33e",
+        "name": "orderexec setbuy",
+        "func": "let cmd = \"setbuy\";\n\nlet quantity = Number((Number(msg.bot.finance.depo) * Number(msg.bot.settings.ordersize) / 100 / msg.bot.status.currentprice).toFixed(msg.bot.settings.digitq));\nlet floor = msg.bot.currentfloor[0] - 1;\nlet price = msg.bot.floors[floor][3].toFixed(msg.bot.settings.digitprice);\nlet data = { moneta: msg.bot.settings.moneta, price: price, quantity: quantity};\nconst orderexec = global.get('order_exec')(cmd, data);\n\nlet botname = msg.bot.settings.botname;\n\n//let data2 = botname + \":\" + cmd + \": price:\" + data.price + \", quantity: \" + data.quantity;\n//const tilog = global.get('tilog')(botname, data2);\n//tilog;\n\norderexec.then(orderexec => {\n    msg.orderexec = orderexec;\n    if (orderexec.statusCode === \"ok\") {\n        node.status({ fill: \"green\", shape: \"dot\", text: orderexec.statusBody.orderId });\n\n        node.done();\n\n        //node.warn(\"set buy: \" + botname + \" on floor:\" + flooor + \" q: \" + quantity );\n        node.send(msg);\n\n    } else {\n        node.status({ fill: \"red\", shape: \"dot\" });\n        node.done();\n        node.send(msg);\n    }\n    \n\n}).catch(error => {\n\n    msg.error = error;\n    node.status({ fill: \"red\", shape: \"ring\" });\n\n    node.error(error);\n});\n\n\n\n\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1050,
+        "y": 120,
+        "wires": [
+            [
+                "c32f1fa5032c4323",
+                "11e75410a434974c"
+            ]
+        ]
+    },
+    {
+        "id": "c32f1fa5032c4323",
+        "type": "switch",
+        "z": "f643da0b7b09b33e",
+        "name": "statusCode",
+        "property": "orderexec.statusCode",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "ok",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "not ok",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 1250,
+        "y": 120,
+        "wires": [
+            [
+                "4f5fa5a9b0d51cb8"
+            ],
+            [
+                "34ae5b9f4b1fedc4",
+                "eae3c1f8279dd086"
+            ]
+        ]
+    },
+    {
+        "id": "4f5fa5a9b0d51cb8",
+        "type": "function",
+        "z": "f643da0b7b09b33e",
+        "name": "register buy",
+        "func": "let floor = msg.bot.currentfloor[0] - 1;\nlet currentfloor = msg.bot.floors[floor];\n\ncurrentfloor[7] = 1;\ncurrentfloor[8] = msg.orderexec.statusBody.orderId;\ncurrentfloor[14] = msg.orderexec.statusBody.origQty;\ncurrentfloor[10] = msg.orderexec.statusBody.price;\n\nmsg.bot.floors[currentfloor[0] - 1] = currentfloor;\n\n//msg.bot.finance.baseinorders = (Number(Number(msg.bot.finance.baseinorders) + Number(msg.orderexec.statusBody.origQty) * Number(msg.orderexec.statusBody.price))).toFixed(msg.bot.settings.digitprice);\n//msg.bot.finance.basenal = (Number(Number(msg.bot.finance.basenal) - Number(msg.orderexec.statusBody.origQty) * Number(msg.orderexec.statusBody.price))).toFixed(msg.bot.settings.digitprice);\n\nnode.status({ fill: \"green\", shape: \"ring\", text: currentfloor[0] });\n\n//let data = \"Выставлен ордер - \" + currentfloor[8];\n//const tilog = global.get('tilog')(msg.bot.settings.botname, data);\n//tilog;\n//\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1430,
+        "y": 80,
+        "wires": [
+            [
+                "f5e627c305bce996"
+            ]
+        ]
+    },
+    {
+        "id": "84065a7178289056",
+        "type": "link out",
+        "z": "f643da0b7b09b33e",
+        "name": "",
+        "links": [
+            "c1de80b9cafdd278"
+        ],
+        "x": 1915,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "34ae5b9f4b1fedc4",
+        "type": "link out",
+        "z": "f643da0b7b09b33e",
+        "name": "",
+        "links": [
+            "c1de80b9cafdd278"
+        ],
+        "x": 1395,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "eae3c1f8279dd086",
         "type": "debug",
-        "z": "8929ff49bf2bbea4",
+        "z": "f643da0b7b09b33e",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1520,
+        "y": 180,
+        "wires": []
+    },
+    {
+        "id": "103f92e316371166",
+        "type": "function",
+        "z": "f643da0b7b09b33e",
+        "name": "orderexec cansel",
+        "func": "let cmd = \"cansel\";\n\nlet orderid = msg.orderid;\nlet moneta = msg.bot.settings.moneta;\nlet floor = msg.bot.currentfloor[0] - 1;\nlet data = {\"moneta\":moneta, \"orderid\": orderid};\nconst orderexec = global.get('order_exec')(cmd,data);\n\nlet botname = msg.botname;\n\n//let data2 = botname+\":\"+cmd+\": orderid:\"+orderid;\n//const tilog = global.get('tilog')(botname,data2);\n//tilog;\n\norderexec.then(orderexec => {\n    msg.orderexec = orderexec;\n    if (orderexec.statusCode === \"ok\"){\n        node.status({fill:\"green\",shape:\"dot\", text: orderexec.statusBody.orderId});\n        //msg.bot = msg.orderexec.bot;\n\n                                //msg.bot.ttp.curorderid = resp.orderId;\n                        //msg.bot.ttp.curstop = stopprice;\n                        //msg.bot.ttp.quantity = quantity;\n        \n        //let floor = msg.floorindex + 1;\n        //node.warn(\"cansel buy: \" + botname + \" on floor:\" + floor);\n\n        node.send(msg);\n        \n    } else {\n        node.status({fill:\"red\",shape:\"dot\"});\n        //msg.bot.ttp.curorderid = 0;\n        node.done();\n        node.send(msg);\n    }\n    \n\n}).catch(error => {\n    \n    msg.error = error;\n    node.status({fill:\"red\",shape: \"ring\"});\n    \n    node.error(error);\n});\n\n\n\n\n\n\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1750,
+        "y": 580,
+        "wires": [
+            [
+                "d634154670aac73d",
+                "8b470cb58c3b12b7"
+            ]
+        ]
+    },
+    {
+        "id": "d634154670aac73d",
+        "type": "switch",
+        "z": "f643da0b7b09b33e",
+        "name": "statusCode",
+        "property": "orderexec.statusCode",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "ok",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "not ok",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 1950,
+        "y": 580,
+        "wires": [
+            [
+                "b1fed369105d32f6"
+            ],
+            [
+                "8d10b8e8b4a2df34",
+                "2e3d1535d7fcaaf4"
+            ]
+        ]
+    },
+    {
+        "id": "b1fed369105d32f6",
+        "type": "function",
+        "z": "f643da0b7b09b33e",
+        "name": "register cansel",
+        "func": "let floor = msg.bot.currentfloor[0] - 1;\nlet currentfloor = msg.bot.floors[floor];\n\ncurrentfloor[7] = 0;\ncurrentfloor[8] = 0;\ncurrentfloor[14] = 0;\ncurrentfloor[10] = 0;\n\nmsg.bot.floors[currentfloor[0] - 1] = currentfloor;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2140,
+        "y": 540,
+        "wires": [
+            [
+                "d4c0d6032458a433"
+            ]
+        ]
+    },
+    {
+        "id": "d4c0d6032458a433",
+        "type": "function",
+        "z": "f643da0b7b09b33e",
+        "name": "update bot floors, finance triger + on redis",
+        "func": "let botname = msg.botname;\nlet guid = global.get('guid');\n\nlet finance = msg.bot.finance;\nlet floors = msg.bot.floors;\nlet sales = msg.bot.sales;\n\nlet sumsales = 0;\nsales.all.forEach(function (element) {\n    sumsales = sumsales + element[5];\n\n});\n\nlet quotanal = 0;\nlet quotainorders = 0;\nlet basenal = Number(finance.startdepo) + Number(sumsales);\nlet baseinorders = 0;\n\n\nfloors.forEach(function (item, i, floors) {\n\n    if (item[7] === 1) {\n        baseinorders = baseinorders + Number(item[14]) * Number(item[3]);\n        basenal = basenal - Number(item[14]) * Number(item[3]);\n\n    }\n    if (item[7] === 2) {\n        quotanal = quotanal + Number(item[14]);\n        basenal = basenal - Number(item[14]) * Number(item[10]);\n    }\n    if (item[7] === 3) {\n        quotainorders = quotainorders + Number(item[14]);\n        //quotanal = quotanal - Number(item[14]);\n        basenal = basenal - Number(item[14]) * Number(item[10]);\n    }\n\n\n\n});\nfinance.quotanal = (Number(quotanal)).toFixed(msg.bot.settings.digitq);\nfinance.quotainorders = (Number(quotainorders)).toFixed(msg.bot.settings.digitq);\nfinance.basenal = (Number(basenal)).toFixed(msg.bot.settings.digitprice);\nfinance.baseinorders = (Number(baseinorders)).toFixed(msg.bot.settings.digitprice);\n\nlet p = Number(msg.bot.status.currentprice);\nfinance.depo = Number((Number(finance.quotanal) * p + Number(finance.quotainorders) * p + Number(finance.basenal) + Number(finance.baseinorders)).toFixed(msg.bot.settings.digitprice));\n\n\n\n\nmsg.bot.finance = finance;\nmsg.bot.floors = floors;\nmsg.bot.sales = sales;\n\nreturn msg;\n\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2420,
+        "y": 540,
+        "wires": [
+            [
+                "7e04d87f3c65e53f",
+                "d4ca3f391474fb93"
+            ]
+        ]
+    },
+    {
+        "id": "7e04d87f3c65e53f",
+        "type": "link out",
+        "z": "f643da0b7b09b33e",
+        "name": "",
+        "links": [
+            "c1de80b9cafdd278"
+        ],
+        "x": 2675,
+        "y": 540,
+        "wires": []
+    },
+    {
+        "id": "f5e627c305bce996",
+        "type": "function",
+        "z": "f643da0b7b09b33e",
+        "name": "update bot floors, finance triger + on redis",
+        "func": "let botname = msg.botname;\nlet guid = global.get('guid');\n\nlet finance = msg.bot.finance;\nlet floors = msg.bot.floors;\nlet sales = msg.bot.sales;\n\nlet sumsales = 0;\nsales.all.forEach(function (element) {\n    sumsales = sumsales + element[5];\n\n});\n\nlet quotanal = 0;\nlet quotainorders = 0;\nlet basenal = Number(finance.startdepo) + Number(sumsales);\nlet baseinorders = 0;\n\n\nfloors.forEach(function (item, i, floors) {\n\n    if (item[7] === 1) {\n        baseinorders = baseinorders + Number(item[14]) * Number(item[3]);\n        basenal = basenal - Number(item[14]) * Number(item[3]);\n\n    }\n    if (item[7] === 2) {\n        quotanal = quotanal + Number(item[14]);\n        basenal = basenal - Number(item[14]) * Number(item[10]);\n    }\n    if (item[7] === 3) {\n        quotainorders = quotainorders + Number(item[14]);\n        //quotanal = quotanal - Number(item[14]);\n        basenal = basenal - Number(item[14]) * Number(item[10]);\n    }\n\n\n\n});\nfinance.quotanal = (Number(quotanal)).toFixed(msg.bot.settings.digitq);\nfinance.quotainorders = (Number(quotainorders)).toFixed(msg.bot.settings.digitq);\nfinance.basenal = (Number(basenal)).toFixed(msg.bot.settings.digitprice);\nfinance.baseinorders = (Number(baseinorders)).toFixed(msg.bot.settings.digitprice);\n\nlet p = Number(msg.bot.status.currentprice);\nfinance.depo = Number((Number(finance.quotanal) * p + Number(finance.quotainorders) * p + Number(finance.basenal) + Number(finance.baseinorders)).toFixed(msg.bot.settings.digitprice));\n\n\n\n\n\nmsg.bot.finance = finance;\nmsg.bot.floors = floors;\nmsg.bot.sales = sales;\n\n\n//global.set(msg.botname, msg.bot);\n\n\nreturn msg;\n\n\n\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1700,
+        "y": 80,
+        "wires": [
+            [
+                "84065a7178289056"
+            ]
+        ]
+    },
+    {
+        "id": "8d10b8e8b4a2df34",
+        "type": "link out",
+        "z": "f643da0b7b09b33e",
+        "name": "",
+        "links": [
+            "c1de80b9cafdd278"
+        ],
+        "x": 2095,
+        "y": 600,
+        "wires": []
+    },
+    {
+        "id": "2e3d1535d7fcaaf4",
+        "type": "debug",
+        "z": "f643da0b7b09b33e",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 2220,
+        "y": 620,
+        "wires": []
+    },
+    {
+        "id": "ad35fc1a6d370428",
+        "type": "debug",
+        "z": "f643da0b7b09b33e",
         "name": "",
         "active": false,
         "tosidebar": true,
@@ -1182,94 +3300,3390 @@
         "targetType": "full",
         "statusVal": "",
         "statusType": "auto",
-        "x": 210,
+        "x": 1330,
+        "y": 580,
+        "wires": []
+    },
+    {
+        "id": "8b470cb58c3b12b7",
+        "type": "debug",
+        "z": "f643da0b7b09b33e",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1970,
+        "y": 520,
+        "wires": []
+    },
+    {
+        "id": "d4ca3f391474fb93",
+        "type": "debug",
+        "z": "f643da0b7b09b33e",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 2610,
+        "y": 480,
+        "wires": []
+    },
+    {
+        "id": "9e90068f641b1386",
+        "type": "function",
+        "z": "f643da0b7b09b33e",
+        "name": "tester___",
+        "func": "let start_node_time = new Date().getTime();\n\nnode.status({fill: \"green\", shape: \"ring\", text: start_node_time});\n    \n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 180,
+        "y": 620,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "d8536023cc099910",
+        "type": "function",
+        "z": "f643da0b7b09b33e",
+        "name": "update bot floors, finance triger + on redis",
+        "func": "let botname = msg.botname;\nlet guid = global.get('guid');\n\nlet finance = msg.bot.finance;\nlet floors = msg.bot.floors;\nlet sales = msg.bot.sales;\n\nlet sumsales = 0;\nsales.all.forEach(function (element) {\n    sumsales = sumsales + element[5];\n\n});\n\nlet quotanal = 0;\nlet quotainorders = 0;\nlet basenal = Number(finance.startdepo) + Number(sumsales);\nlet baseinorders = 0;\n\n\nfloors.forEach(function (item, i, floors) {\n\n    if (item[7] === 1) {\n        baseinorders = baseinorders + Number(item[14]) * Number(item[3]);\n        basenal = basenal - Number(item[14]) * Number(item[3]);\n\n    }\n    if (item[7] === 2) {\n        quotanal = quotanal + Number(item[14]);\n        basenal = basenal - Number(item[14]) * Number(item[10]);\n    }\n    if (item[7] === 3) {\n        quotainorders = quotainorders + Number(item[14]);\n        //quotanal = quotanal - Number(item[14]);\n        basenal = basenal - Number(item[14]) * Number(item[10]);\n    }\n\n\n\n});\nfinance.quotanal = (Number(quotanal)).toFixed(msg.bot.settings.digitq);\nfinance.quotainorders = (Number(quotainorders)).toFixed(msg.bot.settings.digitq);\nfinance.basenal = (Number(basenal)).toFixed(msg.bot.settings.digitprice);\nfinance.baseinorders = (Number(baseinorders)).toFixed(msg.bot.settings.digitprice);\n\nlet p = Number(msg.bot.status.currentprice);\nfinance.depo = Number((Number(finance.quotanal) * p + Number(finance.quotainorders) * p + Number(finance.basenal) + Number(finance.baseinorders)).toFixed(msg.bot.settings.digitprice));\n\n\n\n\nmsg.bot.finance = finance;\nmsg.bot.floors = floors;\nmsg.bot.sales = sales;\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2080,
+        "y": 740,
+        "wires": [
+            [
+                "3a80ac675cc5b41a"
+            ]
+        ]
+    },
+    {
+        "id": "446039aefc6efaf0",
+        "type": "function",
+        "z": "f643da0b7b09b33e",
+        "name": "update bot floors, finance triger + on redis",
+        "func": "let botname = msg.botname;\nlet guid = global.get('guid');\n\nlet finance = msg.bot.finance;\nlet floors = msg.bot.floors;\nlet sales = msg.bot.sales;\n\nlet sumsales = 0;\nsales.all.forEach(function (element) {\n    sumsales = sumsales + element[5];\n\n});\n\nlet quotanal = 0;\nlet quotainorders = 0;\nlet basenal = Number(finance.startdepo) + Number(sumsales);\nlet baseinorders = 0;\n\n\nfloors.forEach(function (item, i, floors) {\n\n    if (item[7] === 1) {\n        baseinorders = baseinorders + Number(item[14]) * Number(item[3]);\n        basenal = basenal - Number(item[14]) * Number(item[3]);\n\n    }\n    if (item[7] === 2) {\n        quotanal = quotanal + Number(item[14]);\n        basenal = basenal - Number(item[14]) * Number(item[10]);\n    }\n    if (item[7] === 3) {\n        quotainorders = quotainorders + Number(item[14]);\n        //quotanal = quotanal - Number(item[14]);\n        basenal = basenal - Number(item[14]) * Number(item[10]);\n    }\n\n\n\n});\nfinance.quotanal = (Number(quotanal)).toFixed(msg.bot.settings.digitq);\nfinance.quotainorders = (Number(quotainorders)).toFixed(msg.bot.settings.digitq);\nfinance.basenal = (Number(basenal)).toFixed(msg.bot.settings.digitprice);\nfinance.baseinorders = (Number(baseinorders)).toFixed(msg.bot.settings.digitprice);\n\nlet p = Number(msg.bot.status.currentprice);\nfinance.depo = Number((Number(finance.quotanal) * p + Number(finance.quotainorders) * p + Number(finance.basenal) + Number(finance.baseinorders)).toFixed(msg.bot.settings.digitprice));\n\n\n\n\nmsg.bot.finance = finance;\nmsg.bot.floors = floors;\nmsg.bot.sales = sales;\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2000,
+        "y": 460,
+        "wires": [
+            [
+                "143a749463398893"
+            ]
+        ]
+    },
+    {
+        "id": "6047d32d13caab4d",
+        "type": "function",
+        "z": "f643da0b7b09b33e",
+        "name": "update bot floors, finance triger + on redis",
+        "func": "let botname = msg.botname;\nlet guid = global.get('guid');\n\nlet finance = msg.bot.finance;\nlet floors = msg.bot.floors;\nlet sales = msg.bot.sales;\n\nlet sumsales = 0;\nsales.all.forEach(function (element) {\n    sumsales = sumsales + element[5];\n\n});\n\nlet quotanal = 0;\nlet quotainorders = 0;\nlet basenal = Number(finance.startdepo) + Number(sumsales);\nlet baseinorders = 0;\n\n\nfloors.forEach(function (item, i, floors) {\n\n    if (item[7] === 1) {\n        baseinorders = baseinorders + Number(item[14]) * Number(item[3]);\n        basenal = basenal - Number(item[14]) * Number(item[3]);\n\n    }\n    if (item[7] === 2) {\n        quotanal = quotanal + Number(item[14]);\n        basenal = basenal - Number(item[14]) * Number(item[10]);\n    }\n    if (item[7] === 3) {\n        quotainorders = quotainorders + Number(item[14]);\n        //quotanal = quotanal - Number(item[14]);\n        basenal = basenal - Number(item[14]) * Number(item[10]);\n    }\n\n\n\n});\nfinance.quotanal = (Number(quotanal)).toFixed(msg.bot.settings.digitq);\nfinance.quotainorders = (Number(quotainorders)).toFixed(msg.bot.settings.digitq);\nfinance.basenal = (Number(basenal)).toFixed(msg.bot.settings.digitprice);\nfinance.baseinorders = (Number(baseinorders)).toFixed(msg.bot.settings.digitprice);\n\nlet p = Number(msg.bot.status.currentprice);\nfinance.depo = Number((Number(finance.quotanal) * p + Number(finance.quotainorders) * p + Number(finance.basenal) + Number(finance.baseinorders)).toFixed(msg.bot.settings.digitprice));\n\n\n\n\nmsg.bot.finance = finance;\nmsg.bot.floors = floors;\nmsg.bot.sales = sales;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1080,
+        "y": 820,
+        "wires": [
+            [
+                "dd998b700bdae2f0"
+            ]
+        ]
+    },
+    {
+        "id": "1983ee28c14da90f",
+        "type": "function",
+        "z": "f643da0b7b09b33e",
+        "name": "update bot floors, finance triger + on redis",
+        "func": "let botname = msg.botname;\nlet guid = global.get('guid');\n\nlet finance = msg.bot.finance;\nlet floors = msg.bot.floors;\nlet sales = msg.bot.sales;\n\nlet sumsales = 0;\nsales.all.forEach(function (element) {\n    sumsales = sumsales + element[5];\n\n});\n\nlet quotanal = 0;\nlet quotainorders = 0;\nlet basenal = Number(finance.startdepo) + Number(sumsales);\nlet baseinorders = 0;\n\n\nfloors.forEach(function (item, i, floors) {\n\n    if (item[7] === 1) {\n        baseinorders = baseinorders + Number(item[14]) * Number(item[3]);\n        basenal = basenal - Number(item[14]) * Number(item[3]);\n\n    }\n    if (item[7] === 2) {\n        quotanal = quotanal + Number(item[14]);\n        basenal = basenal - Number(item[14]) * Number(item[10]);\n    }\n    if (item[7] === 3) {\n        quotainorders = quotainorders + Number(item[14]);\n        //quotanal = quotanal - Number(item[14]);\n        basenal = basenal - Number(item[14]) * Number(item[10]);\n    }\n\n\n\n});\nfinance.quotanal = (Number(quotanal)).toFixed(msg.bot.settings.digitq);\nfinance.quotainorders = (Number(quotainorders)).toFixed(msg.bot.settings.digitq);\nfinance.basenal = (Number(basenal)).toFixed(msg.bot.settings.digitprice);\nfinance.baseinorders = (Number(baseinorders)).toFixed(msg.bot.settings.digitprice);\n\nlet p = Number(msg.bot.status.currentprice);\nfinance.depo = Number((Number(finance.quotanal) * p + Number(finance.quotainorders) * p + Number(finance.basenal) + Number(finance.baseinorders)).toFixed(msg.bot.settings.digitprice));\n\n\n\n\nmsg.bot.finance = finance;\nmsg.bot.floors = floors;\nmsg.bot.sales = sales;\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2020,
+        "y": 380,
+        "wires": [
+            [
+                "a7bb2946f8f0ea4d"
+            ]
+        ]
+    },
+    {
+        "id": "c3e5d17dde715ead",
+        "type": "function",
+        "z": "f643da0b7b09b33e",
+        "name": "update bot floors, finance triger + on redis",
+        "func": "let botname = msg.botname;\nlet guid = global.get('guid');\n\nlet finance = msg.bot.finance;\nlet floors = msg.bot.floors;\nlet sales = msg.bot.sales;\n\nlet sumsales = 0;\nsales.all.forEach(function (element) {\n    sumsales = sumsales + element[5];\n\n});\n\nlet quotanal = 0;\nlet quotainorders = 0;\nlet basenal = Number(finance.startdepo) + Number(sumsales);\nlet baseinorders = 0;\n\n\nfloors.forEach(function (item, i, floors) {\n\n    if (item[7] === 1) {\n        baseinorders = baseinorders + Number(item[14]) * Number(item[3]);\n        basenal = basenal - Number(item[14]) * Number(item[3]);\n\n    }\n    if (item[7] === 2) {\n        quotanal = quotanal + Number(item[14]);\n        basenal = basenal - Number(item[14]) * Number(item[10]);\n    }\n    if (item[7] === 3) {\n        quotainorders = quotainorders + Number(item[14]);\n        //quotanal = quotanal - Number(item[14]);\n        basenal = basenal - Number(item[14]) * Number(item[10]);\n    }\n\n\n\n});\nfinance.quotanal = (Number(quotanal)).toFixed(msg.bot.settings.digitq);\nfinance.quotainorders = (Number(quotainorders)).toFixed(msg.bot.settings.digitq);\nfinance.basenal = (Number(basenal)).toFixed(msg.bot.settings.digitprice);\nfinance.baseinorders = (Number(baseinorders)).toFixed(msg.bot.settings.digitprice);\n\nlet p = Number(msg.bot.status.currentprice);\nfinance.depo = Number((Number(finance.quotanal) * p + Number(finance.quotainorders) * p + Number(finance.basenal) + Number(finance.baseinorders)).toFixed(msg.bot.settings.digitprice));\n\n\n\n\nmsg.bot.finance = finance;\nmsg.bot.floors = floors;\nmsg.bot.sales = sales;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2020,
+        "y": 660,
+        "wires": [
+            [
+                "f8477aadd0dec13b"
+            ]
+        ]
+    },
+    {
+        "id": "d7492a66d6fdb9e7",
+        "type": "function",
+        "z": "f643da0b7b09b33e",
+        "name": "partially filled buy order",
+        "func": "let tgmsg = \"partially filled buy order \" + msg.bot.currentfloor[8];\n\n//node.warn(msg);\nlet guid = global.get('guid');\nmsg = {};\nmsg.payload = {tgmsg, guid};\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2010,
+        "y": 860,
+        "wires": [
+            [
+                "747087ec9dfc7f2c"
+            ]
+        ]
+    },
+    {
+        "id": "194bbbae22fd308a",
+        "type": "redis-out",
+        "z": "f643da0b7b09b33e",
+        "server": "f120eab2.0a60a8",
+        "command": "publish",
+        "name": "",
+        "topic": "tgpost",
+        "obj": true,
+        "x": 2430,
+        "y": 860,
+        "wires": []
+    },
+    {
+        "id": "93eae2cd196c21ef",
+        "type": "function",
+        "z": "f643da0b7b09b33e",
+        "name": "change floors",
+        "func": "node.warn(\"partially filled order \" + msg.bot.currentfloor[14]);\nlet node_time = new Date().getTime();\n\nlet currentfloor = msg.bot.currentfloor;\ncurrentfloor[7] = 2;\ncurrentfloor[9] = node_time;\nmsg.bot.floors[currentfloor[0] - 1] = currentfloor;\n\nlet data = \"Ордер на покупку исполнен, ID - \" + msg.bot.currentfloor[8];\nconst tilog = global.get('tilog')(msg.bot.settings.botname, data);\ntilog;\n\nnode.status({ fill: \"green\", shape: \"ring\"});\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1980,
+        "y": 800,
+        "wires": [
+            [
+                "f939b4e2ea9138bb"
+            ]
+        ]
+    },
+    {
+        "id": "41a9873ca478fbd4",
+        "type": "link out",
+        "z": "f643da0b7b09b33e",
+        "name": "",
+        "links": [
+            "c1de80b9cafdd278"
+        ],
+        "x": 2495,
+        "y": 800,
+        "wires": []
+    },
+    {
+        "id": "f939b4e2ea9138bb",
+        "type": "function",
+        "z": "f643da0b7b09b33e",
+        "name": "update bot floors, finance triger + on redis",
+        "func": "let botname = msg.botname;\nlet guid = global.get('guid');\n\nlet finance = msg.bot.finance;\nlet floors = msg.bot.floors;\nlet sales = msg.bot.sales;\n\nlet sumsales = 0;\nsales.all.forEach(function (element) {\n    sumsales = sumsales + element[5];\n\n});\n\nlet quotanal = 0;\nlet quotainorders = 0;\nlet basenal = Number(finance.startdepo) + Number(sumsales);\nlet baseinorders = 0;\n\n\nfloors.forEach(function (item, i, floors) {\n\n    if (item[7] === 1) {\n        baseinorders = baseinorders + Number(item[14]) * Number(item[3]);\n        basenal = basenal - Number(item[14]) * Number(item[3]);\n\n    }\n    if (item[7] === 2) {\n        quotanal = quotanal + Number(item[14]);\n        basenal = basenal - Number(item[14]) * Number(item[10]);\n    }\n    if (item[7] === 3) {\n        quotainorders = quotainorders + Number(item[14]);\n        //quotanal = quotanal - Number(item[14]);\n        basenal = basenal - Number(item[14]) * Number(item[10]);\n    }\n\n\n\n});\nfinance.quotanal = (Number(quotanal)).toFixed(msg.bot.settings.digitq);\nfinance.quotainorders = (Number(quotainorders)).toFixed(msg.bot.settings.digitq);\nfinance.basenal = (Number(basenal)).toFixed(msg.bot.settings.digitprice);\nfinance.baseinorders = (Number(baseinorders)).toFixed(msg.bot.settings.digitprice);\n\nlet p = Number(msg.bot.status.currentprice);\nfinance.depo = Number((Number(finance.quotanal) * p + Number(finance.quotainorders) * p + Number(finance.basenal) + Number(finance.baseinorders)).toFixed(msg.bot.settings.digitprice));\n\n\n\n\nmsg.bot.finance = finance;\nmsg.bot.floors = floors;\nmsg.bot.sales = sales;\n\n//global.set(msg.botname, msg.bot);\n\nlet volname = guid + \"-bots:\" + botname + \":data\";\nlet botdata = {\n    \"finance\": JSON.stringify(finance),\n    \"floors\": JSON.stringify(floors),\n    \"sales\": JSON.stringify(sales)\n\n};\nconst upd = global.get('setbot_data')(volname, botdata);\n\nupd.then(upd => {\n\n    msg.payload = upd;\n\n    node.status({ fill: \"green\", shape: \"ring\" });\n    node.send(msg);\n\n}).catch(error => {\n\n    node.status({ fill: \"red\", shape: \"ring\", text: \"error\" });\n    node.error(error);\n});\n\nreturn msg;\n\n\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2260,
+        "y": 800,
+        "wires": [
+            [
+                "41a9873ca478fbd4"
+            ]
+        ]
+    },
+    {
+        "id": "747087ec9dfc7f2c",
+        "type": "rbe",
+        "z": "f643da0b7b09b33e",
+        "name": "",
+        "func": "rbe",
+        "gap": "",
+        "start": "",
+        "inout": "out",
+        "septopics": true,
+        "property": "payload",
+        "topi": "topic",
+        "x": 2240,
+        "y": 860,
+        "wires": [
+            [
+                "194bbbae22fd308a"
+            ]
+        ]
+    },
+    {
+        "id": "02bfaff19623e58c",
+        "type": "inject",
+        "z": "f643da0b7b09b33e",
+        "g": "c723fa7827c597d2",
+        "name": " stop",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "reset",
+                "v": "true",
+                "vt": "bool"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 1610,
+        "y": 1180,
+        "wires": [
+            [
+                "108d162050f2bedb"
+            ]
+        ]
+    },
+    {
+        "id": "108d162050f2bedb",
+        "type": "redis-out",
+        "z": "f643da0b7b09b33e",
+        "g": "c723fa7827c597d2",
+        "server": "f120eab2.0a60a8",
+        "command": "publish",
+        "name": "",
+        "topic": "stop",
+        "obj": false,
+        "x": 1610,
+        "y": 1220,
+        "wires": []
+    },
+    {
+        "id": "692c5e5bb70e41c4",
+        "type": "inject",
+        "z": "f643da0b7b09b33e",
+        "g": "c723fa7827c597d2",
+        "name": "start",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": "9",
+        "topic": "",
+        "payloadType": "date",
+        "x": 1190,
+        "y": 1180,
+        "wires": [
+            [
+                "9a1bc6c73bf93cea"
+            ]
+        ]
+    },
+    {
+        "id": "9a1bc6c73bf93cea",
+        "type": "redis-out",
+        "z": "f643da0b7b09b33e",
+        "g": "c723fa7827c597d2",
+        "server": "f120eab2.0a60a8",
+        "command": "publish",
+        "name": "",
+        "topic": "start",
+        "obj": false,
+        "x": 1190,
+        "y": 1220,
+        "wires": []
+    },
+    {
+        "id": "5f58ba037a88ad40",
+        "type": "inject",
+        "z": "f643da0b7b09b33e",
+        "g": "c723fa7827c597d2",
+        "name": "start1",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 1370,
+        "y": 1180,
+        "wires": [
+            [
+                "b1e85c33253a7bc1"
+            ]
+        ]
+    },
+    {
+        "id": "b1e85c33253a7bc1",
+        "type": "redis-out",
+        "z": "f643da0b7b09b33e",
+        "g": "c723fa7827c597d2",
+        "server": "f120eab2.0a60a8",
+        "command": "publish",
+        "name": "",
+        "topic": "start1",
+        "obj": false,
+        "x": 1370,
+        "y": 1220,
+        "wires": []
+    },
+    {
+        "id": "2f83bb2fab63d1bd",
+        "type": "redis-instance",
+        "z": "f643da0b7b09b33e",
+        "g": "c723fa7827c597d2",
+        "server": "f120eab2.0a60a8",
+        "name": "",
+        "topic": "redis",
+        "location": "flow",
+        "x": 1810,
+        "y": 1200,
+        "wires": []
+    },
+    {
+        "id": "1a16326994b68adc",
+        "type": "debug",
+        "z": "f643da0b7b09b33e",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 170,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "11e75410a434974c",
+        "type": "debug",
+        "z": "f643da0b7b09b33e",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1220,
+        "y": 200,
+        "wires": []
+    },
+    {
+        "id": "387fcf8a.76cff",
+        "type": "function",
+        "z": "353e417759fd5750",
+        "g": "014ce62956a26f95",
+        "name": "order_exec()",
+        "func": "",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "let guid = global.get('guid');\n\n\nlet order_exec = function (cmd = msg.topic, data = msg.payload) {\n    \n    let promise = new Promise((resolve, reject) => {\n        msg.resolve = resolve;\n        msg.reject = reject;\n    });\n    \n\n    msg.topic = msg.botname;\n    msg.cmd = cmd;\n    msg.payload = data;\n    msg.botname = data.botname;\n    node.send(Object.assign({}, msg));\n    \n    return promise;\n};\n\nglobal.set('order_exec', order_exec);",
+        "finalize": "",
+        "libs": [],
+        "x": 250,
+        "y": 520,
+        "wires": [
+            [
+                "e99da6578187f6b1"
+            ]
+        ]
+    },
+    {
+        "id": "c985b525.212f78",
+        "type": "inject",
+        "z": "353e417759fd5750",
+        "g": "014ce62956a26f95",
+        "name": "cmd, data",
+        "props": [],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "1",
+        "topic": "",
+        "x": 150,
+        "y": 220,
+        "wires": [
+            [
+                "387fcf8a.76cff"
+            ]
+        ]
+    },
+    {
+        "id": "2bed7653.30adaa",
+        "type": "function",
+        "z": "353e417759fd5750",
+        "g": "014ce62956a26f95",
+        "name": "resolve",
+        "func": "msg.resolve(msg.payload);\n\n// reject\n// setTimeout(function () {\n//     msg.reject({message: 'Could not request joke'});\n// }, 2000);",
+        "outputs": "0",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 620,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "ade3bf55.b02e3",
+        "type": "switch",
+        "z": "353e417759fd5750",
+        "g": "014ce62956a26f95",
+        "name": "cmd",
+        "property": "cmd",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "setbuy",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "cansel",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "setsell",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "marketsell",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "marketbuy",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 5,
+        "x": 1080,
+        "y": 340,
+        "wires": [
+            [
+                "2cfa357e.60327a"
+            ],
+            [
+                "241d62c4.835d6e"
+            ],
+            [
+                "56c6a73caae35c2f"
+            ],
+            [
+                "cc5b16dd.4820c8"
+            ],
+            [
+                "46152e90.390ef8"
+            ]
+        ]
+    },
+    {
+        "id": "9606b8d3.0957",
+        "type": "comment",
+        "z": "353e417759fd5750",
+        "g": "014ce62956a26f95",
+        "name": "setbuy",
+        "info": "",
+        "x": 1330,
+        "y": 200,
+        "wires": []
+    },
+    {
+        "id": "2cfa357e.60327a",
+        "type": "function",
+        "z": "353e417759fd5750",
+        "g": "014ce62956a26f95",
+        "name": "set buy order on binance",
+        "func": "\nfunction parseApiError(error) {\n  if (error.body) {\n    try {\n      var resp = JSON.parse(error.body);\n      return resp.msg;\n    } catch (error) {/* pass thru */}\n  }\n  return \"Unknown error. Status code: \"+error.statsCode;\n}\n\nlet LBinance = global.get('gBinance');\n//node.warn(LBinance);\n//let key = global.get('key');\n//let secret = global.get('secret');\nlet key = env.get(\"BINANCEKEY\");\nlet secret = env.get(\"BINANCESECRET\");\n\nlet binance = new LBinance().options({\n\tAPIKEY: key,\n\tAPISECRET: secret,\n\tuseServerTime: true,\n\tadjustForTimeDifference: true \n});\n\n\n\n\nlet moneta = msg.payload.moneta;\nlet quantity = Number(msg.payload.quantity);\nlet price = Number(msg.payload.price);\n//node.warn(moneta+\" set buy order q = \"+quantity+\" p = \"+price);\n\n\n\n\nbinance.useServerTime(function() {\n    binance.buy(moneta, quantity, price, {type:'LIMIT'}, (err, resp) => {\n // console.info(\"Limit Buy response\", response);\n // console.info(\"order id: \" + response.orderId);\n    if (err) {\n        var errorMsg = parseApiError(err) + \", moneta:\" + moneta;\n        node.error(errorMsg, msg);\n\n        msg.err = err;\n        node.status({fill: \"red\", shape: \"ring\", text: errorMsg});\n        \n        node.send(msg);\n        //return [msg, null];\n    \n    }\n    if (resp) {\n        msg.orderid = resp.orderId;\n        msg.resp = resp;\n        node.status({fill: \"green\", shape: \"ring\", text: resp.orderId});\n        \n        node.send(msg);\n       // return [null,msg];\n                \n    }\n    //node.status({}); //clear status message\n});\n\t\n});",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "gBinance",
+                "module": "node-binance-api"
+            }
+        ],
+        "x": 1510,
+        "y": 200,
+        "wires": [
+            [
+                "be53914b.bf62b"
+            ]
+        ]
+    },
+    {
+        "id": "cc5b16dd.4820c8",
+        "type": "function",
+        "z": "353e417759fd5750",
+        "g": "014ce62956a26f95",
+        "name": "set market sell",
+        "func": "\nfunction parseApiError(error) {\n    if (error.body) {\n        try {\n            var resp = JSON.parse(error.body);\n            return resp.msg;\n        } catch (error) {/* pass thru */ }\n    }\n    return \"Unknown error. Status code: \" + error.statsCode;\n}\n\nlet LBinance = global.get('gBinance');\n//let key = global.get('key');\n//let secret = global.get('secret');\nlet key = env.get(\"BINANCEKEY\");\nlet secret = env.get(\"BINANCESECRET\");\n\nlet binance = new LBinance().options({\n    APIKEY: key,\n    APISECRET: secret,\n    reconnect: false,\n    useServerTime: true\n});\n\nlet moneta = msg.payload.moneta;\nlet quantity = Number(msg.payload.quantity);\n\nnode.warn(\"market sell sp:\" + \" q:\" + quantity);\n\nbinance.useServerTime(function () {\n    binance.marketSell(moneta, quantity, function (err, resp) {\n        if (err) {\n            var errorMsg = parseApiError(err);\n            msg.err = err;\n            node.error(errorMsg, msg);\n            node.status({ fill: \"red\", shape: \"ring\", text: errorMsg });\n            node.send(msg);\n\n\n        }\n        if (resp) {\n\n            msg.resp = resp;\n            node.status({ fill: \"green\", shape: \"ring\" });\n            node.send(msg);\n        }\n\n    })\n\n});\n\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1500,
+        "y": 440,
+        "wires": [
+            [
+                "c8becf6bb0419135"
+            ]
+        ]
+    },
+    {
+        "id": "46152e90.390ef8",
+        "type": "function",
+        "z": "353e417759fd5750",
+        "g": "014ce62956a26f95",
+        "name": "",
+        "func": "\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 1480,
+        "y": 520,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "df242fa3.762dc",
+        "type": "comment",
+        "z": "353e417759fd5750",
+        "g": "014ce62956a26f95",
+        "name": "cansel",
+        "info": "",
+        "x": 1330,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "f8fb32fa.8c38e",
+        "type": "comment",
+        "z": "353e417759fd5750",
+        "g": "014ce62956a26f95",
+        "name": "setsell",
+        "info": "",
+        "x": 1330,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "7fc0c8c6.6d262",
+        "type": "comment",
+        "z": "353e417759fd5750",
+        "g": "014ce62956a26f95",
+        "name": "marketsell",
+        "info": "",
+        "x": 1340,
         "y": 440,
         "wires": []
     },
     {
-        "id": "30269c0017720ad9",
+        "id": "594b48ef.1a0e68",
+        "type": "comment",
+        "z": "353e417759fd5750",
+        "g": "014ce62956a26f95",
+        "name": "marketbuy",
+        "info": "",
+        "x": 1340,
+        "y": 520,
+        "wires": []
+    },
+    {
+        "id": "8eca3137.03e0a8",
+        "type": "switch",
+        "z": "353e417759fd5750",
+        "g": "014ce62956a26f95",
+        "name": "work mode",
+        "property": "workmode",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "binance",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "binance_backtest",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 790,
+        "y": 520,
+        "wires": [
+            [
+                "ade3bf55.b02e3"
+            ],
+            [
+                "72c134ed.8f07cc"
+            ]
+        ]
+    },
+    {
+        "id": "8af21b87.015cb",
+        "type": "comment",
+        "z": "353e417759fd5750",
+        "g": "014ce62956a26f95",
+        "name": "binance",
+        "info": "",
+        "x": 920,
+        "y": 480,
+        "wires": []
+    },
+    {
+        "id": "90c4f7da.42c3b8",
+        "type": "comment",
+        "z": "353e417759fd5750",
+        "g": "014ce62956a26f95",
+        "name": "binance_backtest",
+        "info": "",
+        "x": 950,
+        "y": 560,
+        "wires": []
+    },
+    {
+        "id": "ac3992bd.d4dd5",
         "type": "function",
-        "z": "8929ff49bf2bbea4",
-        "name": "set worker free",
-        "func": "\nlet worker_name = global.get('worker_name');\n\nmsg.topic = \"workers:regist\";\nmsg.payload = {\n    worker_name: worker_name,\n    status : \"free\",\n    }\n    \n\n\nreturn msg;",
+        "z": "353e417759fd5750",
+        "g": "014ce62956a26f95",
+        "name": "get workmode",
+        "func": "let workmode = global.get('workmode');\nmsg.workmode = workmode;\nnode.status({ fill: \"green\", shape: \"ring\" });\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 600,
+        "y": 520,
+        "wires": [
+            [
+                "8eca3137.03e0a8"
+            ]
+        ]
+    },
+    {
+        "id": "72c134ed.8f07cc",
+        "type": "switch",
+        "z": "353e417759fd5750",
+        "g": "014ce62956a26f95",
+        "name": "cmd",
+        "property": "topic",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "setbuy",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "cansel",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "setsell",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "marketsell",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "marketbuy",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 5,
+        "x": 1080,
+        "y": 720,
+        "wires": [
+            [
+                "d9e1bbad.d8dc4"
+            ],
+            [
+                "7d460277.6d43cc"
+            ],
+            [
+                "83dab1d2.d3929"
+            ],
+            [
+                "c2ee13d8.13fab8"
+            ],
+            [
+                "4fd27ca5.37d60c"
+            ]
+        ]
+    },
+    {
+        "id": "937d8df0.8d461",
+        "type": "comment",
+        "z": "353e417759fd5750",
+        "g": "014ce62956a26f95",
+        "name": "setbuy",
+        "info": "",
+        "x": 1330,
+        "y": 640,
+        "wires": []
+    },
+    {
+        "id": "d9e1bbad.d8dc4",
+        "type": "function",
+        "z": "353e417759fd5750",
+        "g": "014ce62956a26f95",
+        "name": "",
+        "func": "\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 1480,
+        "y": 640,
+        "wires": [
+            [
+                "f6791e2.e72656"
+            ]
+        ]
+    },
+    {
+        "id": "7d460277.6d43cc",
+        "type": "function",
+        "z": "353e417759fd5750",
+        "g": "014ce62956a26f95",
+        "name": "",
+        "func": "\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 1480,
+        "y": 700,
+        "wires": [
+            [
+                "4b18cb02.0baa0c"
+            ]
+        ]
+    },
+    {
+        "id": "83dab1d2.d3929",
+        "type": "function",
+        "z": "353e417759fd5750",
+        "g": "014ce62956a26f95",
+        "name": "",
+        "func": "\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 1480,
+        "y": 760,
+        "wires": [
+            [
+                "2827f6dd.5c7162"
+            ]
+        ]
+    },
+    {
+        "id": "c2ee13d8.13fab8",
+        "type": "function",
+        "z": "353e417759fd5750",
+        "g": "014ce62956a26f95",
+        "name": "",
+        "func": "\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 1480,
+        "y": 820,
+        "wires": [
+            [
+                "5f7186a8.0ea498"
+            ]
+        ]
+    },
+    {
+        "id": "4fd27ca5.37d60c",
+        "type": "function",
+        "z": "353e417759fd5750",
+        "g": "014ce62956a26f95",
+        "name": "",
+        "func": "\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 1480,
+        "y": 880,
+        "wires": [
+            [
+                "e5d314a7.f6825"
+            ]
+        ]
+    },
+    {
+        "id": "8044def5.ed945",
+        "type": "comment",
+        "z": "353e417759fd5750",
+        "g": "014ce62956a26f95",
+        "name": "cansel",
+        "info": "",
+        "x": 1330,
+        "y": 700,
+        "wires": []
+    },
+    {
+        "id": "f52a6bcf.7d3728",
+        "type": "comment",
+        "z": "353e417759fd5750",
+        "g": "014ce62956a26f95",
+        "name": "setsell",
+        "info": "",
+        "x": 1330,
+        "y": 760,
+        "wires": []
+    },
+    {
+        "id": "fa849ff6.802878",
+        "type": "comment",
+        "z": "353e417759fd5750",
+        "g": "014ce62956a26f95",
+        "name": "marketsell",
+        "info": "",
+        "x": 1340,
+        "y": 820,
+        "wires": []
+    },
+    {
+        "id": "f38ba797.bdd398",
+        "type": "comment",
+        "z": "353e417759fd5750",
+        "g": "014ce62956a26f95",
+        "name": "marketbuy",
+        "info": "",
+        "x": 1340,
+        "y": 880,
+        "wires": []
+    },
+    {
+        "id": "f6791e2.e72656",
+        "type": "debug",
+        "z": "353e417759fd5750",
+        "g": "014ce62956a26f95",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1630,
+        "y": 640,
+        "wires": []
+    },
+    {
+        "id": "4b18cb02.0baa0c",
+        "type": "debug",
+        "z": "353e417759fd5750",
+        "g": "014ce62956a26f95",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1630,
+        "y": 700,
+        "wires": []
+    },
+    {
+        "id": "2827f6dd.5c7162",
+        "type": "debug",
+        "z": "353e417759fd5750",
+        "g": "014ce62956a26f95",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1630,
+        "y": 760,
+        "wires": []
+    },
+    {
+        "id": "5f7186a8.0ea498",
+        "type": "debug",
+        "z": "353e417759fd5750",
+        "g": "014ce62956a26f95",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1630,
+        "y": 820,
+        "wires": []
+    },
+    {
+        "id": "e5d314a7.f6825",
+        "type": "debug",
+        "z": "353e417759fd5750",
+        "g": "014ce62956a26f95",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1630,
+        "y": 880,
+        "wires": []
+    },
+    {
+        "id": "be53914b.bf62b",
+        "type": "function",
+        "z": "353e417759fd5750",
+        "g": "014ce62956a26f95",
+        "name": "обработчик ошибок",
+        "func": "if (msg.err) {\n    msg.payload.statusCode = \"not ok\";\n    msg.payload.statusBody = msg.err.body;\n    //node.warn(msg.err.statusCode)\n    \n\n    \n    \n    return [null,msg];\n} else {\n    msg.payload.statusCode = \"ok\";\n    msg.payload.statusBody = msg.resp;\n    //msg.payload.bot = msg.bot;\n    return [msg,null];\n}\n\n\n\n",
+        "outputs": 2,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1760,
+        "y": 200,
+        "wires": [
+            [
+                "563d14b6.3a5db4",
+                "c4cfc0830f4e28bc"
+            ],
+            [
+                "c0b46394.7bd6e",
+                "c4cfc0830f4e28bc"
+            ]
+        ]
+    },
+    {
+        "id": "5a624a9b.734534",
+        "type": "link in",
+        "z": "353e417759fd5750",
+        "g": "014ce62956a26f95",
+        "name": "",
+        "links": [
+            "563d14b6.3a5db4",
+            "c0b46394.7bd6e",
+            "2253204.d02816",
+            "874d8336.9507e",
+            "11245d07d29c58d7",
+            "f873485fa819703f",
+            "0ba1f4d05ad6d76a",
+            "6250c3310b6d177b"
+        ],
+        "x": 435,
+        "y": 220,
+        "wires": [
+            [
+                "2bed7653.30adaa"
+            ]
+        ]
+    },
+    {
+        "id": "563d14b6.3a5db4",
+        "type": "link out",
+        "z": "353e417759fd5750",
+        "g": "014ce62956a26f95",
+        "name": "",
+        "links": [
+            "5a624a9b.734534",
+            "17bad0f2.7af38f"
+        ],
+        "x": 1935,
+        "y": 180,
+        "wires": []
+    },
+    {
+        "id": "c0b46394.7bd6e",
+        "type": "link out",
+        "z": "353e417759fd5750",
+        "g": "014ce62956a26f95",
+        "name": "",
+        "links": [
+            "5a624a9b.734534",
+            "17bad0f2.7af38f"
+        ],
+        "x": 1935,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "241d62c4.835d6e",
+        "type": "function",
+        "z": "353e417759fd5750",
+        "g": "014ce62956a26f95",
+        "name": "cansel order",
+        "func": "\n\nfunction parseApiError(error) {\n  if (error.body) {\n    try {\n      var resp = JSON.parse(error.body);\n      return resp.msg;\n    } catch (error) {/* pass thru */}\n  }\n  return \"Unknown error. Status code: \"+error.statsCode;\n}\n\nlet LBinance = global.get('gBinance');\n//node.warn(LBinance);\n//let key = global.get('key');\n//let secret = global.get('secret');\nlet key = env.get(\"BINANCEKEY\");\nlet secret = env.get(\"BINANCESECRET\");\n\nlet binance = new LBinance().options({\n\tAPIKEY: key,\n\tAPISECRET: secret,\n\treconnect: false,\n\tuseServerTime: true\n});\n\nlet moneta = msg.payload.moneta;\nlet orderid = msg.payload.orderid;\n\n//msg.payload = \"qjson.status\";\n\nbinance.useServerTime(function() {\nbinance.cancel(moneta, orderid, (err, resp) => {\n // console.info(\"Limit Buy response\", response);\n // console.info(\"order id: \" + response.orderId);\n    if (err) {\n        var errorMsg = parseApiError(err) + \", moneta:\" + moneta;\n        node.error(errorMsg, msg);\n        \n\n    msg.err = err;\n    node.status({fill: \"red\", shape: \"ring\", text: errorMsg});\n    node.send(msg);\n        \n    \n    }\n    if (resp) {\n        msg.orderid = resp.orderId;\n        msg.resp = resp;\n        \n\n    node.status({fill: \"green\", shape: \"ring\"});\n    node.send(msg);\n        \n    }\n    //node.status({}); //clear status message\n})});\n\n\n\n\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1470,
+        "y": 280,
+        "wires": [
+            [
+                "6f817e7d.c291c"
+            ]
+        ]
+    },
+    {
+        "id": "6f817e7d.c291c",
+        "type": "function",
+        "z": "353e417759fd5750",
+        "g": "014ce62956a26f95",
+        "name": "обработчик ошибок",
+        "func": "if (msg.err) {\n    msg.payload.statusCode = \"not ok\";\n    msg.payload.statusBody = msg.err.body;\n    //node.warn(msg.err.statusCode)\n    \n\n    \n    \n    return [null,msg];\n} else {\n    msg.payload.statusCode = \"ok\";\n    msg.payload.statusBody = msg.resp;\n    //msg.payload.bot = msg.bot;\n    return [msg,null];\n}\n\n\n\n",
+        "outputs": 2,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1680,
+        "y": 280,
+        "wires": [
+            [
+                "85f53fe7.0846f8",
+                "2253204.d02816"
+            ],
+            [
+                "9ebc7b79.d11ad8",
+                "874d8336.9507e"
+            ]
+        ]
+    },
+    {
+        "id": "85f53fe7.0846f8",
+        "type": "debug",
+        "z": "353e417759fd5750",
+        "g": "014ce62956a26f95",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 2030,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "9ebc7b79.d11ad8",
+        "type": "debug",
+        "z": "353e417759fd5750",
+        "g": "014ce62956a26f95",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 2030,
+        "y": 300,
+        "wires": []
+    },
+    {
+        "id": "2253204.d02816",
+        "type": "link out",
+        "z": "353e417759fd5750",
+        "g": "014ce62956a26f95",
+        "name": "",
+        "links": [
+            "5a624a9b.734534",
+            "17bad0f2.7af38f"
+        ],
+        "x": 1935,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "874d8336.9507e",
+        "type": "link out",
+        "z": "353e417759fd5750",
+        "g": "014ce62956a26f95",
+        "name": "",
+        "links": [
+            "5a624a9b.734534",
+            "17bad0f2.7af38f"
+        ],
+        "x": 1935,
+        "y": 300,
+        "wires": []
+    },
+    {
+        "id": "56c6a73caae35c2f",
+        "type": "function",
+        "z": "353e417759fd5750",
+        "g": "014ce62956a26f95",
+        "name": "set stop sell order",
+        "func": "\nfunction parseApiError(error) {\n  if (error.body) {\n    try {\n      var resp = JSON.parse(error.body);\n      return resp.msg;\n    } catch (error) {/* pass thru */ }\n  }\n  return \"Unknown error. Status code: \" + error.statsCode;\n}\n\nlet LBinance = global.get('gBinance');\n//let key = global.get('key');\n//let secret = global.get('secret');\nlet key = env.get(\"BINANCEKEY\");\nlet secret = env.get(\"BINANCESECRET\");\n\nlet binance = new LBinance().options({\n  APIKEY: key,\n  APISECRET: secret,\n  reconnect: false,\n  useServerTime: true\n});\n\nlet moneta = msg.payload.moneta;\nlet quantity = msg.payload.quantity;\nlet priceb = msg.payload.priceb;\nlet stopprice = msg.payload.stopprice;\n\nbinance.useServerTime(function () {\n  binance.sell(moneta, quantity, priceb, { stopPrice: stopprice, type: \"STOP_LOSS_LIMIT\" }, function (err, resp) {\n    if (err) {\n      var errorMsg = parseApiError(err);\n      msg.err = err;\n      node.error(errorMsg, msg);\n      node.status({ fill: \"red\", shape: \"ring\", text: errorMsg });\n      node.send(msg);\n\n    }\n    if (resp) {\n      //msg.bot.ttp.curorderid = resp.orderId;\n      resp.curstop = stopprice;\n      //msg.bot.ttp.quantity = quantity;\n      msg.resp = resp;\n      node.status({ fill: \"green\", shape: \"ring\" });\n      node.send(msg);\n    }\n \n  })\n\n});",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1490,
+        "y": 360,
+        "wires": [
+            [
+                "f5c3922ede7ca10e"
+            ]
+        ],
+        "inputLabels": [
+            "orderid, moneta"
+        ],
+        "outputLabels": [
+            "status"
+        ],
+        "icon": "font-awesome/fa-compress"
+    },
+    {
+        "id": "f5c3922ede7ca10e",
+        "type": "function",
+        "z": "353e417759fd5750",
+        "g": "014ce62956a26f95",
+        "name": "обработчик ошибок",
+        "func": "if (msg.err) {\n    msg.payload.statusCode = \"not ok\";\n    msg.payload.statusBody = msg.err.body;\n    //node.warn(msg.err.statusCode)\n    \n\n    \n    \n    return [null,msg];\n} else {\n    msg.payload.statusCode = \"ok\";\n    msg.payload.statusBody = msg.resp;\n    //msg.payload.bot = msg.bot;\n    return [msg,null];\n}\n\n\n\n",
+        "outputs": 2,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1720,
+        "y": 360,
+        "wires": [
+            [
+                "11245d07d29c58d7",
+                "904948d9b141e76a"
+            ],
+            [
+                "f873485fa819703f",
+                "c51f492683bd478b"
+            ]
+        ]
+    },
+    {
+        "id": "11245d07d29c58d7",
+        "type": "link out",
+        "z": "353e417759fd5750",
+        "g": "014ce62956a26f95",
+        "name": "",
+        "links": [
+            "5a624a9b.734534",
+            "17bad0f2.7af38f"
+        ],
+        "x": 1935,
+        "y": 340,
+        "wires": []
+    },
+    {
+        "id": "f873485fa819703f",
+        "type": "link out",
+        "z": "353e417759fd5750",
+        "g": "014ce62956a26f95",
+        "name": "",
+        "links": [
+            "5a624a9b.734534",
+            "17bad0f2.7af38f"
+        ],
+        "x": 1935,
+        "y": 380,
+        "wires": []
+    },
+    {
+        "id": "904948d9b141e76a",
+        "type": "debug",
+        "z": "353e417759fd5750",
+        "g": "014ce62956a26f95",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 2030,
+        "y": 340,
+        "wires": []
+    },
+    {
+        "id": "c51f492683bd478b",
+        "type": "debug",
+        "z": "353e417759fd5750",
+        "g": "014ce62956a26f95",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 2030,
+        "y": 380,
+        "wires": []
+    },
+    {
+        "id": "e99da6578187f6b1",
+        "type": "rbe",
+        "z": "353e417759fd5750",
+        "g": "014ce62956a26f95",
+        "name": "",
+        "func": "rbe",
+        "gap": "",
+        "start": "",
+        "inout": "out",
+        "septopics": true,
+        "property": "payload",
+        "topi": "topic",
+        "x": 420,
+        "y": 520,
+        "wires": [
+            [
+                "ac3992bd.d4dd5"
+            ]
+        ]
+    },
+    {
+        "id": "0c245c89ee18c959",
+        "type": "catch",
+        "z": "353e417759fd5750",
+        "g": "014ce62956a26f95",
+        "name": "",
+        "scope": [
+            "241d62c4.835d6e"
+        ],
+        "uncaught": false,
+        "x": 1370,
+        "y": 140,
+        "wires": [
+            [
+                "d82e020b5a4a47a5"
+            ]
+        ]
+    },
+    {
+        "id": "d82e020b5a4a47a5",
+        "type": "debug",
+        "z": "353e417759fd5750",
+        "g": "014ce62956a26f95",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1540,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "c8becf6bb0419135",
+        "type": "function",
+        "z": "353e417759fd5750",
+        "g": "014ce62956a26f95",
+        "name": "обработчик ошибок",
+        "func": "if (msg.err) {\n    msg.payload.statusCode = \"not ok\";\n    msg.payload.statusBody = msg.err.body;\n    //node.warn(msg.err.statusCode)\n    \n\n    \n    \n    return [null,msg];\n} else {\n    msg.payload.statusCode = \"ok\";\n    msg.payload.statusBody = msg.resp;\n    //msg.payload.bot = msg.bot;\n    return [msg,null];\n}\n\n\n\n",
+        "outputs": 2,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1720,
+        "y": 440,
+        "wires": [
+            [
+                "0ba1f4d05ad6d76a"
+            ],
+            [
+                "6250c3310b6d177b"
+            ]
+        ]
+    },
+    {
+        "id": "0ba1f4d05ad6d76a",
+        "type": "link out",
+        "z": "353e417759fd5750",
+        "g": "014ce62956a26f95",
+        "name": "",
+        "links": [
+            "5a624a9b.734534",
+            "17bad0f2.7af38f"
+        ],
+        "x": 1935,
+        "y": 420,
+        "wires": []
+    },
+    {
+        "id": "6250c3310b6d177b",
+        "type": "link out",
+        "z": "353e417759fd5750",
+        "g": "014ce62956a26f95",
+        "name": "",
+        "links": [
+            "5a624a9b.734534",
+            "17bad0f2.7af38f"
+        ],
+        "x": 1935,
+        "y": 460,
+        "wires": []
+    },
+    {
+        "id": "c4cfc0830f4e28bc",
+        "type": "debug",
+        "z": "353e417759fd5750",
+        "g": "014ce62956a26f95",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 2030,
+        "y": 180,
+        "wires": []
+    },
+    {
+        "id": "1adeb6d2.0028b1",
+        "type": "function",
+        "z": "353e417759fd5750",
+        "g": "79e296b2.11a2d8",
+        "name": "register work mode",
+        "func": "let key = msg.payload;\n\nglobal.set('workmode',key);\n\n\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 470,
+        "y": 1060,
+        "wires": [
+            [
+                "9a835f6c.6a1ab"
+            ]
+        ]
+    },
+    {
+        "id": "174c55c9.364c72",
+        "type": "inject",
+        "z": "353e417759fd5750",
+        "g": "79e296b2.11a2d8",
+        "name": "workmode",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "1",
+        "topic": "",
+        "payload": "binance",
+        "payloadType": "str",
+        "x": 250,
+        "y": 1040,
+        "wires": [
+            [
+                "1adeb6d2.0028b1"
+            ]
+        ]
+    },
+    {
+        "id": "af87984e.38efa8",
+        "type": "ui_button",
+        "z": "353e417759fd5750",
+        "g": "79e296b2.11a2d8",
+        "name": "",
+        "group": "261e447.e94ad3c",
+        "order": 1,
+        "width": "4",
+        "height": "1",
+        "passthru": false,
+        "label": "binance",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "icon": "",
+        "payload": "binance",
+        "payloadType": "str",
+        "topic": "",
+        "topicType": "str",
+        "x": 220,
+        "y": 1080,
+        "wires": [
+            [
+                "1adeb6d2.0028b1"
+            ]
+        ]
+    },
+    {
+        "id": "af6bd09e.c7c798",
+        "type": "ui_button",
+        "z": "353e417759fd5750",
+        "g": "79e296b2.11a2d8",
+        "name": "",
+        "group": "261e447.e94ad3c",
+        "order": 1,
+        "width": "4",
+        "height": "1",
+        "passthru": false,
+        "label": "binance_backtest",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "icon": "",
+        "payload": "binance_backtest",
+        "payloadType": "str",
+        "topic": "",
+        "x": 250,
+        "y": 1120,
+        "wires": [
+            [
+                "1adeb6d2.0028b1"
+            ]
+        ]
+    },
+    {
+        "id": "9a835f6c.6a1ab",
+        "type": "ui_text",
+        "z": "353e417759fd5750",
+        "g": "79e296b2.11a2d8",
+        "group": "261e447.e94ad3c",
+        "order": 2,
+        "width": "4",
+        "height": "1",
+        "name": "",
+        "label": "mode now",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "x": 670,
+        "y": 1060,
+        "wires": []
+    },
+    {
+        "id": "130f3240.00961e",
+        "type": "function",
+        "z": "353e417759fd5750",
+        "g": "b5c4460e3abcebce",
+        "name": "get_order_status()",
+        "func": "",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "\n\n\nlet get_order_status = function (moneta = msg.moneta, orderid = msg.orderid) {\n    \n    let promise = new Promise((resolve, reject) => {\n        msg.resolve = resolve;\n        msg.reject = reject;\n    });\n    \n\n    msg.moneta = moneta;\n    msg.orderid = orderid;\n    \n    node.send(Object.assign({}, msg));\n    \n    return promise;\n};\n\nglobal.set('get_order_status', get_order_status);",
+        "finalize": "",
+        "libs": [],
+        "x": 250,
+        "y": 1460,
+        "wires": [
+            [
+                "607a1476.9d2f3c"
+            ]
+        ]
+    },
+    {
+        "id": "f4452587.561d48",
+        "type": "inject",
+        "z": "353e417759fd5750",
+        "g": "b5c4460e3abcebce",
+        "name": "",
+        "props": [],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "1",
+        "topic": "",
+        "x": 230,
+        "y": 1380,
+        "wires": [
+            [
+                "130f3240.00961e"
+            ]
+        ]
+    },
+    {
+        "id": "6b7c6b19.00a204",
+        "type": "function",
+        "z": "353e417759fd5750",
+        "g": "b5c4460e3abcebce",
+        "name": "resolve",
+        "func": "msg.resolve(msg.payload);\n// reject\n// setTimeout(function () {\n//     msg.reject({message: 'Could not request joke'});\n// }, 2000);",
+        "outputs": "0",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 820,
+        "y": 1380,
+        "wires": []
+    },
+    {
+        "id": "b1193833.175118",
+        "type": "switch",
+        "z": "353e417759fd5750",
+        "g": "b5c4460e3abcebce",
+        "name": "work mode",
+        "property": "workmode",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "binance",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "binance_backtest",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 230,
+        "y": 1640,
+        "wires": [
+            [
+                "b5f725fd.240e98"
+            ],
+            [
+                "d73dab1c.a64828"
+            ]
+        ]
+    },
+    {
+        "id": "efe6ca9d.d20898",
+        "type": "comment",
+        "z": "353e417759fd5750",
+        "g": "b5c4460e3abcebce",
+        "name": "binance",
+        "info": "",
+        "x": 370,
+        "y": 1580,
+        "wires": []
+    },
+    {
+        "id": "2ccabce5.3df754",
+        "type": "comment",
+        "z": "353e417759fd5750",
+        "g": "b5c4460e3abcebce",
+        "name": "binance_backtest",
+        "info": "",
+        "x": 400,
+        "y": 1700,
+        "wires": []
+    },
+    {
+        "id": "307f6fe7.76709",
+        "type": "function",
+        "z": "353e417759fd5750",
+        "g": "b5c4460e3abcebce",
+        "name": "get workmode",
+        "func": "let workmode = global.get('workmode');\nmsg.workmode = workmode;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 260,
+        "y": 1520,
+        "wires": [
+            [
+                "b1193833.175118"
+            ]
+        ]
+    },
+    {
+        "id": "f83aa4a.5b36658",
+        "type": "link in",
+        "z": "353e417759fd5750",
+        "g": "b5c4460e3abcebce",
+        "name": "",
+        "links": [
+            "840a8727.00fd28",
+            "9fcdc428.e98b78",
+            "6126ca08.741e74",
+            "5419e44a.d5383c",
+            "f6fb5868.e9bd18",
+            "301639c.27435c6",
+            "d73dab1c.a64828",
+            "bf190e9d.225ad",
+            "605bd5f0e5e8ae22",
+            "dffbe6ee7486f03e",
+            "1d3673435835237c"
+        ],
+        "x": 695,
+        "y": 1380,
+        "wires": [
+            [
+                "6b7c6b19.00a204"
+            ]
+        ]
+    },
+    {
+        "id": "b5f725fd.240e98",
+        "type": "function",
+        "z": "353e417759fd5750",
+        "g": "b5c4460e3abcebce",
+        "name": "get orderstatus on binance",
+        "func": "\nfunction parseApiError(error) {\n  if (error.body) {\n    try {\n      var resp = JSON.parse(error.body);\n      return resp.msg;\n    } catch (error) {/* pass thru */}\n  }\n  return \"Unknown error. Status code: \"+error.statsCode;\n}\n\nlet LBinance = global.get('gBinance');\n//node.warn(LBinance);\nlet key = global.get('key');\nlet secret = global.get('secret');\n\n\nlet binance = new LBinance().options({\n\tAPIKEY: key,\n\tAPISECRET: secret,\n\tuseServerTime: true,\n\tadjustForTimeDifference: true \n});\n\n\n\n\nlet moneta = msg.moneta;\nlet orderid = Number(msg.orderid);\n\nbinance.useServerTime(function() {\n    binance.orderStatus(moneta, orderid, (err, resp) => {\n // console.info(\"Limit Buy response\", response);\n // console.info(\"order id: \" + response.orderId);\n    if (err) {\n        var errorMsg = parseApiError(err) + \", moneta:\" + moneta;\n        node.error(errorMsg, msg);\n\n        msg.err = err;\n        node.status({fill: \"red\", shape: \"ring\", text: errorMsg});\n        \n        node.send(msg);\n        //return [msg, null];\n    \n    }\n    if (resp) {\n        msg.order_status = resp.status;\n\n        msg.resp = resp;\n        node.status({fill: \"green\", shape: \"ring\", text: resp.orderId});\n        \n        node.send(msg);\n       // return [null,msg];\n                \n    }\n    //node.status({}); //clear status message\n});\n\t\n});",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
         "x": 560,
-        "y": 440,
+        "y": 1580,
         "wires": [
             [
-                "a37d953d4c3eb0a5"
+                "ec0d7b62.22bf98"
             ]
         ]
     },
     {
-        "id": "a37d953d4c3eb0a5",
-        "type": "redis-out",
-        "z": "8929ff49bf2bbea4",
-        "server": "da97327dd29e690a",
-        "command": "rpush",
+        "id": "f6fb5868.e9bd18",
+        "type": "link out",
+        "z": "353e417759fd5750",
+        "g": "b5c4460e3abcebce",
         "name": "",
-        "topic": "workers:regist",
-        "obj": true,
-        "x": 760,
-        "y": 440,
+        "links": [
+            "f83aa4a.5b36658"
+        ],
+        "x": 975,
+        "y": 1620,
         "wires": []
     },
     {
-        "id": "3c8817fd6c5a1613",
-        "type": "delay",
-        "z": "8929ff49bf2bbea4",
-        "name": "",
-        "pauseType": "random",
-        "timeout": "1",
-        "timeoutUnits": "milliseconds",
-        "rate": "10",
-        "nbRateUnits": "1",
-        "rateUnits": "second",
-        "randomFirst": "0",
-        "randomLast": "900",
-        "randomUnits": "milliseconds",
-        "drop": false,
-        "allowrate": false,
-        "outputs": 1,
-        "x": 380,
-        "y": 400,
+        "id": "ec0d7b62.22bf98",
+        "type": "function",
+        "z": "353e417759fd5750",
+        "g": "b5c4460e3abcebce",
+        "name": "обработчик ошибок",
+        "func": "if (msg.err) {\n    msg.statusCode = \"not ok\";\n    msg.statusBody = msg.err.body;\n    \n    return [null,msg];\n\n} else {\n    msg.statusCode = \"ok\";\n    msg.payload = msg.order_status;\n    msg.statusBody = msg.resp;\n    \n    return [msg,null];\n}\n\n\n\n",
+        "outputs": 2,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 820,
+        "y": 1580,
         "wires": [
             [
-                "30269c0017720ad9",
-                "3c92409f284b0c9a"
+                "9a627e02.c4ed6",
+                "bf190e9d.225ad"
+            ],
+            [
+                "f6fb5868.e9bd18"
             ]
         ]
     },
     {
-        "id": "3c92409f284b0c9a",
+        "id": "607a1476.9d2f3c",
         "type": "function",
-        "z": "8929ff49bf2bbea4",
-        "name": "task finished",
-        "func": "let task_id = msg.payload.task.task_id;\nmsg.topic = \"tasks:finished\";\nmsg.payload = JSON.stringify({\n...msg.payload,\n\n    \n    ex_time: new Date().getTime() - task_id\n});\n\n\nreturn msg;\n\n",
+        "z": "353e417759fd5750",
+        "g": "b5c4460e3abcebce",
+        "name": "prepare get order status",
+        "func": "\nlet guid = global.get('guid');\nlet moneta = msg.moneta;\nlet orderid = msg.orderid;\n\nmsg.payload = [];\nmsg.topic = \"orders-status-\" + guid + \":\" + moneta + \":\" + orderid;\n\nnode.status({fill: \"green\", shape: \"ring\", text: orderid});\nreturn msg;\n",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 550,
-        "y": 360,
+        "x": 490,
+        "y": 1460,
         "wires": [
             [
-                "cb676b24d8e36a71",
-                "5cfd2e9e3709b223"
+                "d8222377.a5f0c"
+            ]
+        ],
+        "inputLabels": [
+            "orderid"
+        ],
+        "outputLabels": [
+            "status"
+        ],
+        "icon": "node-red-contrib-binance/binance.png"
+    },
+    {
+        "id": "d8222377.a5f0c",
+        "type": "redis-command",
+        "z": "353e417759fd5750",
+        "g": "b5c4460e3abcebce",
+        "server": "f120eab2.0a60a8",
+        "command": "GET",
+        "name": "get order status",
+        "topic": "msg.payload",
+        "params": "[]",
+        "paramsType": "json",
+        "payloadType": "json",
+        "block": false,
+        "x": 720,
+        "y": 1460,
+        "wires": [
+            [
+                "f9b6f483.e38838"
             ]
         ]
     },
     {
-        "id": "cb676b24d8e36a71",
-        "type": "debug",
-        "z": "8929ff49bf2bbea4",
+        "id": "f9b6f483.e38838",
+        "type": "function",
+        "z": "353e417759fd5750",
+        "g": "b5c4460e3abcebce",
+        "name": "обработчик ошибок",
+        "func": "if (!msg.payload) {\n    msg.statusCode = \"not ok\";\n    msg.statusBody = msg.payload;\n    //node.warn(msg.err.statusCode)\n    \n\n    \n    \n    return [null,msg];\n} else {\n    msg.statusCode = \"ok\";\n    msg.statusBody = msg.payload;\n    return [msg,null];\n}\n\n\n\n",
+        "outputs": 2,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 940,
+        "y": 1460,
+        "wires": [
+            [
+                "301639c.27435c6"
+            ],
+            [
+                "307f6fe7.76709"
+            ]
+        ]
+    },
+    {
+        "id": "301639c.27435c6",
+        "type": "link out",
+        "z": "353e417759fd5750",
+        "g": "b5c4460e3abcebce",
         "name": "",
-        "active": false,
+        "links": [
+            "f83aa4a.5b36658"
+        ],
+        "x": 1115,
+        "y": 1440,
+        "wires": []
+    },
+    {
+        "id": "d73dab1c.a64828",
+        "type": "link out",
+        "z": "353e417759fd5750",
+        "g": "b5c4460e3abcebce",
+        "name": "",
+        "links": [
+            "f83aa4a.5b36658"
+        ],
+        "x": 515,
+        "y": 1700,
+        "wires": []
+    },
+    {
+        "id": "8c2b136a.c18c",
+        "type": "redis-command",
+        "z": "353e417759fd5750",
+        "g": "b5c4460e3abcebce",
+        "server": "f120eab2.0a60a8",
+        "command": "SET",
+        "name": "",
+        "topic": "",
+        "params": "[]",
+        "paramsType": "json",
+        "payloadType": "json",
+        "block": false,
+        "x": 1280,
+        "y": 1560,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "bb1ad3fd.e2d78",
+        "type": "comment",
+        "z": "353e417759fd5750",
+        "g": "b5c4460e3abcebce",
+        "name": "binance error",
+        "info": "",
+        "x": 1070,
+        "y": 1620,
+        "wires": []
+    },
+    {
+        "id": "9a627e02.c4ed6",
+        "type": "function",
+        "z": "353e417759fd5750",
+        "g": "b5c4460e3abcebce",
+        "name": "prepare get order status",
+        "func": "\nlet guid = global.get('guid');\nlet moneta = msg.moneta;\nlet orderid = msg.orderid;\n\nlet topic = \"orders-status-\" + guid + \":\" + moneta + \":\" + orderid;\nmsg.payload = [topic, msg.order_status, \"EX\", 3];\nmsg.topic = \"\";\n\nnode.status({fill: \"green\", shape: \"ring\", text: orderid});\nreturn msg;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1070,
+        "y": 1560,
+        "wires": [
+            [
+                "8c2b136a.c18c"
+            ]
+        ],
+        "inputLabels": [
+            "orderid"
+        ],
+        "outputLabels": [
+            "status"
+        ],
+        "icon": "node-red-contrib-binance/binance.png"
+    },
+    {
+        "id": "bf190e9d.225ad",
+        "type": "link out",
+        "z": "353e417759fd5750",
+        "g": "b5c4460e3abcebce",
+        "name": "",
+        "links": [
+            "f83aa4a.5b36658"
+        ],
+        "x": 975,
+        "y": 1520,
+        "wires": []
+    },
+    {
+        "id": "91002369b1074d75",
+        "type": "function",
+        "z": "353e417759fd5750",
+        "g": "048120318edbeca7",
+        "name": "getbot_status()",
+        "func": "",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "\nlet guid = env.get(\"GOOGLEUID\");\nlet getbot_status = function (botname = msg.payload) {\n    \n    let promise = new Promise((resolve, reject) => {\n        msg.resolve = resolve;\n        msg.reject = reject;\n    });\n    \n    msg.topic = guid+\"-bots:\"+botname+\":status\";\n    msg.payload = [];\n\n    node.send(Object.assign({}, msg));\n    \n    return promise;\n};\n\nglobal.set('getbot_status', getbot_status);",
+        "finalize": "",
+        "libs": [],
+        "x": 380,
+        "y": 2060,
+        "wires": [
+            [
+                "3cbc407f58d45bb0"
+            ]
+        ]
+    },
+    {
+        "id": "54bc231adc5891e5",
+        "type": "inject",
+        "z": "353e417759fd5750",
+        "g": "048120318edbeca7",
+        "name": "botname",
+        "props": [],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "1",
+        "topic": "",
+        "x": 200,
+        "y": 2060,
+        "wires": [
+            [
+                "91002369b1074d75"
+            ]
+        ]
+    },
+    {
+        "id": "38c8c689cb5c0e28",
+        "type": "function",
+        "z": "353e417759fd5750",
+        "g": "048120318edbeca7",
+        "name": "resolve",
+        "func": "msg.resolve(msg.payload);\n\n// reject\n// setTimeout(function () {\n//     msg.reject({message: 'Could not request joke'});\n// }, 2000);",
+        "outputs": "0",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 760,
+        "y": 2060,
+        "wires": []
+    },
+    {
+        "id": "85a473180350d074",
+        "type": "function",
+        "z": "353e417759fd5750",
+        "g": "048120318edbeca7",
+        "name": "getbotlist()",
+        "func": "",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "\n// Code added here will be run once\n// whenever the node is deployed.\nlet getbotlist = function (guid = msg.payload) {\n    \n    let promise = new Promise((resolve, reject) => {\n        msg.resolve = resolve;\n        msg.reject = reject;\n    });\n    \n\n    msg.topic = guid+\"-botlist\";\n    msg.payload = [];\n\n    node.send(Object.assign({}, msg));\n    \n    return promise;\n};\n\nglobal.set('getbotlist', getbotlist);",
+        "finalize": "",
+        "libs": [],
+        "x": 350,
+        "y": 2000,
+        "wires": [
+            [
+                "cc432a8e0784b0f9"
+            ]
+        ]
+    },
+    {
+        "id": "caa36ec009038d1a",
+        "type": "inject",
+        "z": "353e417759fd5750",
+        "g": "048120318edbeca7",
+        "name": "guid",
+        "props": [],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "1",
+        "topic": "",
+        "x": 190,
+        "y": 2000,
+        "wires": [
+            [
+                "85a473180350d074"
+            ]
+        ]
+    },
+    {
+        "id": "cc432a8e0784b0f9",
+        "type": "redis-command",
+        "z": "353e417759fd5750",
+        "g": "048120318edbeca7",
+        "server": "f120eab2.0a60a8",
+        "command": "GET",
+        "name": "get botlist",
+        "topic": "msg.payload",
+        "params": "[]",
+        "paramsType": "json",
+        "payloadType": "json",
+        "block": false,
+        "x": 520,
+        "y": 2000,
+        "wires": [
+            [
+                "2e7a67404d21442a"
+            ]
+        ]
+    },
+    {
+        "id": "2e7a67404d21442a",
+        "type": "function",
+        "z": "353e417759fd5750",
+        "g": "048120318edbeca7",
+        "name": "resolve",
+        "func": "msg.resolve(msg.payload);\n\n// reject\n// setTimeout(function () {\n//     msg.reject({message: 'Could not request joke'});\n// }, 2000);",
+        "outputs": "0",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 680,
+        "y": 2000,
+        "wires": []
+    },
+    {
+        "id": "3cbc407f58d45bb0",
+        "type": "redis-command",
+        "z": "353e417759fd5750",
+        "g": "048120318edbeca7",
+        "server": "f120eab2.0a60a8",
+        "command": "GET",
+        "name": "get bot status",
+        "topic": "msg.payload",
+        "params": "[]",
+        "paramsType": "json",
+        "payloadType": "json",
+        "block": false,
+        "x": 580,
+        "y": 2060,
+        "wires": [
+            [
+                "38c8c689cb5c0e28"
+            ]
+        ]
+    },
+    {
+        "id": "5b61de68b494bd33",
+        "type": "function",
+        "z": "353e417759fd5750",
+        "g": "048120318edbeca7",
+        "name": "getbot_settings()",
+        "func": "",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "let guid = env.get(\"GOOGLEUID\");\n\nlet getbot_settings = function (botname = msg.payload) {\n    \n    let promise = new Promise((resolve, reject) => {\n        msg.resolve = resolve;\n        msg.reject = reject;\n    });\n    \n\n    msg.topic = guid+\"-bots:\"+botname+\":settings\";\n    msg.payload = [];\n\n    node.send(Object.assign({}, msg));\n    \n    return promise;\n};\n\nglobal.set('getbot_settings', getbot_settings);",
+        "finalize": "",
+        "libs": [],
+        "x": 390,
+        "y": 2120,
+        "wires": [
+            [
+                "33d2dd1688f92679"
+            ]
+        ]
+    },
+    {
+        "id": "a2ef331bd08c5903",
+        "type": "inject",
+        "z": "353e417759fd5750",
+        "g": "048120318edbeca7",
+        "name": "botname",
+        "props": [],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "1",
+        "topic": "",
+        "x": 200,
+        "y": 2120,
+        "wires": [
+            [
+                "5b61de68b494bd33"
+            ]
+        ]
+    },
+    {
+        "id": "ebd3770efa8b27af",
+        "type": "function",
+        "z": "353e417759fd5750",
+        "g": "048120318edbeca7",
+        "name": "resolve",
+        "func": "msg.resolve(msg.payload);\n\n// reject\n// setTimeout(function () {\n//     msg.reject({message: 'Could not request joke'});\n// }, 2000);",
+        "outputs": "0",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 780,
+        "y": 2120,
+        "wires": []
+    },
+    {
+        "id": "33d2dd1688f92679",
+        "type": "redis-command",
+        "z": "353e417759fd5750",
+        "g": "048120318edbeca7",
+        "server": "f120eab2.0a60a8",
+        "command": "GET",
+        "name": "get bot settings",
+        "topic": "msg.payload",
+        "params": "[]",
+        "paramsType": "json",
+        "payloadType": "json",
+        "block": false,
+        "x": 600,
+        "y": 2120,
+        "wires": [
+            [
+                "ebd3770efa8b27af"
+            ]
+        ]
+    },
+    {
+        "id": "b58eea72b93f13de",
+        "type": "function",
+        "z": "353e417759fd5750",
+        "g": "048120318edbeca7",
+        "name": "getbot_ttp()",
+        "func": "",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "let guid = env.get(\"GOOGLEUID\");\nlet getbot_ttp = function (botname = msg.payload) {\n    \n    let promise = new Promise((resolve, reject) => {\n        msg.resolve = resolve;\n        msg.reject = reject;\n    });\n    \n\n    msg.topic = guid+\"-bots:\"+botname+\":ttp\";\n    msg.payload = [];\n\n    node.send(Object.assign({}, msg));\n    \n    return promise;\n};\n\nglobal.set('getbot_ttp', getbot_ttp);",
+        "finalize": "",
+        "libs": [],
+        "x": 370,
+        "y": 2180,
+        "wires": [
+            [
+                "f8e441b5bf25d02b"
+            ]
+        ]
+    },
+    {
+        "id": "681d5081aa7276f4",
+        "type": "inject",
+        "z": "353e417759fd5750",
+        "g": "048120318edbeca7",
+        "name": "botname",
+        "props": [],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "1",
+        "topic": "",
+        "x": 200,
+        "y": 2180,
+        "wires": [
+            [
+                "b58eea72b93f13de"
+            ]
+        ]
+    },
+    {
+        "id": "2d034a3b4969d69c",
+        "type": "function",
+        "z": "353e417759fd5750",
+        "g": "048120318edbeca7",
+        "name": "resolve",
+        "func": "msg.resolve(msg.payload);\n\n// reject\n// setTimeout(function () {\n//     msg.reject({message: 'Could not request joke'});\n// }, 2000);",
+        "outputs": "0",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 740,
+        "y": 2180,
+        "wires": []
+    },
+    {
+        "id": "f8e441b5bf25d02b",
+        "type": "redis-command",
+        "z": "353e417759fd5750",
+        "g": "048120318edbeca7",
+        "server": "f120eab2.0a60a8",
+        "command": "GET",
+        "name": "get bot ttp",
+        "topic": "msg.payload",
+        "params": "[]",
+        "paramsType": "json",
+        "payloadType": "json",
+        "block": false,
+        "x": 550,
+        "y": 2180,
+        "wires": [
+            [
+                "2d034a3b4969d69c"
+            ]
+        ]
+    },
+    {
+        "id": "e9fba05140f9c559",
+        "type": "function",
+        "z": "353e417759fd5750",
+        "g": "048120318edbeca7",
+        "name": "getbot_onoff()",
+        "func": "",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "let guid = env.get(\"GOOGLEUID\");\nlet getbot_onoff = function (botname = msg.payload) {\n    \n    let promise = new Promise((resolve, reject) => {\n        msg.resolve = resolve;\n        msg.reject = reject;\n    });\n    \n\n    msg.topic = guid+\"-bots:\"+botname+\":onoff\";\n    msg.payload = [];\n\n    node.send(Object.assign({}, msg));\n    \n    return promise;\n};\n\nglobal.set('getbot_onoff', getbot_onoff);",
+        "finalize": "",
+        "libs": [],
+        "x": 380,
+        "y": 2360,
+        "wires": [
+            [
+                "806473f046ac801f"
+            ]
+        ]
+    },
+    {
+        "id": "68780f4ed6394507",
+        "type": "inject",
+        "z": "353e417759fd5750",
+        "g": "048120318edbeca7",
+        "name": "botname",
+        "props": [],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "1",
+        "topic": "",
+        "x": 200,
+        "y": 2360,
+        "wires": [
+            [
+                "e9fba05140f9c559"
+            ]
+        ]
+    },
+    {
+        "id": "49e45671dc6dde59",
+        "type": "function",
+        "z": "353e417759fd5750",
+        "g": "048120318edbeca7",
+        "name": "resolve",
+        "func": "msg.resolve(msg.payload);\n\n// reject\n// setTimeout(function () {\n//     msg.reject({message: 'Could not request joke'});\n// }, 2000);",
+        "outputs": "0",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 800,
+        "y": 2360,
+        "wires": []
+    },
+    {
+        "id": "806473f046ac801f",
+        "type": "redis-command",
+        "z": "353e417759fd5750",
+        "g": "048120318edbeca7",
+        "server": "f120eab2.0a60a8",
+        "command": "GET",
+        "name": "get bot onoff",
+        "topic": "msg.payload",
+        "params": "[]",
+        "paramsType": "json",
+        "payloadType": "json",
+        "block": false,
+        "x": 570,
+        "y": 2360,
+        "wires": [
+            [
+                "49e45671dc6dde59"
+            ]
+        ]
+    },
+    {
+        "id": "562ff39eb84e69fd",
+        "type": "function",
+        "z": "353e417759fd5750",
+        "g": "048120318edbeca7",
+        "name": "setbotlist()",
+        "func": "",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "\n// Code added here will be run once\n// whenever the node is deployed.\nlet setbotlist = function (guid = msg.payload.guid, botlist = msg.payload.botlist) {\n    \n    let promise = new Promise((resolve, reject) => {\n        msg.resolve = resolve;\n        msg.reject = reject;\n    });\n    \n\n    msg.topic = guid+\"-botlist\";\n    msg.payload = botlist;\n\n    node.send(Object.assign({}, msg));\n    \n    return promise;\n};\n\nglobal.set('setbotlist', setbotlist);",
+        "finalize": "",
+        "libs": [],
+        "x": 1250,
+        "y": 2000,
+        "wires": [
+            [
+                "f8b6987bf7dab58f"
+            ]
+        ]
+    },
+    {
+        "id": "b1df2d40528537c1",
+        "type": "inject",
+        "z": "353e417759fd5750",
+        "g": "048120318edbeca7",
+        "name": "guid, botlist",
+        "props": [],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "1",
+        "topic": "",
+        "x": 1070,
+        "y": 2000,
+        "wires": [
+            [
+                "562ff39eb84e69fd"
+            ]
+        ]
+    },
+    {
+        "id": "fae5e5360b112e39",
+        "type": "function",
+        "z": "353e417759fd5750",
+        "g": "048120318edbeca7",
+        "name": "resolve",
+        "func": "msg.resolve(msg.payload);\n\n// reject\n// setTimeout(function () {\n//     msg.reject({message: 'Could not request joke'});\n// }, 2000);",
+        "outputs": "0",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1580,
+        "y": 2000,
+        "wires": []
+    },
+    {
+        "id": "f8b6987bf7dab58f",
+        "type": "redis-command",
+        "z": "353e417759fd5750",
+        "g": "048120318edbeca7",
+        "server": "f120eab2.0a60a8",
+        "command": "getset",
+        "name": "set botlist",
+        "topic": "",
+        "params": "[]",
+        "paramsType": "json",
+        "payloadType": "json",
+        "block": false,
+        "x": 1420,
+        "y": 2000,
+        "wires": [
+            [
+                "fae5e5360b112e39"
+            ]
+        ]
+    },
+    {
+        "id": "0b70f554344ed103",
+        "type": "function",
+        "z": "353e417759fd5750",
+        "g": "048120318edbeca7",
+        "name": "setbot_status()",
+        "func": "",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "\nlet setbot_status = function (botname = msg.topic, status = msg.payload) {\n    \n    let promise = new Promise((resolve, reject) => {\n        msg.resolve = resolve;\n        msg.reject = reject;\n    });\n    \n\n    msg.topic = botname;\n    msg.payload = status;\n\n    node.send(Object.assign({}, msg));\n    \n    return promise;\n};\n\nglobal.set('setbot_status', setbot_status);",
+        "finalize": "",
+        "libs": [],
+        "x": 1280,
+        "y": 2060,
+        "wires": [
+            [
+                "546128bed7ba8244"
+            ]
+        ]
+    },
+    {
+        "id": "43ed2206ae8dbe66",
+        "type": "inject",
+        "z": "353e417759fd5750",
+        "g": "048120318edbeca7",
+        "name": "botname, status",
+        "props": [],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "1",
+        "topic": "",
+        "x": 1080,
+        "y": 2060,
+        "wires": [
+            [
+                "0b70f554344ed103"
+            ]
+        ]
+    },
+    {
+        "id": "1a76aa7a7ff5c2e2",
+        "type": "function",
+        "z": "353e417759fd5750",
+        "g": "048120318edbeca7",
+        "name": "resolve",
+        "func": "msg.resolve(msg.payload);\n\n// reject\n// setTimeout(function () {\n//     msg.reject({message: 'Could not request joke'});\n// }, 2000);",
+        "outputs": "0",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1660,
+        "y": 2060,
+        "wires": []
+    },
+    {
+        "id": "546128bed7ba8244",
+        "type": "redis-command",
+        "z": "353e417759fd5750",
+        "g": "048120318edbeca7",
+        "server": "f120eab2.0a60a8",
+        "command": "getset",
+        "name": "",
+        "topic": "",
+        "params": "[]",
+        "paramsType": "json",
+        "payloadType": "json",
+        "block": false,
+        "x": 1470,
+        "y": 2060,
+        "wires": [
+            [
+                "1a76aa7a7ff5c2e2"
+            ]
+        ]
+    },
+    {
+        "id": "2f4c3485729e3440",
+        "type": "function",
+        "z": "353e417759fd5750",
+        "g": "048120318edbeca7",
+        "name": "getbot_data()",
+        "func": "",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "let guid = env.get(\"GOOGLEUID\");\nlet getbot_data = function (botname = msg.payload) {\n    \n    let promise = new Promise((resolve, reject) => {\n        msg.resolve = resolve;\n        msg.reject = reject;\n    });\n    \n\n    msg.topic = guid+\"-bots:\"+botname+\":data\";\n    msg.payload = [];\n\n    node.send(Object.assign({}, msg));\n    \n    return promise;\n};\n\nglobal.set('getbot_data', getbot_data);",
+        "finalize": "",
+        "libs": [],
+        "x": 370,
+        "y": 2240,
+        "wires": [
+            [
+                "2e77778de767d2d9"
+            ]
+        ]
+    },
+    {
+        "id": "bd67d9792381b2eb",
+        "type": "inject",
+        "z": "353e417759fd5750",
+        "g": "048120318edbeca7",
+        "name": "botname",
+        "props": [],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "1",
+        "topic": "",
+        "x": 200,
+        "y": 2240,
+        "wires": [
+            [
+                "2f4c3485729e3440"
+            ]
+        ]
+    },
+    {
+        "id": "f9f577d0da59868f",
+        "type": "function",
+        "z": "353e417759fd5750",
+        "g": "048120318edbeca7",
+        "name": "resolve",
+        "func": "msg.resolve(msg.payload);\n\n// reject\n// setTimeout(function () {\n//     msg.reject({message: 'Could not request joke'});\n// }, 2000);",
+        "outputs": "0",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 760,
+        "y": 2240,
+        "wires": []
+    },
+    {
+        "id": "2e77778de767d2d9",
+        "type": "redis-command",
+        "z": "353e417759fd5750",
+        "g": "048120318edbeca7",
+        "server": "f120eab2.0a60a8",
+        "command": "hgetall",
+        "name": "",
+        "topic": "",
+        "params": "{}",
+        "paramsType": "json",
+        "payloadType": "json",
+        "block": false,
+        "x": 550,
+        "y": 2240,
+        "wires": [
+            [
+                "f9f577d0da59868f"
+            ]
+        ]
+    },
+    {
+        "id": "a667c0dd847aa312",
+        "type": "function",
+        "z": "353e417759fd5750",
+        "g": "048120318edbeca7",
+        "name": "setbot_data()",
+        "func": "",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "let guid = env.get(\"GOOGLEUID\");\nlet setbot_data = function (volname = msg.topic, data = msg.payload) {\n    \n    let promise = new Promise((resolve, reject) => {\n        msg.resolve = resolve;\n        msg.reject = reject;\n    });\n    \n\n    msg.topic = volname;\n    msg.payload = data;\n\n    node.send(Object.assign({}, msg));\n    \n    return promise;\n};\n\nglobal.set('setbot_data', setbot_data);",
+        "finalize": "",
+        "libs": [],
+        "x": 1230,
+        "y": 2240,
+        "wires": [
+            [
+                "9b5160469297046a"
+            ]
+        ]
+    },
+    {
+        "id": "0f30e83273a11e5c",
+        "type": "inject",
+        "z": "353e417759fd5750",
+        "g": "048120318edbeca7",
+        "name": "botname",
+        "props": [],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "1",
+        "topic": "",
+        "x": 1060,
+        "y": 2240,
+        "wires": [
+            [
+                "a667c0dd847aa312"
+            ]
+        ]
+    },
+    {
+        "id": "4f05bd668da083ff",
+        "type": "function",
+        "z": "353e417759fd5750",
+        "g": "048120318edbeca7",
+        "name": "resolve",
+        "func": "msg.resolve(msg.payload);\n\n// reject\n// setTimeout(function () {\n//     msg.reject({message: 'Could not request joke'});\n// }, 2000);",
+        "outputs": "0",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1620,
+        "y": 2240,
+        "wires": []
+    },
+    {
+        "id": "9b5160469297046a",
+        "type": "redis-command",
+        "z": "353e417759fd5750",
+        "g": "048120318edbeca7",
+        "server": "f120eab2.0a60a8",
+        "command": "hmset",
+        "name": "",
+        "topic": "",
+        "params": "[]",
+        "paramsType": "json",
+        "payloadType": "json",
+        "block": false,
+        "x": 1410,
+        "y": 2240,
+        "wires": [
+            [
+                "4f05bd668da083ff"
+            ]
+        ]
+    },
+    {
+        "id": "d7b39504af93e7f7",
+        "type": "function",
+        "z": "353e417759fd5750",
+        "g": "048120318edbeca7",
+        "name": "setbot_ttp()",
+        "func": "",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "\nlet setbot_ttp = function (botname = msg.topic, ttp = msg.payload) {\n    \n    let promise = new Promise((resolve, reject) => {\n        msg.resolve = resolve;\n        msg.reject = reject;\n    });\n    \n\n    msg.topic = botname;\n    msg.payload = ttp;\n\n    node.send(Object.assign({}, msg));\n    \n    return promise;\n};\n\nglobal.set('setbot_ttp', setbot_ttp);",
+        "finalize": "",
+        "libs": [],
+        "x": 1270,
+        "y": 2180,
+        "wires": [
+            [
+                "2b18414b4a3f8aaa"
+            ]
+        ]
+    },
+    {
+        "id": "5e752f84c84031eb",
+        "type": "inject",
+        "z": "353e417759fd5750",
+        "g": "048120318edbeca7",
+        "name": "botname, ttp",
+        "props": [],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "1",
+        "topic": "",
+        "x": 1070,
+        "y": 2180,
+        "wires": [
+            [
+                "d7b39504af93e7f7"
+            ]
+        ]
+    },
+    {
+        "id": "6d62a92d5a53f020",
+        "type": "function",
+        "z": "353e417759fd5750",
+        "g": "048120318edbeca7",
+        "name": "resolve",
+        "func": "msg.resolve(msg.payload);\n\n// reject\n// setTimeout(function () {\n//     msg.reject({message: 'Could not request joke'});\n// }, 2000);",
+        "outputs": "0",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1660,
+        "y": 2180,
+        "wires": []
+    },
+    {
+        "id": "2b18414b4a3f8aaa",
+        "type": "redis-command",
+        "z": "353e417759fd5750",
+        "g": "048120318edbeca7",
+        "server": "f120eab2.0a60a8",
+        "command": "getset",
+        "name": "",
+        "topic": "",
+        "params": "[]",
+        "paramsType": "json",
+        "payloadType": "json",
+        "block": false,
+        "x": 1470,
+        "y": 2180,
+        "wires": [
+            [
+                "6d62a92d5a53f020"
+            ]
+        ]
+    },
+    {
+        "id": "0675cf14e1c40b79",
+        "type": "inject",
+        "z": "353e417759fd5750",
+        "g": "048120318edbeca7",
+        "name": "guid, lead",
+        "props": [],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "1",
+        "topic": "",
+        "x": 1060,
+        "y": 2300,
+        "wires": [
+            [
+                "52bb7aacce10da86"
+            ]
+        ]
+    },
+    {
+        "id": "52bb7aacce10da86",
+        "type": "function",
+        "z": "353e417759fd5750",
+        "g": "048120318edbeca7",
+        "name": "setleads()",
+        "func": "",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "let guid = global.get('guid');\nlet setleads = function (leads = msg.payload) {\n    \n    let promise = new Promise((resolve, reject) => {\n        msg.resolve = resolve;\n        msg.reject = reject;\n    });\n    \n\n    msg.topic = guid+\"-leads\";\n    msg.payload = JSON.stringify(leads);\n\n    node.send(Object.assign({}, msg));\n    \n    return promise;\n};\n\nglobal.set('setleads', setleads);",
+        "finalize": "",
+        "libs": [],
+        "x": 1240,
+        "y": 2300,
+        "wires": [
+            [
+                "a598cf9306306929"
+            ]
+        ]
+    },
+    {
+        "id": "a598cf9306306929",
+        "type": "redis-command",
+        "z": "353e417759fd5750",
+        "g": "048120318edbeca7",
+        "server": "f120eab2.0a60a8",
+        "command": "getset",
+        "name": "",
+        "topic": "",
+        "params": "[]",
+        "paramsType": "json",
+        "payloadType": "json",
+        "block": false,
+        "x": 1410,
+        "y": 2300,
+        "wires": [
+            [
+                "477b9f3956393f39"
+            ]
+        ]
+    },
+    {
+        "id": "477b9f3956393f39",
+        "type": "function",
+        "z": "353e417759fd5750",
+        "g": "048120318edbeca7",
+        "name": "resolve",
+        "func": "msg.resolve(msg.payload);\n\n// reject\n// setTimeout(function () {\n//     msg.reject({message: 'Could not request joke'});\n// }, 2000);",
+        "outputs": "0",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1580,
+        "y": 2300,
+        "wires": []
+    },
+    {
+        "id": "e1d84a73e7e74924",
+        "type": "inject",
+        "z": "353e417759fd5750",
+        "g": "048120318edbeca7",
+        "name": "guid",
+        "props": [],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "1",
+        "topic": "",
+        "x": 190,
+        "y": 2300,
+        "wires": [
+            [
+                "2969e077aef97f77"
+            ]
+        ]
+    },
+    {
+        "id": "2969e077aef97f77",
+        "type": "function",
+        "z": "353e417759fd5750",
+        "g": "048120318edbeca7",
+        "name": "getleads()",
+        "func": "",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "let getleads = function (guid = msg.payload.guid) {\n    \n    let promise = new Promise((resolve, reject) => {\n        msg.resolve = resolve;\n        msg.reject = reject;\n    });\n    \n    msg.topic = guid+\"-leads\";\n    msg.payload = [];\n\n    node.send(Object.assign({}, msg));\n    \n    return promise;\n};\n\nglobal.set('getleads', getleads);",
+        "finalize": "",
+        "libs": [],
+        "x": 380,
+        "y": 2300,
+        "wires": [
+            [
+                "c4eb37e84cd37624"
+            ]
+        ]
+    },
+    {
+        "id": "ad0d7275ea85d9e2",
+        "type": "function",
+        "z": "353e417759fd5750",
+        "g": "048120318edbeca7",
+        "name": "resolve",
+        "func": "msg.resolve(msg.payload);\n\n// reject\n// setTimeout(function () {\n//     msg.reject({message: 'Could not request joke'});\n// }, 2000);",
+        "outputs": "0",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 800,
+        "y": 2300,
+        "wires": []
+    },
+    {
+        "id": "c4eb37e84cd37624",
+        "type": "redis-command",
+        "z": "353e417759fd5750",
+        "g": "048120318edbeca7",
+        "server": "f120eab2.0a60a8",
+        "command": "GET",
+        "name": "",
+        "topic": "msg.payload",
+        "params": "[]",
+        "paramsType": "json",
+        "payloadType": "json",
+        "block": false,
+        "x": 590,
+        "y": 2300,
+        "wires": [
+            [
+                "ad0d7275ea85d9e2"
+            ]
+        ]
+    },
+    {
+        "id": "09fab8f34f7dea3e",
+        "type": "function",
+        "z": "353e417759fd5750",
+        "g": "048120318edbeca7",
+        "name": "tglead()",
+        "func": "",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "\nlet tglead = function (posttg = msg.payload.posttg, guid = msg.payload.guid, typemsg = msg.payload.typemsg) {\n    \n    let promise = new Promise((resolve, reject) => {\n        msg.resolve = resolve;\n        msg.reject = reject;\n    });\n    \n\n    msg = {};\n    msg.payload = {posttg, guid, typemsg};\n\n    node.send(Object.assign({}, msg));\n    \n    return promise;\n};\n\nglobal.set('tglead', tglead);",
+        "finalize": "",
+        "libs": [],
+        "x": 1920,
+        "y": 2300,
+        "wires": [
+            [
+                "76ef8aef545938d7"
+            ]
+        ]
+    },
+    {
+        "id": "c291578025a7dac7",
+        "type": "inject",
+        "z": "353e417759fd5750",
+        "g": "048120318edbeca7",
+        "name": "guid, lead",
+        "props": [],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "1",
+        "topic": "",
+        "x": 1760,
+        "y": 2300,
+        "wires": [
+            [
+                "09fab8f34f7dea3e"
+            ]
+        ]
+    },
+    {
+        "id": "76ef8aef545938d7",
+        "type": "redis-out",
+        "z": "353e417759fd5750",
+        "g": "048120318edbeca7",
+        "server": "f120eab2.0a60a8",
+        "command": "publish",
+        "name": "",
+        "topic": "tgpost",
+        "obj": true,
+        "x": 2070,
+        "y": 2300,
+        "wires": []
+    },
+    {
+        "id": "8421b42ef331902b",
+        "type": "function",
+        "z": "353e417759fd5750",
+        "g": "048120318edbeca7",
+        "name": "setbot_settings()",
+        "func": "",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "\nlet setbot_settings = function (botname = msg.topic, settings = msg.payload) {\n    \n    let promise = new Promise((resolve, reject) => {\n        msg.resolve = resolve;\n        msg.reject = reject;\n    });\n    \n\n    msg.topic = botname;\n    msg.payload = settings;\n\n    node.send(Object.assign({}, msg));\n    \n    return promise;\n};\n\nglobal.set('setbot_settings', setbot_settings);",
+        "finalize": "",
+        "libs": [],
+        "x": 1280,
+        "y": 2120,
+        "wires": [
+            [
+                "796a325983588e67"
+            ]
+        ]
+    },
+    {
+        "id": "2e12580400f01cb0",
+        "type": "inject",
+        "z": "353e417759fd5750",
+        "g": "048120318edbeca7",
+        "name": "botname, settings",
+        "props": [],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "1",
+        "topic": "",
+        "x": 1090,
+        "y": 2120,
+        "wires": [
+            [
+                "8421b42ef331902b"
+            ]
+        ]
+    },
+    {
+        "id": "88be5d43e25bbab5",
+        "type": "function",
+        "z": "353e417759fd5750",
+        "g": "048120318edbeca7",
+        "name": "resolve",
+        "func": "msg.resolve(msg.payload);\n\n// reject\n// setTimeout(function () {\n//     msg.reject({message: 'Could not request joke'});\n// }, 2000);",
+        "outputs": "0",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1660,
+        "y": 2120,
+        "wires": []
+    },
+    {
+        "id": "796a325983588e67",
+        "type": "redis-command",
+        "z": "353e417759fd5750",
+        "g": "048120318edbeca7",
+        "server": "f120eab2.0a60a8",
+        "command": "getset",
+        "name": "",
+        "topic": "",
+        "params": "[]",
+        "paramsType": "json",
+        "payloadType": "json",
+        "block": false,
+        "x": 1470,
+        "y": 2120,
+        "wires": [
+            [
+                "88be5d43e25bbab5"
+            ]
+        ]
+    },
+    {
+        "id": "a1d26aa75b137aa5",
+        "type": "function",
+        "z": "353e417759fd5750",
+        "g": "048120318edbeca7",
+        "name": "setbot_onoff()",
+        "func": "",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "\nlet setbot_onoff = function (botname = msg.topic, onoff = msg.payload) {\n    \n    let promise = new Promise((resolve, reject) => {\n        msg.resolve = resolve;\n        msg.reject = reject;\n    });\n    \n\n    msg.topic = botname;\n    msg.payload = onoff;\n\n    node.send(Object.assign({}, msg));\n    \n    return promise;\n};\n\nglobal.set('setbot_onoff', setbot_onoff);",
+        "finalize": "",
+        "libs": [],
+        "x": 1280,
+        "y": 2360,
+        "wires": [
+            [
+                "f2f3669acc5a1967"
+            ]
+        ]
+    },
+    {
+        "id": "c16073e365380562",
+        "type": "inject",
+        "z": "353e417759fd5750",
+        "g": "048120318edbeca7",
+        "name": "botname, onoff",
+        "props": [],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "1",
+        "topic": "",
+        "x": 1080,
+        "y": 2360,
+        "wires": [
+            [
+                "a1d26aa75b137aa5"
+            ]
+        ]
+    },
+    {
+        "id": "72a4bee8563f2952",
+        "type": "function",
+        "z": "353e417759fd5750",
+        "g": "048120318edbeca7",
+        "name": "resolve",
+        "func": "msg.resolve(msg.payload);\n\n// reject\n// setTimeout(function () {\n//     msg.reject({message: 'Could not request joke'});\n// }, 2000);",
+        "outputs": "0",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1660,
+        "y": 2360,
+        "wires": []
+    },
+    {
+        "id": "f2f3669acc5a1967",
+        "type": "redis-command",
+        "z": "353e417759fd5750",
+        "g": "048120318edbeca7",
+        "server": "f120eab2.0a60a8",
+        "command": "getset",
+        "name": "",
+        "topic": "",
+        "params": "[]",
+        "paramsType": "json",
+        "payloadType": "json",
+        "block": false,
+        "x": 1470,
+        "y": 2360,
+        "wires": [
+            [
+                "72a4bee8563f2952"
+            ]
+        ]
+    },
+    {
+        "id": "8d14f5fc3845adff",
+        "type": "function",
+        "z": "353e417759fd5750",
+        "g": "54197cf454887ecb",
+        "name": "getprice()",
+        "func": "",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "\n// Code added here will be run once\n// whenever the node is deployed.\nlet getprice = function (moneta = msg.payload) {\n    \n    let promise = new Promise((resolve, reject) => {\n        msg.resolve = resolve;\n        msg.reject = reject;\n    });\n    \n\n    msg.topic = \"prices:\"+moneta;\n    msg.payload = [];\n\n    node.send(Object.assign({}, msg));\n    \n    return promise;\n};\n\nglobal.set('getprice', getprice);",
+        "finalize": "",
+        "x": 360,
+        "y": 1920,
+        "wires": [
+            [
+                "a0695b5f57215c9a"
+            ]
+        ]
+    },
+    {
+        "id": "6a1466a03b9d3d55",
+        "type": "inject",
+        "z": "353e417759fd5750",
+        "g": "54197cf454887ecb",
+        "name": "moneta",
+        "props": [],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "1",
+        "topic": "",
+        "x": 200,
+        "y": 1920,
+        "wires": [
+            [
+                "8d14f5fc3845adff"
+            ]
+        ]
+    },
+    {
+        "id": "a0695b5f57215c9a",
+        "type": "redis-command",
+        "z": "353e417759fd5750",
+        "g": "54197cf454887ecb",
+        "server": "f120eab2.0a60a8",
+        "command": "GET",
+        "name": "get price",
+        "topic": "msg.payload",
+        "params": "[]",
+        "paramsType": "json",
+        "payloadType": "json",
+        "block": false,
+        "x": 520,
+        "y": 1920,
+        "wires": [
+            [
+                "5c90fc22745f5191"
+            ]
+        ]
+    },
+    {
+        "id": "5c90fc22745f5191",
+        "type": "function",
+        "z": "353e417759fd5750",
+        "g": "54197cf454887ecb",
+        "name": "resolve",
+        "func": "msg.resolve(msg.payload);\n\n// reject\n// setTimeout(function () {\n//     msg.reject({message: 'Could not request joke'});\n// }, 2000);",
+        "outputs": "0",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 800,
+        "y": 1920,
+        "wires": []
+    },
+    {
+        "id": "9cca35f02ce4d817",
+        "type": "function",
+        "z": "353e417759fd5750",
+        "g": "54197cf454887ecb",
+        "name": "getbot_start_set()",
+        "func": "",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "let guid = env.get(\"GOOGLEUID\");\nlet getbot_start_set = function (botname = msg.payload) {\n    \n    let promise = new Promise((resolve, reject) => {\n        msg.resolve = resolve;\n        msg.reject = reject;\n    });\n    \n\n    msg.topic = guid+\"-bots:\"+botname+\":start_set\";\n    msg.payload = [];\n\n    node.send(Object.assign({}, msg));\n    \n    return promise;\n};\n\nglobal.set('getbot_start_set', getbot_start_set);",
+        "finalize": "",
+        "libs": [],
+        "x": 390,
+        "y": 1880,
+        "wires": [
+            [
+                "96bdef7048780d35"
+            ]
+        ]
+    },
+    {
+        "id": "bfb1e76b54a7b1fb",
+        "type": "inject",
+        "z": "353e417759fd5750",
+        "g": "54197cf454887ecb",
+        "name": "botname",
+        "props": [],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "1",
+        "topic": "",
+        "x": 200,
+        "y": 1880,
+        "wires": [
+            [
+                "9cca35f02ce4d817"
+            ]
+        ]
+    },
+    {
+        "id": "ddc7f34243674b87",
+        "type": "function",
+        "z": "353e417759fd5750",
+        "g": "54197cf454887ecb",
+        "name": "resolve",
+        "func": "msg.resolve(msg.payload);\n\n// reject\n// setTimeout(function () {\n//     msg.reject({message: 'Could not request joke'});\n// }, 2000);",
+        "outputs": "0",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 800,
+        "y": 1880,
+        "wires": []
+    },
+    {
+        "id": "96bdef7048780d35",
+        "type": "redis-command",
+        "z": "353e417759fd5750",
+        "g": "54197cf454887ecb",
+        "server": "f120eab2.0a60a8",
+        "command": "GET",
+        "name": "get bot starts_set",
+        "topic": "msg.payload",
+        "params": "[]",
+        "paramsType": "json",
+        "payloadType": "json",
+        "block": false,
+        "x": 610,
+        "y": 1880,
+        "wires": [
+            [
+                "ddc7f34243674b87"
+            ]
+        ]
+    },
+    {
+        "id": "eb0ebfc5.9889a",
+        "type": "file",
+        "z": "353e417759fd5750",
+        "g": "d508da9d29e25c1b",
+        "name": "",
+        "filename": "",
+        "appendNewline": true,
+        "createDir": true,
+        "overwriteFile": "false",
+        "encoding": "none",
+        "x": 860,
+        "y": 2700,
+        "wires": [
+            [
+                "afaf3a2c.646c88"
+            ]
+        ]
+    },
+    {
+        "id": "6868e3af.6c4b4c",
+        "type": "function",
+        "z": "353e417759fd5750",
+        "g": "d508da9d29e25c1b",
+        "name": "data prepare",
+        "func": "var date = new Date();\nvar time = new Date().getTime();\n\nmsg.payload = date.toString().split('GMT')[0] + \"-\" + time +\" : \"+msg.payload;\nmsg.filename = \"/data/journals/\"+msg.topic+\".txt\";\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 540,
+        "y": 2700,
+        "wires": [
+            [
+                "eb0ebfc5.9889a"
+            ]
+        ]
+    },
+    {
+        "id": "6526e141.43af9",
+        "type": "function",
+        "z": "353e417759fd5750",
+        "g": "d508da9d29e25c1b",
+        "name": "tilog()",
+        "func": "",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "let guid = global.get('guid');\n\n\nlet tilog = function (botname = msg.topic, data = msg.payload) {\n    \n    let promise = new Promise((resolve, reject) => {\n        msg.resolve = resolve;\n        msg.reject = reject;\n    });\n    \n\n    msg.topic = botname;\n    msg.payload = data;\n\n    node.send(Object.assign({}, msg));\n    \n    return promise;\n};\n\nglobal.set('tilog', tilog);",
+        "finalize": "",
+        "libs": [],
+        "x": 380,
+        "y": 2700,
+        "wires": [
+            [
+                "6868e3af.6c4b4c"
+            ]
+        ]
+    },
+    {
+        "id": "eab25c49.10d9c8",
+        "type": "inject",
+        "z": "353e417759fd5750",
+        "g": "d508da9d29e25c1b",
+        "name": "botname, log msg",
+        "props": [],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "1",
+        "topic": "",
+        "x": 200,
+        "y": 2700,
+        "wires": [
+            [
+                "6526e141.43af9"
+            ]
+        ]
+    },
+    {
+        "id": "afaf3a2c.646c88",
+        "type": "function",
+        "z": "353e417759fd5750",
+        "g": "d508da9d29e25c1b",
+        "name": "resolve",
+        "func": "msg.resolve(msg.payload);\n\n// reject\n// setTimeout(function () {\n//     msg.reject({message: 'Could not request joke'});\n// }, 2000);",
+        "outputs": "0",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 1010,
+        "y": 2700,
+        "wires": []
+    },
+    {
+        "id": "9018737c.12e188",
+        "type": "inject",
+        "z": "353e417759fd5750",
+        "g": "d508da9d29e25c1b",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 1250,
+        "y": 2700,
+        "wires": [
+            [
+                "81a608ac.0eeab8"
+            ]
+        ]
+    },
+    {
+        "id": "81a608ac.0eeab8",
+        "type": "function",
+        "z": "353e417759fd5750",
+        "g": "d508da9d29e25c1b",
+        "name": "tilog",
+        "func": "let botname = \"LINKDOWNUSDT-1626469485\";\nlet data = \"dfdf\";\nconst tilog = global.get('tilog')(botname,data);\n\ntilog.then(tilog => {\n\n\n        node.status({fill:\"green\",shape:\"dot\"});\n    node.send(msg);\n     \n    \n\n}).catch(error => {\n    \n    msg.error = error;\n    node.status({fill:\"red\",shape: \"ring\"});\n    \n    node.error(error);\n});",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 1420,
+        "y": 2700,
+        "wires": [
+            [
+                "d615849.c726078"
+            ]
+        ]
+    },
+    {
+        "id": "d615849.c726078",
+        "type": "debug",
+        "z": "353e417759fd5750",
+        "g": "d508da9d29e25c1b",
+        "name": "",
+        "active": true,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
@@ -1277,21 +6691,32 @@
         "targetType": "full",
         "statusVal": "",
         "statusType": "auto",
-        "x": 810,
-        "y": 360,
+        "x": 1580,
+        "y": 2700,
         "wires": []
     },
     {
-        "id": "5cfd2e9e3709b223",
-        "type": "redis-out",
-        "z": "8929ff49bf2bbea4",
-        "server": "f120eab2.0a60a8",
-        "command": "publish",
+        "id": "04c874ce359ca023",
+        "type": "switch",
+        "z": "353e417759fd5750",
+        "g": "d508da9d29e25c1b",
         "name": "",
-        "topic": "",
-        "obj": true,
-        "x": 810,
-        "y": 320,
-        "wires": []
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 1,
+        "x": 720,
+        "y": 2720,
+        "wires": [
+            []
+        ]
     }
 ]
