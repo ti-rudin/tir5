@@ -147,7 +147,9 @@
             "c4cfc0830f4e28bc"
         ],
         "x": 34,
-        "y": 99
+        "y": 99,
+        "w": 2092,
+        "h": 822
     },
     {
         "id": "79e296b2.11a2d8",
@@ -170,7 +172,9 @@
             "9a835f6c.6a1ab"
         ],
         "x": 134,
-        "y": 999
+        "y": 999,
+        "w": 632,
+        "h": 162
     },
     {
         "id": "b5c4460e3abcebce",
@@ -208,7 +212,9 @@
             "bf190e9d.225ad"
         ],
         "x": 134,
-        "y": 1339
+        "y": 1339,
+        "w": 1232,
+        "h": 402
     },
     {
         "id": "048120318edbeca7",
@@ -286,7 +292,9 @@
             "54197cf454887ecb"
         ],
         "x": 68,
-        "y": 1813
+        "y": 1813,
+        "w": 2078,
+        "h": 588
     },
     {
         "id": "d508da9d29e25c1b",
@@ -313,7 +321,9 @@
             "04c874ce359ca023"
         ],
         "x": 64,
-        "y": 2659
+        "y": 2659,
+        "w": 1612,
+        "h": 102
     },
     {
         "id": "5154e25d5a925517",
@@ -367,7 +377,9 @@
             "96bdef7048780d35"
         ],
         "x": 94,
-        "y": 1839
+        "y": 1839,
+        "w": 792,
+        "h": 122
     },
     {
         "id": "acbee441.8c1e1",
@@ -1306,151 +1318,6 @@
         "wires": []
     },
     {
-        "id": "105d5d575a582aa5",
-        "type": "redis-in",
-        "z": "8929ff49bf2bbea4",
-        "d": true,
-        "server": "f120eab2.0a60a8",
-        "command": "subscribe",
-        "name": "",
-        "topic": "resurse:ex2",
-        "obj": true,
-        "timeout": 0,
-        "x": 210,
-        "y": 400,
-        "wires": [
-            [
-                "e47c1828f339606d",
-                "3c8817fd6c5a1613"
-            ]
-        ]
-    },
-    {
-        "id": "e47c1828f339606d",
-        "type": "debug",
-        "z": "8929ff49bf2bbea4",
-        "name": "",
-        "active": false,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "true",
-        "targetType": "full",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 210,
-        "y": 440,
-        "wires": []
-    },
-    {
-        "id": "30269c0017720ad9",
-        "type": "function",
-        "z": "8929ff49bf2bbea4",
-        "name": "set worker free",
-        "func": "\nlet worker_name = global.get('worker_name');\n\nmsg.topic = \"workers:regist\";\nmsg.payload = {\n    worker_name: worker_name,\n    status : \"free\",\n    }\n    \n\n\nreturn msg;",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 580,
-        "y": 440,
-        "wires": [
-            [
-                "a37d953d4c3eb0a5"
-            ]
-        ]
-    },
-    {
-        "id": "a37d953d4c3eb0a5",
-        "type": "redis-out",
-        "z": "8929ff49bf2bbea4",
-        "server": "da97327dd29e690a",
-        "command": "rpush",
-        "name": "",
-        "topic": "workers:regist",
-        "obj": true,
-        "x": 760,
-        "y": 440,
-        "wires": []
-    },
-    {
-        "id": "3c8817fd6c5a1613",
-        "type": "delay",
-        "z": "8929ff49bf2bbea4",
-        "name": "",
-        "pauseType": "random",
-        "timeout": "1",
-        "timeoutUnits": "milliseconds",
-        "rate": "10",
-        "nbRateUnits": "1",
-        "rateUnits": "second",
-        "randomFirst": "0",
-        "randomLast": "1900",
-        "randomUnits": "milliseconds",
-        "drop": false,
-        "allowrate": false,
-        "outputs": 1,
-        "x": 380,
-        "y": 400,
-        "wires": [
-            [
-                "30269c0017720ad9",
-                "3c92409f284b0c9a"
-            ]
-        ]
-    },
-    {
-        "id": "3c92409f284b0c9a",
-        "type": "function",
-        "z": "8929ff49bf2bbea4",
-        "name": "task finished",
-        "func": "let task_id = msg.payload.task.task_id;\nmsg.topic = \"tasks:finished\";\nmsg.payload = JSON.stringify({\n...msg.payload,\n\n    \n    ex_time: new Date().getTime() - task_id\n});\n\n\nreturn msg;\n\n",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 590,
-        "y": 340,
-        "wires": [
-            [
-                "cb676b24d8e36a71",
-                "5cfd2e9e3709b223"
-            ]
-        ]
-    },
-    {
-        "id": "cb676b24d8e36a71",
-        "type": "debug",
-        "z": "8929ff49bf2bbea4",
-        "name": "",
-        "active": false,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "true",
-        "targetType": "full",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 810,
-        "y": 360,
-        "wires": []
-    },
-    {
-        "id": "5cfd2e9e3709b223",
-        "type": "redis-out",
-        "z": "8929ff49bf2bbea4",
-        "server": "f120eab2.0a60a8",
-        "command": "publish",
-        "name": "",
-        "topic": "",
-        "obj": true,
-        "x": 810,
-        "y": 320,
-        "wires": []
-    },
-    {
         "id": "5f4515f84461838f",
         "type": "redis-in",
         "z": "8929ff49bf2bbea4",
@@ -1585,7 +1452,8 @@
         "y": 760,
         "wires": [
             [
-                "9c5c9326b995a656"
+                "9c5c9326b995a656",
+                "81e7f50cc93c2e67"
             ]
         ]
     },
@@ -1609,7 +1477,8 @@
         "y": 760,
         "wires": [
             [
-                "676af55402f85391"
+                "676af55402f85391",
+                "9b193b4e5d1d6503"
             ]
         ],
         "inputLabels": [
@@ -1666,7 +1535,7 @@
                 "d39b03215a7cf48e"
             ],
             [
-                "9c5c9326b995a656"
+                "e119952d712fa2d7"
             ]
         ]
     },
@@ -1789,7 +1658,7 @@
         "type": "debug",
         "z": "8929ff49bf2bbea4",
         "name": "",
-        "active": false,
+        "active": true,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
@@ -1902,7 +1771,7 @@
         "type": "debug",
         "z": "8929ff49bf2bbea4",
         "name": "",
-        "active": false,
+        "active": true,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
@@ -2129,6 +1998,59 @@
             [
                 "d3e0688d41cc172c"
             ]
+        ]
+    },
+    {
+        "id": "e119952d712fa2d7",
+        "type": "function",
+        "z": "8929ff49bf2bbea4",
+        "name": "",
+        "func": "node.warn(msg);\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1110,
+        "y": 760,
+        "wires": [
+            [
+                "9c5c9326b995a656"
+            ]
+        ]
+    },
+    {
+        "id": "9b193b4e5d1d6503",
+        "type": "function",
+        "z": "8929ff49bf2bbea4",
+        "name": "",
+        "func": "node.warn(msg);\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1040,
+        "y": 600,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "81e7f50cc93c2e67",
+        "type": "function",
+        "z": "8929ff49bf2bbea4",
+        "name": "",
+        "func": "node.warn(msg);\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 860,
+        "y": 620,
+        "wires": [
+            []
         ]
     },
     {

@@ -450,7 +450,7 @@
     },
     "node-red-node-ui-table": {
         "name": "node-red-node-ui-table",
-        "version": "0.3.11",
+        "version": "0.4.3",
         "local": false,
         "user": false,
         "nodes": {
@@ -469,7 +469,7 @@
     },
     "node-red-dashboard": {
         "name": "node-red-dashboard",
-        "version": "3.0.4",
+        "version": "3.5.0",
         "local": false,
         "user": false,
         "nodes": {
@@ -745,44 +745,6 @@
                 "user": false,
                 "module": "node-red-contrib-simple-message-queue",
                 "file": "/usr/src/node-red/node_modules/node-red-contrib-simple-message-queue/simple-message-queue.js"
-            }
-        }
-    },
-    "node-red-contrib-aedes": {
-        "name": "node-red-contrib-aedes",
-        "version": "0.11.1",
-        "local": true,
-        "user": true,
-        "nodes": {
-            "aedes-mqtt-broker": {
-                "name": "aedes-mqtt-broker",
-                "types": [
-                    "aedes broker"
-                ],
-                "enabled": true,
-                "local": true,
-                "user": false,
-                "module": "node-red-contrib-aedes",
-                "file": "/data/node_modules/node-red-contrib-aedes/aedes.js"
-            }
-        }
-    },
-    "node-red-contrib-xstate-machine": {
-        "name": "node-red-contrib-xstate-machine",
-        "version": "1.1.1",
-        "local": true,
-        "user": true,
-        "nodes": {
-            "smxstate": {
-                "name": "smxstate",
-                "types": [
-                    "smxstate"
-                ],
-                "enabled": true,
-                "local": true,
-                "user": false,
-                "module": "node-red-contrib-xstate-machine",
-                "file": "/data/node_modules/node-red-contrib-xstate-machine/dist/smxstate-node.js"
             }
         }
     }

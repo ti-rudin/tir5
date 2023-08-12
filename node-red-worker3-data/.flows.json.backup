@@ -1265,8 +1265,8 @@
         "id": "24edc88413df93b5",
         "type": "function",
         "z": "8929ff49bf2bbea4",
-        "name": "worker_name = \"ex2\"",
-        "func": "\nlet worker_name = \"ex2\"; \nglobal.set('worker_name', worker_name);\nmsg.topic = \"workers:regist\";\nmsg.payload = {\n    worker_name: worker_name,\n    status : \"free\",\n    }\n    \n\n\nreturn msg;",
+        "name": "worker_name = \"ex3\"",
+        "func": "\nlet worker_name = \"ex3\"; \nglobal.set('worker_name', worker_name);\nmsg.topic = \"workers:regist\";\nmsg.payload = {\n    worker_name: worker_name,\n    status : \"free\",\n    }\n    \n\n\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -1457,7 +1457,7 @@
         "server": "f120eab2.0a60a8",
         "command": "subscribe",
         "name": "",
-        "topic": "resurse:ex2",
+        "topic": "resurse:ex3",
         "obj": true,
         "timeout": 0,
         "x": 270,
@@ -1474,7 +1474,7 @@
         "type": "debug",
         "z": "8929ff49bf2bbea4",
         "name": "debug 36",
-        "active": true,
+        "active": false,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
@@ -1585,7 +1585,8 @@
         "y": 760,
         "wires": [
             [
-                "9c5c9326b995a656"
+                "9c5c9326b995a656",
+                "81e7f50cc93c2e67"
             ]
         ]
     },
@@ -1609,7 +1610,8 @@
         "y": 760,
         "wires": [
             [
-                "676af55402f85391"
+                "676af55402f85391",
+                "9b193b4e5d1d6503"
             ]
         ],
         "inputLabels": [
@@ -1666,7 +1668,7 @@
                 "d39b03215a7cf48e"
             ],
             [
-                "9c5c9326b995a656"
+                "e119952d712fa2d7"
             ]
         ]
     },
@@ -1789,7 +1791,7 @@
         "type": "debug",
         "z": "8929ff49bf2bbea4",
         "name": "",
-        "active": false,
+        "active": true,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
@@ -1902,7 +1904,7 @@
         "type": "debug",
         "z": "8929ff49bf2bbea4",
         "name": "",
-        "active": false,
+        "active": true,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
@@ -2129,6 +2131,59 @@
             [
                 "d3e0688d41cc172c"
             ]
+        ]
+    },
+    {
+        "id": "e119952d712fa2d7",
+        "type": "function",
+        "z": "8929ff49bf2bbea4",
+        "name": "",
+        "func": "node.warn(msg);\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1110,
+        "y": 760,
+        "wires": [
+            [
+                "9c5c9326b995a656"
+            ]
+        ]
+    },
+    {
+        "id": "9b193b4e5d1d6503",
+        "type": "function",
+        "z": "8929ff49bf2bbea4",
+        "name": "",
+        "func": "node.warn(msg);\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1040,
+        "y": 600,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "81e7f50cc93c2e67",
+        "type": "function",
+        "z": "8929ff49bf2bbea4",
+        "name": "",
+        "func": "node.warn(msg);\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 860,
+        "y": 620,
+        "wires": [
+            []
         ]
     },
     {
