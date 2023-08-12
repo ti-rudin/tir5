@@ -52,7 +52,9 @@
             "4144add5c78f1ce1"
         ],
         "x": 1254,
-        "y": 999
+        "y": 999,
+        "w": 752,
+        "h": 122
     },
     {
         "id": "c723fa7827c597d2",
@@ -74,9 +76,7 @@
             "2f83bb2fab63d1bd"
         ],
         "x": 1094,
-        "y": 1139,
-        "w": 792,
-        "h": 122
+        "y": 1139
     },
     {
         "id": "014ce62956a26f95",
@@ -318,33 +318,6 @@
         "y": 2659
     },
     {
-        "id": "54197cf454887ecb",
-        "type": "group",
-        "z": "353e417759fd5750",
-        "g": "048120318edbeca7",
-        "style": {
-            "stroke": "#2e333a",
-            "stroke-opacity": "1",
-            "fill": "#383c45",
-            "fill-opacity": "0.5",
-            "label": true,
-            "label-position": "nw",
-            "color": "#a4a4a4"
-        },
-        "nodes": [
-            "8d14f5fc3845adff",
-            "6a1466a03b9d3d55",
-            "a0695b5f57215c9a",
-            "5c90fc22745f5191",
-            "9cca35f02ce4d817",
-            "bfb1e76b54a7b1fb",
-            "ddc7f34243674b87",
-            "96bdef7048780d35"
-        ],
-        "x": 94,
-        "y": 1839
-    },
-    {
         "id": "5154e25d5a925517",
         "type": "group",
         "z": "8929ff49bf2bbea4",
@@ -370,6 +343,33 @@
         "y": 19,
         "w": 612,
         "h": 162
+    },
+    {
+        "id": "54197cf454887ecb",
+        "type": "group",
+        "z": "353e417759fd5750",
+        "g": "048120318edbeca7",
+        "style": {
+            "stroke": "#2e333a",
+            "stroke-opacity": "1",
+            "fill": "#383c45",
+            "fill-opacity": "0.5",
+            "label": true,
+            "label-position": "nw",
+            "color": "#a4a4a4"
+        },
+        "nodes": [
+            "8d14f5fc3845adff",
+            "6a1466a03b9d3d55",
+            "a0695b5f57215c9a",
+            "5c90fc22745f5191",
+            "9cca35f02ce4d817",
+            "bfb1e76b54a7b1fb",
+            "ddc7f34243674b87",
+            "96bdef7048780d35"
+        ],
+        "x": 94,
+        "y": 1839
     },
     {
         "id": "acbee441.8c1e1",
@@ -1476,7 +1476,7 @@
         "type": "debug",
         "z": "8929ff49bf2bbea4",
         "name": "debug 36",
-        "active": false,
+        "active": true,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
@@ -1771,7 +1771,7 @@
         "type": "function",
         "z": "8929ff49bf2bbea4",
         "name": "task finished",
-        "func": "let task_id = msg.task_id;\nmsg.topic = \"tasks:finished\";\nmsg.payload = JSON.stringify({\n\n    bot: msg.bot,\n    task_id: task_id,\n    ex_time: new Date().getTime() - task_id\n});\n\n\nreturn msg;\n\n",
+        "func": "let task_id = msg.task_id;\nmsg.topic = \"tasks:finished:ma\";\nmsg.payload = JSON.stringify({\n\n    bot: msg.bot,\n    task_id: task_id,\n    ex_time: new Date().getTime() - task_id,\n    pending_time: msg.pending_time\n});\n\n\nreturn msg;\n\n",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -1854,7 +1854,7 @@
         "type": "function",
         "z": "8929ff49bf2bbea4",
         "name": "task finished",
-        "func": "let task_id = msg.payload.task.task_id;\nmsg.topic = \"tasks:finished:floorcheck\";\nmsg.payload = JSON.stringify({\n\n    bot: msg.bot,\n    task_id: task_id,\n    ex_time: new Date().getTime() - task_id\n});\n\n\nreturn msg;\n\n",
+        "func": "let task_id = msg.payload.task.task_id;\nmsg.topic = \"tasks:finished:floorcheck\";\nmsg.payload = JSON.stringify({\n\n    bot: msg.bot,\n    task_id: task_id,\n    ex_time: new Date().getTime() - task_id,\n    pending_time: msg.pending_time\n});\n\n\nreturn msg;\n\n",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -1904,7 +1904,7 @@
         "type": "debug",
         "z": "8929ff49bf2bbea4",
         "name": "",
-        "active": false,
+        "active": true,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
@@ -3694,7 +3694,7 @@
         "type": "debug",
         "z": "f643da0b7b09b33e",
         "name": "",
-        "active": true,
+        "active": false,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
