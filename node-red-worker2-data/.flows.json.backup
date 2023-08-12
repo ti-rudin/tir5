@@ -52,9 +52,7 @@
             "4144add5c78f1ce1"
         ],
         "x": 1254,
-        "y": 999,
-        "w": 752,
-        "h": 122
+        "y": 999
     },
     {
         "id": "c723fa7827c597d2",
@@ -1577,7 +1575,7 @@
         "type": "function",
         "z": "8929ff49bf2bbea4",
         "name": "load data",
-        "func": "msg.bot = msg.payload.task.bot;\nmsg.task_id = msg.payload.task.task_id;\nnode.status({ fill: \"green\", shape: \"dot\" });\nreturn msg;",
+        "func": "msg.bot = msg.payload.task.bot;\nmsg.pending_time = msg.payload.pending_time;\nmsg.task_id = msg.payload.task.task_id;\nnode.status({ fill: \"green\", shape: \"dot\" });\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -1718,7 +1716,7 @@
         "type": "function",
         "z": "8929ff49bf2bbea4",
         "name": "load data",
-        "func": "msg.bot = msg.payload.task.bot;\nmsg.task_id = msg.payload.task.task_id;\nnode.status({ fill: \"green\", shape: \"dot\" });\nreturn msg;",
+        "func": "msg.bot = msg.payload.task.bot;\nmsg.task_id = msg.payload.task.task_id;\nmsg.pending_time = msg.payload.pending_time;\nnode.status({ fill: \"green\", shape: \"dot\" });\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -1904,7 +1902,7 @@
         "type": "debug",
         "z": "8929ff49bf2bbea4",
         "name": "",
-        "active": true,
+        "active": false,
         "tosidebar": true,
         "console": false,
         "tostatus": false,

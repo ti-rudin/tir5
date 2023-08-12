@@ -101,28 +101,28 @@ services:
     #  - "traefik.http.routers.node-red-worker2.entrypoints=websecure"
     #  - "traefik.http.routers.node-red-worker2.tls.certresolver=myresolver"
     #  - "traefik.http.services.node-red-worker2.loadBalancer.server.port=1882"
-  #node-red-worker3:
-  #  container_name: node-red-worker3
-  #  build:
-  #    context: .
-  #    dockerfile: ./nodered-worker3.Dockerfile
-  #  env_file: .env
-  #  ports:
-  #    - "1883:1883"
-  #  networks:
-  #    - tibotnet
-  #  depends_on:
-  #    - redis
-  #  volumes:
-  #    - ./node-red-worker3-data:/data 
-  #    - ./nr-logs:/usr/src/node-red/logs
-  #  restart: always
-  #  #labels:
-  #  #  - "traefik.enable=true"
-  #  #  - "traefik.http.routers.node-red-worker2.rule=Host(`worker3.ti-robots.ru`)"
-  #  #  - "traefik.http.routers.node-red-worker2.entrypoints=websecure"
-  #  #  - "traefik.http.routers.node-red-worker2.tls.certresolver=myresolver"
-  #  #  - "traefik.http.services.node-red-worker2.loadBalancer.server.port=1882"
+  node-red-worker3:
+    container_name: node-red-worker3
+    build:
+      context: .
+      dockerfile: ./nodered-worker3.Dockerfile
+    env_file: .env
+    ports:
+      - "1883:1883"
+    networks:
+      - tibotnet
+    depends_on:
+      - redis
+    volumes:
+      - ./node-red-worker3-data:/data 
+      - ./nr-logs:/usr/src/node-red/logs
+    restart: always
+    #labels:
+    #  - "traefik.enable=true"
+    #  - "traefik.http.routers.node-red-worker2.rule=Host(`worker3.ti-robots.ru`)"
+    #  - "traefik.http.routers.node-red-worker2.entrypoints=websecure"
+    #  - "traefik.http.routers.node-red-worker2.tls.certresolver=myresolver"
+    #  - "traefik.http.services.node-red-worker2.loadBalancer.server.port=1882"
 
   redis:
     image: "redis:alpine"

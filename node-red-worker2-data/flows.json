@@ -52,9 +52,7 @@
             "4144add5c78f1ce1"
         ],
         "x": 1254,
-        "y": 999,
-        "w": 752,
-        "h": 122
+        "y": 999
     },
     {
         "id": "c723fa7827c597d2",
@@ -1692,7 +1690,7 @@
         "name": "floor-check",
         "info": "",
         "x": 880,
-        "y": 900,
+        "y": 840,
         "wires": []
     },
     {
@@ -1771,7 +1769,7 @@
         "type": "function",
         "z": "8929ff49bf2bbea4",
         "name": "task finished",
-        "func": "let task_id = msg.task_id;\nmsg.topic = \"tasks:finished:ma\";\nmsg.payload = JSON.stringify({\n\n    bot: msg.bot,\n    task_id: task_id,\n    ex_time: new Date().getTime() - task_id,\n    pending_time: msg.pending_time\n});\n\n\nreturn msg;\n\n",
+        "func": "let task_id = msg.task_id;\nmsg.topic = \"tasks:finished:ma\";\nmsg.payload = JSON.stringify({\n\n    bot: msg.bot,\n    task_id: msg.task_id,\n    ex_time: new Date().getTime() - task_id,\n    pending_time: msg.pending_time\n});\n\n\nreturn msg;\n\n",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -1854,7 +1852,7 @@
         "type": "function",
         "z": "8929ff49bf2bbea4",
         "name": "task finished",
-        "func": "let task_id = msg.payload.task.task_id;\nmsg.topic = \"tasks:finished:floorcheck\";\nmsg.payload = JSON.stringify({\n\n    bot: msg.bot,\n    task_id: task_id,\n    ex_time: new Date().getTime() - task_id,\n    pending_time: msg.pending_time\n});\n\n\nreturn msg;\n\n",
+        "func": "let task_id = msg.payload.task.task_id;\nmsg.topic = \"tasks:finished:floorcheck\";\nmsg.payload = JSON.stringify({\n\n    bot: msg.bot,\n    task_id: msg.task_id,\n    ex_time: new Date().getTime() - task_id,\n    pending_time: msg.pending_time\n});\n\n\nreturn msg;\n\n",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -1904,7 +1902,7 @@
         "type": "debug",
         "z": "8929ff49bf2bbea4",
         "name": "",
-        "active": true,
+        "active": false,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
